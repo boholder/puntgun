@@ -1,45 +1,105 @@
 import os
 from typing import List, Union
 
-from tweepy import User, Client, OAuth1UserHandler, Tweet
+from tweepy import User, Client, OAuth1UserHandler, Tweet, Response
+
+# keys for accessing twitter auth api secrets
+from puntgun.util import get_input
+
+NO_VALUE_PROVIDED = 'No value provided.'
 
 API_KEY = 'TWI_API_KEY'
 API_KEY_SECRET = 'TWI_API_KEY_SECRET'
 ACCESS_TOKEN = 'TWI_ACCESS_TOKEN'
 ACCESS_TOKEN_SECRET = 'TWI_ACCESS_TOKEN_SECRET'
 
+# additional url params for querying twitter user state api
+USER_PARAM_USER_FIELDS = ['id', 'username', 'pinned_tweet_id',  # metadata
+                          'created_at', 'description', 'public_metrics', 'protected', 'verified']  # metrics
+USER_PARAM_EXPANSIONS = 'pinned_tweet_id'
+USER_PARAM_TWITTER_FIELDS = ['text']  # metrics
+
 
 class Hunter:
-    user_fields = ['id', 'name', 'username', 'created_at', 'description',
-                   'pinned_tweet_id', 'public_metrics', 'protected',
-                   'verified']
+    """
+    Handles the Twitter API via tweepy.
+    Sort of like a DAO, wrapper of the resource accessing,
+    and doesn't have decision logic.
+    """
 
     def __init__(self):
         self.client = init_tweepy_client()
+
         me = self.client.get_me().data
         self.id = me.get('id')
         self.username = me.get('username')
 
         print('[{}] the hunter dressed up.\n'.format(self.username))
 
-    def observe(self, user_id='', username='', user_ids=None) -> Union[User, List[User]]:
-        """Get user(s) information from Twitter."""
+    def observe(self, user_id='', username='', user_ids=None) -> Union[Response, List[Response]]:
+        """Get user(s) information from Twitter.
+        TODO 900 per 15min
+        TODO 出错误码时tweepy的响应类型是什么?应该怎么定义我这些函数的响应类型？
+        """
+
+        def query(**params) -> Response:
+            return self.client.get_user(
+                user_auth=True,
+                user_fields=USER_PARAM_USER_FIELDS,
+                expansions=USER_PARAM_EXPANSIONS,
+                twitter_fields=USER_PARAM_TWITTER_FIELDS,
+                **params)
+
         if user_id:
-            return self.client.get_user(id=user_id, user_auth=True, user_fields=Hunter.user_fields).data
+            return query(user_id=user_id)
         elif username:
-            return self.client.get_user(username=username, user_auth=True, user_fields=Hunter.user_fields).data
+            return query(username=username)
         elif user_ids:
             return [self.observe(user_id=user_id) for user_id in user_ids]
         else:
-            raise ValueError('No value provided.')
+            raise ValueError(NO_VALUE_PROVIDED)
 
-    def trace(self, user_id='', user_ids=None, **params) -> List[Tweet]:
-        return self.client.search_recent_tweets(query="from:{}".format(user_id), user_auth=True)
+    def find_feeding_place(self, user_id='') -> List[Tweet]:
+        """Get user liked tweets
+        TODO 75 per 15min
+        """
+        return self.client.get_liked_tweets(user_id)
 
+    def listen_tweeting(self, **params) -> List[Tweet]:
+        """Search for tweets
+        TODO 180 per 15min
+        """
+        return self.client.search_recent_tweets(user_auth=True, **params)
 
-# class Trace:
-#     def __init__(self, user: User):
-#
+    def shot_down(self, user_id='', user_ids=None) -> Union[bool, List[bool]]:
+        """Block user
+        TODO 50 per 15min
+        """
+        if user_id:
+            return self.client.block(user_id).data.get("blocking")
+        elif user_ids:
+            return [self.shot_down(user_id=user_id) for user_id in user_ids]
+        else:
+            raise ValueError(NO_VALUE_PROVIDED)
+
+    def ignore(self, user_id='', user_ids=None) -> Union[bool, List[bool]]:
+        """Mute user
+        TODO 50 per 15min
+        """
+        if user_id:
+            return self.client.mute(user_id).data.get("muting")
+        elif user_ids:
+            return [self.ignore(user_id=user_id) for user_id in user_ids]
+        else:
+            raise ValueError(NO_VALUE_PROVIDED)
+
+    def check_decoy(self, count=1) -> List[User]:
+        """Get your followers ids
+        TODO 15 per 15min
+        TODO 返回的顺序是按时间asc还是desc?
+        TODO 函数内部处理分页
+        """
+        return self.client.get_users_followers(self.id, user_auth=True)
 
 
 def init_tweepy_client() -> Client:
@@ -117,16 +177,3 @@ def get_consumer_key_pair_from_input():
           '-> https://developer.twitter.com/en/docs/authentication/oauth-1-0a/pin-based-oauth\n\n')
 
     return get_input('Api key'), get_input('Api secret')
-
-
-def get_input(key: str) -> str:
-    key_loop = True
-    value = ''
-    while key_loop:
-        value = input('{}:'.format(key))
-        # default yes
-        confirm = input('confirm?([y]/n)')
-        if not confirm or confirm.lower() == 'y':
-            key_loop = False
-
-    return value

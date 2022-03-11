@@ -1,0 +1,97 @@
+# Your can refer https://yaml.org/ for the syntax of the YAML.
+# For character escaping content, read this:
+# https://pyyaml.org/wiki/PyYAMLDocumentation#scalars
+#
+# For possible configuration options, see config-manual.md in the root directory,
+# or check the latest version of online manual:
+# https://github.com/boholder/puntgun/blob/main/config-manual.md
+
+# ========================
+# script behavior settings
+# ========================
+
+manually-confirm: false
+
+# ========================
+# rules
+# ========================
+
+block:
+  - users:
+      who:
+        id-are: [ "12345678", "87654321" ]
+
+  - users:
+      who:
+        username-are: [ "Twitter", "TwitterAPI" ]
+
+  - users:
+      who:
+        are-my-follower:
+          recent: 100
+
+  - users:
+      who:
+        hit-search-results-of:
+          - search:
+              name: hate coffee or cats
+              query: '"hate" "coffee" OR "cats"'
+              count: 100
+          - search-query: '"收留无家可归的乌克兰小姐姐"'
+          - search-query: '"son of a b*tch"'
+
+  - users:
+      who:
+        agree-with-tweet:
+          id: "12345678"
+          search-query: 'text-text-text'
+
+  - users:
+      who:
+        id-are: [ "12345678", "87654321" ]
+      any-of:
+        - search-query: 'text-text-text'
+        - all-of:
+            - user-created:
+                after: "2019-01-01 00:00:00"
+                before: "2020-01-01"
+            - user-texts-match: '[\u1F100-\u1F1E5]'
+            - user-follower:
+                more-than: 1
+                less-than: 1000
+            - user-following:
+                more-than: 1
+                less-than: 1000
+            # follower / following
+            - user-foer-foing-ratio:
+                more-than: 0.1 # 1 follower / 10 following
+                less-than: 3 # 3 follower / 1 following
+            - user-tweet-count:
+                more-than: 1
+                less-than: 100
+            - user-recent-speaking-ratio:
+                recent: 100
+                more-than: 0.05 # 5 post / 95 retweet in 100 tweets
+                less-than: 0.9 # 90 post / 10 retweet in 100 tweets
+
+        - let-me-check:
+            user-info: ture
+            recent-tweets: 3
+            recent-replies:
+              count: 3
+              with-origin-tweet: true
+            recent-likes: 3
+
+mute:
+  - users:
+      who:
+        id-are: [ "12345678", "87654321" ]
+
+fragments:
+  - search-rules:
+      - search-query: 'tweet-query-string-1'
+      - search-query: 'tweet-query-string-2'
+
+  - numeric-fields:
+      more-than: 10
+      less-than: 1000
