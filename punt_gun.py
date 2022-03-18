@@ -1,13 +1,14 @@
 from puntgun.hunter import Hunter
-from puntgun.hunting_plan import HuntingPlan
+from puntgun.config.hunting_plan import HuntingPlan
 
 
 def print_banner():
-    print(' ,______________________________________\n'
-          '|______________________________ [____]  ""-,__  __..--=====\n'
-          'Punt Gun                         \\_____/   ""            |\n'
-          '- a configurable Twitter             [ ))"------------..__|\n'
-          '  user blocking script\n')
+    print("""
+,______________________________________
+|______________________________ [____]  ""-,______..--=====
+Punt Gun - a configurable Twitter\\_____/   ""            |
+             user blocking script    [ ))"------------..__|
+    """)
 
 
 if __name__ == '__main__':

@@ -133,8 +133,11 @@ under one "users" rule, perform the action on all users in the [who](#who)'s res
 ```yaml
 block:
   - users:
-      who:
+      who: # required
         id-are: [ "12345678", "87654321" ]
+      all-of: # optional
+        - follower-less-than: 10
+      let-me-check: ["user-info"] # optional
 ```
 
 ### who
