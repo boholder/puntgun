@@ -24,7 +24,7 @@ def get_logger(name: str) -> logging.Logger:
     return logging.getLogger(name)
 
 
-def log_assertion_error_with(cls_logger):
+def log_error_with(cls_logger):
     """Decorator to log assertion failures.
 
     Let classes pass their own logger to this decorator,
@@ -35,7 +35,7 @@ def log_assertion_error_with(cls_logger):
         def wrapper(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
-            except AssertionError as e:
+            except Exception as e:
                 cls_logger.error(e)
                 raise e
 

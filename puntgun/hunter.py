@@ -1,3 +1,4 @@
+import functools
 import os
 from typing import List, Union
 
@@ -27,7 +28,14 @@ class Hunter:
     and doesn't have decision logic.
     """
 
+    @staticmethod
+    @functools.lru_cache(maxsize=1)
+    def instance() -> 'Hunter':
+        """Get singleton instance of Hunter"""
+        return Hunter()
+
     def __init__(self):
+        """You should only get instance of this class via ``instance`` static method."""
         self.client = init_tweepy_client()
 
         me = self.client.get_me().data

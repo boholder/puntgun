@@ -24,6 +24,15 @@ class TestAbstractField(TestCase):
         assert_that(calling(Field.of).with_args("test_field", str, default_value=1),
                     raises(AssertionError, pattern="expect type"))
 
+    def test_manually_call_expect_type_check_on_given_value(self):
+        class TestField(Field):
+            is_init_by_class_attr = True
+            config_keyword = "test_field"
+            expect_type = str
+
+        assert_that(calling(TestField().check_expect_type_constraint).with_args(1),
+                    raises(AssertionError, pattern="expect type"))
+
     def test_normal_initialization_with_class_attr(self):
         class TestField(Field):
             is_init_by_class_attr = True
