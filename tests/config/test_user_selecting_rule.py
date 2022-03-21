@@ -4,7 +4,7 @@ from unittest import TestCase
 
 from hamcrest import assert_that, instance_of
 
-from puntgun.config.user_selecting_rule import WhoField
+from puntgun.config.user_selecting_rule import WhoField, UserSelectingRule
 
 
 class TestAbstractWhoField(TestCase):
@@ -15,19 +15,20 @@ class TestAbstractWhoField(TestCase):
             expect_type = str
 
             def __init__(self, raw_config_value):
-                self.v = None
-                super().__init__(raw_config_value)
-
-            def query_users_from_client(self):
-                return self.v
-
-            def set_value(self, raw_config_value):
+                super().__init__()
                 self.v = raw_config_value
+
+            def query(self, _):
+                return self.v
 
         field = WhoField.get_instance_via_config({"test-key": "text"})
         assert_that(isinstance(field, TestWhoField))
         assert_that(field.v, instance_of(str))
         assert_that(field.v, "text")
+
+        user_selecting_rule = UserSelectingRule({"who": {"test-key": "text"}})
+        assert_that(user_selecting_rule.who, instance_of(TestWhoField))
+        assert_that(user_selecting_rule.who.v, "text")
 
     @unittest.skip("test feasibility when developing")
     def test_inherit_cache(self):

@@ -30,7 +30,7 @@ class TestAbstractField(TestCase):
             config_keyword = "test_field"
             expect_type = str
 
-        assert_that(calling(TestField().check_expect_type_constraint).with_args(1),
+        assert_that(calling(TestField.build).with_args(1),
                     raises(AssertionError, pattern="expect type"))
 
     def test_normal_initialization_with_class_attr(self):
@@ -75,30 +75,30 @@ class TestAbstractMapOption(TestCase):
 
     def test_check_option_required_fields(self):
         class TestOption(MapOption):
-            valid_fields = [Field.of("field", str),
-                            Field.of("required_field", str, required=True)]
+            valid_options = [Field.of("field", str),
+                             Field.of("required_field", str, required=True)]
 
         assert_that(calling(TestOption).with_args({"field": "value"}),
                     raises(AssertionError, pattern="required_field"))
 
     def test_check_exist_fields_required_fields(self):
         class TestOption(MapOption):
-            valid_fields = [Field.of("field1", str, require_with=["field2"])]
+            valid_options = [Field.of("field1", str, require_with=["field2"])]
 
         assert_that(calling(TestOption).with_args({"field1": "value"}),
                     raises(AssertionError, pattern="field2"))
 
     def test_check_exist_fields_conflict_fields(self):
         class TestOption(MapOption):
-            valid_fields = [Field.of("field1", str, conflict_with=["field2"]),
-                            Field.of("field2", str)]
+            valid_options = [Field.of("field1", str, conflict_with=["field2"]),
+                             Field.of("field2", str)]
 
         assert_that(calling(TestOption).with_args({"field1": "value", "field2": "value"}),
                     raises(AssertionError, pattern="conflict"))
 
     def test_field_extraction(self):
         class TestOption(MapOption):
-            valid_fields = [Field.of("field1", str)]
+            valid_options = [Field.of("field1", str)]
 
         assert_that(getattr(TestOption({"field1": "value"}), "field1"), equal_to("value"))
 
@@ -115,8 +115,8 @@ class TestAbstractListOption(TestCase):
 
     def test_field_extraction(self):
         class TestOption(ListOption):
-            valid_fields = [Field.of("item1", str),
-                            Field.of("item2", dict)]
+            valid_options = [Field.of("item1", str),
+                             Field.of("item2", dict)]
 
         option = TestOption([{"item1": "t1"},
                              {"item1": "t2"},

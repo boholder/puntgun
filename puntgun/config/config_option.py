@@ -7,7 +7,7 @@ but theses' input is a structured object (parsed from yaml file).
 """
 import logging
 from collections import defaultdict
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Type
 
 from puntgun.util import get_logger, log_error_with
 
@@ -15,37 +15,60 @@ from puntgun.util import get_logger, log_error_with
 class Option(object):
     """
     Option classes are responsible for checking the validity of user-written
-    configuration, and extracting field values from yaml-converted raw dictionary structure.
+    configuration, and extracting field values from yaml-converted raw dictionary structure,
+    and act as a wrapper for the contained values.
+
+    Options can be nested, so there are some class attributes
+    that describe relationships between other options and between parent option.
     """
-    pass
+
+    # ---remain for child class to override
+    config_keyword: str = "generic-option"
+
+    # ---optional setting attributes for overriding
+    # list of ``config_keyword`` that cannot co-exist with this option
+    conflict_with: List[str] = []
+    # list of ``config_keyword`` that must be present if this option present
+    require_with: List[str] = []
+    # if is required in parent option
+    required: bool = False
+
+    @classmethod
+    def build(cls, raw_config_value):
+        """
+        Return wrapped instance (ListOption, MapOption)
+        or directly return the input primitive value (Field).
+
+        Called by ``MapOption`` and ``ListOption``'s ``__init__`` method
+        to automatically build inner fields,
+        so one parent option (which inherited from these two) doesn't need to
+        manually build their inner fields (has-a).
+
+        But parent options should know exactly what type (instance, or primitive value)
+        inner fields will be and how to use them.
+        """
+        raise NotImplementedError
 
 
 class Field(Option):
     """
     Represent a basic option that doesn't have inner fields or items,
-    only have a primitive-type value.
-    Pure DTO, no logic.
+    only have a primitive value.
 
     Rules in source code use a set of this class to indicate
     what kind of field is valid inside them.
     You can define a child class by directly setting class attributes
-    or using ``of`` class method.
-
-    If you define one by setting class attributes, please set the ``is_init_by_class_attr`` to ``True``,
-    to enable constraint checking when initialing instance of your custom field class.
+    or using ``of`` metaclass method to generate one.
     """
+
     logger = get_logger(__name__)
 
     # remain for child class to override
-    is_init_by_class_attr = False
     config_keyword: str
     expect_type: type
 
     # optional setting attributes for overriding
     default_value: object = None
-    conflict_with: List[str] = []
-    require_with: List[str] = []
-    required: bool = False
 
     @classmethod
     def of(cls,
@@ -65,47 +88,47 @@ class Field(Option):
         :param require_with: list of ``config_keyword`` that must be present if this field present
         :param required: if is required in parent option
         """
-        instance = cls()
-        instance.config_keyword = config_keyword
-        instance.expect_type = expect_type
-        instance.default_value = default_value
-        instance.conflict_with = conflict_with if conflict_with else []
-        instance.require_with = require_with if require_with else []
-        instance.required = required
 
-        # now we can perform the check
-        instance.__check_setting_constrains()
-        return instance
+        class NewField(Field):
+            def __init__(self):
+                super().__init__()
+
+        NewField.config_keyword = config_keyword
+        NewField.expect_type = expect_type
+        NewField.default_value = default_value
+        NewField.conflict_with = conflict_with if conflict_with else []
+        NewField.require_with = require_with if require_with else []
+        NewField.required = required
+
+        return NewField()
 
     def __init__(self):
-        # Perform constrains check need class attributes to be set,
-        # or will raise AttributeError.
-        #
-        # But if we initialize an instance by class method,
-        # we need to first generate one instance via __init__ method,
-        # without setting class attributes,
-        # so let's skip the check if so.
-        if self.is_init_by_class_attr:
-            self.__check_setting_constrains()
+        Field.__check_setting_constrains(self.__class__)
 
+    @staticmethod
     @log_error_with(logger)
-    def __check_setting_constrains(self):
+    def __check_setting_constrains(cls: Type['Field']):
         """Assertions for checking constraints"""
-        assert self.config_keyword, "Field's \"config_keyword\" must be set"
-        assert self.expect_type, "Field's \"expect_type\" must be set"
+        assert cls.config_keyword, "Field's \"config_keyword\" must be set"
+        assert cls.expect_type, "Field's \"expect_type\" must be set"
 
-        for keyword in self.require_with:
-            assert keyword not in self.conflict_with, \
-                f"Field [{self}]: " \
+        for keyword in cls.require_with:
+            assert keyword not in cls.conflict_with, \
+                f"Field [{cls}]: " \
                 f"keyword [{keyword}] shows in both require_with and conflict_with"
 
-        if self.default_value:
-            assert isinstance(self.default_value, self.expect_type), \
-                f"Field [{self}]: " \
-                f"default value [{self.default_value}] is not of expect type [{self.expect_type}]"
+        if cls.default_value:
+            assert isinstance(cls.default_value, cls.expect_type), \
+                f"Field [{cls}]: " \
+                f"default value [{cls.default_value}] is not of expect type [{cls.expect_type}]"
+
+    @classmethod
+    def build(cls, raw_config_value: Any):
+        cls().__check_expect_type_constraint(raw_config_value)
+        return raw_config_value
 
     @log_error_with(logger)
-    def check_expect_type_constraint(self, value):
+    def __check_expect_type_constraint(self, value):
         assert isinstance(value, self.expect_type), \
             f"Field [{self}]: " \
             f"given value [{value}] is not of expect type [{self.expect_type}]"
@@ -123,8 +146,8 @@ class MapOption(Option):
     logger = get_logger(__name__)
 
     # remain for child class to override
-    config_keyword = "map-option-generic"
-    valid_fields: List[Field] = []
+    config_keyword = "generic-map-option"
+    valid_options: List[Type[Option]] = []
 
     def __init__(self, raw_config_value: Dict[str, Any]):
         """
@@ -132,72 +155,73 @@ class MapOption(Option):
                 in the parsed config dictionary.
         """
         self.raw_config = raw_config_value
-        exist_field_settings = self.__filter_exist_field_settings()
-        self.__check_constraints_of(exist_field_settings)
-        self.exist_fields = self.__extract_exist_fields_into_dict(exist_field_settings, raw_config_value)
+        exist_option_settings = self.__filter_exist_option_settings()
+        self.__check_constraints_of(exist_option_settings)
+        self.exist_options = self.__extract_exist_options_into_dict(exist_option_settings, raw_config_value)
 
     @log_error_with(logger)
-    def __filter_exist_field_settings(self) -> List[Field]:
+    def __filter_exist_option_settings(self) -> list[Type[Option]]:
         assert len(self.raw_config) > 0, \
             f"Option [{self}] must have at least one field."
 
         # check invalid fields
-        exist_fields = self.raw_config.keys()
-        valid_config_keywords = [field.config_keyword for field in self.valid_fields]
-        for field in exist_fields:
+        exist_options = self.raw_config.keys()
+        valid_config_keywords = [field.config_keyword for field in self.valid_options]
+        for field in exist_options:
             assert field in valid_config_keywords, \
                 f"Option [{self}]: [{field}] is not a valid field."
 
         # then shrink exist fields to valid fields
-        return [field for field in self.valid_fields
-                if field.config_keyword in exist_fields]
+        return [field for field in self.valid_options
+                if field.config_keyword in exist_options]
 
     @log_error_with(logger)
-    def __check_constraints_of(self, exist_field_settings: List[Field]):
+    def __check_constraints_of(self, exist_option_settings: List[Type[Option]]):
         """
         Check that all fields aren't violating the constraints themselves made.
         """
 
         # check (option) required fields
-        for field in [field for field in self.valid_fields if field.required]:
-            assert field.config_keyword in exist_field_settings, \
+        for field in [field for field in self.valid_options if field.required]:
+            assert field.config_keyword in exist_option_settings, \
                 f"Option [{self}] requires " \
                 f"field [{field}] must be configured," \
                 f"but it's absent."
 
         # check (exist fields) required fields
-        for field in exist_field_settings:
+        for field in exist_option_settings:
             for required_field in field.require_with:
-                assert required_field in exist_field_settings, \
+                assert required_field in exist_option_settings, \
                     f"Option [{self}]: " \
                     f"field [{field}] requires another field [{required_field}] must be configured, " \
                     f"but it's absent."
 
         # check fields conflict constraints
-        for field in exist_field_settings:
+        for field in exist_option_settings:
             for required_field in field.conflict_with:
-                assert required_field in exist_field_settings, \
+                assert required_field in exist_option_settings, \
                     f"Option [{self}]: " \
                     f"field [{field}] is conflict with another existing field [{required_field}]."
 
     @log_error_with(logger)
-    def __extract_exist_fields_into_dict(self, exist_field_settings: List[Field],
-                                         raw_config: dict) -> Dict[str, Any]:
+    def __extract_exist_options_into_dict(self, exist_option_settings: List[Type[Option]],
+                                          raw_config: dict) -> Dict[str, Any]:
         result = {}
-        for field in exist_field_settings:
+        for field in exist_option_settings:
             keyword = field.config_keyword
-            value = raw_config[keyword]
-            # check if type is same as expect
-            field.check_expect_type_constraint(value)
-            result[keyword] = value
+            result[keyword] = field.build(raw_config[keyword])
 
         return result
+
+    @classmethod
+    def build(cls, raw_config_value: Dict[str, Any]):
+        return cls(raw_config_value)
 
     def __str__(self):
         return self.config_keyword
 
     def __getattr__(self, item):
-        return self.exist_fields[item]
+        return self.exist_options[item]
 
 
 class ListOption(Option):
@@ -210,11 +234,12 @@ class ListOption(Option):
     * Fields' ``conflict_with``, ``required_with``, ``required`` constraints
       are not validated in this type of option.
     """
+
     logger = logging.getLogger(__name__)
 
     # remain for child class to override
-    config_keyword = "list-option-generic"
-    valid_fields: List[Field] = []
+    config_keyword = "generic-list-option"
+    valid_options: List[Type[Option]] = []
 
     def __init__(self, raw_config_value: List[Dict[str, Any]]):
         """
@@ -222,11 +247,11 @@ class ListOption(Option):
                 in the parsed config dictionary.
         """
         self.raw_config = raw_config_value
-        self.exist_fields = self.__extract_exist_fields_into_dict(self.__filter_exist_field_settings(),
-                                                                  raw_config_value)
+        self.exist_options = self.__extract_exist_options_into_dict(self.__filter_exist_option_settings(),
+                                                                    raw_config_value)
 
     @log_error_with(logger)
-    def __filter_exist_field_settings(self) -> List[Field]:
+    def __filter_exist_option_settings(self) -> List[Type[Option]]:
         """
         Check that all fields are valid.
         """
@@ -241,34 +266,36 @@ class ListOption(Option):
         exist_item_names = set([key for keys in exist_keys_list for key in keys])
 
         # check invalid fields
-        valid_config_keywords = [field.config_keyword for field in self.valid_fields]
+        valid_config_keywords = [field.config_keyword for field in self.valid_options]
         for field in exist_item_names:
             assert field in valid_config_keywords, \
                 f"Option [{self}]: [{field}] is not a valid item."
 
         # then shrink exist fields to valid fields
-        return [field for field in self.valid_fields
+        return [field for field in self.valid_options
                 if field.config_keyword in exist_item_names]
 
     @log_error_with(logger)
-    def __extract_exist_fields_into_dict(self, exist_field_settings: list,
-                                         raw_config: List[Dict[str, Any]]) -> Dict[str, List[Any]]:
+    def __extract_exist_options_into_dict(self, exist_option_settings: List[Type[Option]],
+                                          raw_config: List[Dict[str, Any]]) -> Dict[str, List[Any]]:
         result = defaultdict(list)
-        for field in exist_field_settings:
+        for field in exist_option_settings:
             keyword = field.config_keyword
             # there may be multiple same items with the same config_keyword
             matched_values = list(filter(lambda x: x is not None, [item.get(keyword) for item in raw_config]))
 
             for value in matched_values:
-                # check if type is same as expect
-                field.check_expect_type_constraint(value)
                 # add all same keyword items' value into one list, under keyword key.
-                result[keyword].append(value)
+                result[keyword].append(field.build(value))
 
         return result
+
+    @classmethod
+    def build(cls, raw_config_value: List[Dict[str, Any]]):
+        return cls(raw_config_value)
 
     def __str__(self):
         return self.config_keyword
 
     def __getattr__(self, item):
-        return self.exist_fields[item]
+        return self.exist_options[item]
