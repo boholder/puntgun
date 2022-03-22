@@ -6,7 +6,7 @@ from puntgun.config.config_option import Field, MapOption, ListOption
 
 
 class TestAbstractField(TestCase):
-    def test_check_same_field_in_two_constrains(self):
+    def test_check_same_field_in_two_constraints(self):
         class TestField(Field):
             config_keyword = "test_field"
             expect_type = str

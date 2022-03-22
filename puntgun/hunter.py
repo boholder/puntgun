@@ -5,7 +5,7 @@ from typing import List, Union
 from tweepy import User, Client, OAuth1UserHandler, Tweet, Response
 
 # keys for accessing twitter auth api secrets
-from puntgun.util import get_input_from_terminal
+from puntgun import util
 
 NO_VALUE_PROVIDED = 'No value provided.'
 
@@ -152,7 +152,7 @@ def get_access_token_pair_via_authorization_pin(api_key, api_secret):
           'by entering the PIN code you get from newly opened browser window:\n'
           + oauth1_user_handler.get_authorization_url() + '\n')
 
-    pin = get_input_from_terminal('PIN')
+    pin = util.get_input_from_terminal('PIN')
     return oauth1_user_handler.get_access_token(pin)
 
 
@@ -184,4 +184,4 @@ def get_consumer_key_pair_from_input():
           'We\'ll use the pin based auth method, so we don\'t really need to deploy a server for callback.\n'
           '-> https://developer.twitter.com/en/docs/authentication/oauth-1-0a/pin-based-oauth\n\n')
 
-    return get_input_from_terminal('Api key'), get_input_from_terminal('Api secret')
+    return util.get_input_from_terminal('Api key'), util.get_input_from_terminal('Api secret')

@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.INFO,
 
 
 def get_logger(name: str) -> logging.Logger:
-    """Let classes get their own logger with common configuration"""
+    """Let classes get their own logger with common configuration configured."""
     return logging.getLogger(name)
 
 
@@ -45,16 +45,16 @@ def log_error_with(cls_logger):
     return decorator
 
 
-def get_instance_via_config(cls, raw_config_pair: Dict[str, Any]):
+def get_instance_via_config(cls, config_pair: Dict[str, Any]):
     """
     Find same ``config_keyword`` in all given class's subclasses
     and return the instance of matched subclass.
 
     :param cls: indicated class
-    :param raw_config_pair: {config_keyword: value}
+    :param config_pair: {config_keyword: value}
     :return: instance of one subclass of cls
     """
-    keyword, value = raw_config_pair.popitem()
+    keyword, value = config_pair.popitem()
     for subclass in cls.__subclasses__():
         if subclass.config_keyword == keyword:
             return subclass(value)

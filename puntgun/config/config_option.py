@@ -1,15 +1,7 @@
-"""
-These class check the (syntactic) legality of user-written configuration,
-and extract field values from yaml-converted raw structure for further use.
-
-It's sort of reinventing a wheel about argument parsing library like GNU readline,
-but theses' input is a structured object (parsed from yaml file).
-"""
-import logging
 from collections import defaultdict
 from typing import List, Dict, Any, Type
 
-from puntgun.util import get_logger, log_error_with
+from puntgun import util
 
 
 class Option(object):
@@ -34,12 +26,12 @@ class Option(object):
     required: bool = False
 
     @classmethod
-    def build(cls, raw_config_value):
+    def build(cls, config_value):
         """
-        Return wrapped instance (ListOption, MapOption)
+        Return wrapped instance (:class:`ListOption`, :class:`MapOption`)
         or directly return the input primitive value (Field).
 
-        Called by ``MapOption`` and ``ListOption``'s ``__init__`` method
+        Called by :class:`MapOption` and :class:`ListOption`'s ``__init__`` method
         to automatically build inner fields,
         so one parent option (which inherited from these two) doesn't need to
         manually build their inner fields (has-a).
@@ -54,14 +46,17 @@ class Field(Option):
     """
     Represent a basic option that doesn't have inner fields or items,
     only have a primitive value.
-
-    Rules in source code use a set of this class to indicate
+    Rules in source code use a set of this type to indicate
     what kind of field is valid inside them.
+
     You can define a child class by directly setting class attributes
     or using ``of`` metaclass method to generate one.
+    If one field has its own inner fields or have complex logic,
+    I recommend defining class attributes, if that field is just a primitive value,
+    using ``of`` method is more convenient.
     """
 
-    logger = get_logger(__name__)
+    logger = util.get_logger(__qualname__)
 
     # remain for child class to override
     config_keyword: str
@@ -103,11 +98,11 @@ class Field(Option):
         return NewField()
 
     def __init__(self):
-        Field.__check_setting_constrains(self.__class__)
+        Field.__check_setting_constraints(self.__class__)
 
     @staticmethod
-    @log_error_with(logger)
-    def __check_setting_constrains(cls: Type['Field']):
+    @util.log_error_with(logger)
+    def __check_setting_constraints(cls: Type['Field']):
         """Assertions for checking constraints"""
         assert cls.config_keyword, "Field's \"config_keyword\" must be set"
         assert cls.expect_type, "Field's \"expect_type\" must be set"
@@ -123,12 +118,12 @@ class Field(Option):
                 f"default value [{cls.default_value}] is not of expect type [{cls.expect_type}]"
 
     @classmethod
-    def build(cls, raw_config_value: Any):
-        cls().__check_expect_type_constraint(raw_config_value)
-        return raw_config_value
+    def build(cls, config_value: Any):
+        cls().__check_expect_type_constraints(config_value)
+        return config_value
 
-    @log_error_with(logger)
-    def __check_expect_type_constraint(self, value):
+    @util.log_error_with(logger)
+    def __check_expect_type_constraints(self, value):
         assert isinstance(value, self.expect_type), \
             f"Field [{self}]: " \
             f"given value [{value}] is not of expect type [{self.expect_type}]"
@@ -143,23 +138,23 @@ class MapOption(Option):
 
     You can define a map-like option only by directly setting class attributes.
     """
-    logger = get_logger(__name__)
+    logger = util.get_logger(__qualname__)
 
     # remain for child class to override
     config_keyword = "generic-map-option"
     valid_options: List[Type[Option]] = []
 
-    def __init__(self, raw_config_value: Dict[str, Any]):
+    def __init__(self, config_value: Dict[str, Any]):
         """
-        :param raw_config_value: the value corresponding to the "config_keyword" of this option
+        :param config_value: the value corresponding to the "config_keyword" of this option
                 in the parsed config dictionary.
         """
-        self.raw_config = raw_config_value
+        self.raw_config = config_value
         exist_option_settings = self.__filter_exist_option_settings()
         self.__check_constraints_of(exist_option_settings)
-        self.exist_options = self.__extract_exist_options_into_dict(exist_option_settings, raw_config_value)
+        self.exist_options = self.__extract_exist_options_into_dict(exist_option_settings, config_value)
 
-    @log_error_with(logger)
+    @util.log_error_with(logger)
     def __filter_exist_option_settings(self) -> list[Type[Option]]:
         assert len(self.raw_config) > 0, \
             f"Option [{self}] must have at least one field."
@@ -175,7 +170,7 @@ class MapOption(Option):
         return [field for field in self.valid_options
                 if field.config_keyword in exist_options]
 
-    @log_error_with(logger)
+    @util.log_error_with(logger)
     def __check_constraints_of(self, exist_option_settings: List[Type[Option]]):
         """
         Check that all fields aren't violating the constraints themselves made.
@@ -183,7 +178,10 @@ class MapOption(Option):
 
         # check (option) required fields
         for field in [field for field in self.valid_options if field.required]:
-            assert field.config_keyword in exist_option_settings, \
+            # any subclass of required field or itself is exists
+            # a field may don't have subclasses
+            possible_subclasses = field.__subclasses__() if hasattr(field, "__subclasses__") else []
+            assert [f for f in exist_option_settings if f in [field] + possible_subclasses], \
                 f"Option [{self}] requires " \
                 f"field [{field}] must be configured," \
                 f"but it's absent."
@@ -203,7 +201,7 @@ class MapOption(Option):
                     f"Option [{self}]: " \
                     f"field [{field}] is conflict with another existing field [{required_field}]."
 
-    @log_error_with(logger)
+    @util.log_error_with(logger)
     def __extract_exist_options_into_dict(self, exist_option_settings: List[Type[Option]],
                                           raw_config: dict) -> Dict[str, Any]:
         result = {}
@@ -214,8 +212,8 @@ class MapOption(Option):
         return result
 
     @classmethod
-    def build(cls, raw_config_value: Dict[str, Any]):
-        return cls(raw_config_value)
+    def build(cls, config_value: Dict[str, Any]):
+        return cls(config_value)
 
     def __str__(self):
         return self.config_keyword
@@ -235,22 +233,22 @@ class ListOption(Option):
       are not validated in this type of option.
     """
 
-    logger = logging.getLogger(__name__)
+    logger = util.get_logger(__qualname__)
 
     # remain for child class to override
     config_keyword = "generic-list-option"
     valid_options: List[Type[Option]] = []
 
-    def __init__(self, raw_config_value: List[Dict[str, Any]]):
+    def __init__(self, config_value: List[Dict[str, Any]]):
         """
-        :param raw_config_value: the value corresponding to the "config_keyword" of this option
+        :param config_value: the value corresponding to the "config_keyword" of this option
                 in the parsed config dictionary.
         """
-        self.raw_config = raw_config_value
+        self.raw_config = config_value
         self.exist_options = self.__extract_exist_options_into_dict(self.__filter_exist_option_settings(),
-                                                                    raw_config_value)
+                                                                    config_value)
 
-    @log_error_with(logger)
+    @util.log_error_with(logger)
     def __filter_exist_option_settings(self) -> List[Type[Option]]:
         """
         Check that all fields are valid.
@@ -275,7 +273,7 @@ class ListOption(Option):
         return [field for field in self.valid_options
                 if field.config_keyword in exist_item_names]
 
-    @log_error_with(logger)
+    @util.log_error_with(logger)
     def __extract_exist_options_into_dict(self, exist_option_settings: List[Type[Option]],
                                           raw_config: List[Dict[str, Any]]) -> Dict[str, List[Any]]:
         result = defaultdict(list)
@@ -291,8 +289,8 @@ class ListOption(Option):
         return result
 
     @classmethod
-    def build(cls, raw_config_value: List[Dict[str, Any]]):
-        return cls(raw_config_value)
+    def build(cls, config_value: List[Dict[str, Any]]):
+        return cls(config_value)
 
     def __str__(self):
         return self.config_keyword

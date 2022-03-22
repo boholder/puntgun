@@ -2,14 +2,14 @@ from typing import IO, Union
 
 import yaml
 
-from puntgun.util import get_input_from_terminal, get_logger
+from puntgun import util
 
 
 class HuntingPlan:
     """
     Parse configuration file content into rules, and hold them.
     """
-    logger = get_logger(__name__)
+    logger = util.get_logger(__qualname__)
 
     def __init__(self):
         self.raw_config = HuntingPlan.parse_yaml_config(self.read_config_file())
@@ -24,7 +24,7 @@ class HuntingPlan:
 
     @classmethod
     def read_config_file(cls) -> IO:
-        file_name = get_input_from_terminal("Select file_name file (./config.yml)")
+        file_name = util.get_input_from_terminal("Select file_name file (./config.yml)")
         if not file_name:
             file_name = "config.yml"
 

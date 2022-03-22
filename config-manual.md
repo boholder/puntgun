@@ -673,10 +673,10 @@ let-me-check:
 | possible | a `name`, and a list of [Filter Rule](#filter-rule)s and nested [Rule Set](#rule-set)s |
 | `name` | optional, the custom name of the rule set |
 
-An optional [Rule Set](#rule-set) contains a list of [Filter Rule](#filter-rule)s
+An [Rule Set](#rule-set) contains a list of [Filter Rule](#filter-rule)s
 and nested [Rule Set](#rule-set)s.
-Like the [who](#who) field, a rule set can only be put under a [User Selecting Rule](#user-selecting-rule).
-One [User Selecting Rule](#user-selecting-rule) can have 0~1 rule set as further filter chain.
+Like the [who](#who) field, a rule set can be put under a [User Selecting Rule](#user-selecting-rule),
+and one [User Selecting Rule](#user-selecting-rule) can have 0~1 rule set as further filter chain.
 
 You can optionally give a rule set a custom name with `name` field.
 
@@ -715,12 +715,11 @@ OR logic rule set, any of under rules triggered, this set triggered.
 | `goal` | when to trigger the rule, number |
 | `condition` | contains one `wight` and one [Filter Rule](#filter-rule) or nested [Rule Set](#rule-set) |
 
-We need a configurable rule set... here we go.
 As you can see in the example,
 filter rules and nested rule sets need to be wrapped into a `condition`,
 pairing with a `wight` to indicate the wight of this rule.
 
-The value of `goal`, `wight` field can be any positive number, feel free to set them.
+The value of `goal`, `wight` field can be any positive integer.
 When accumulated triggered rules' wights not less than this value,
 the `wight-of` rule triggered.
 
@@ -745,7 +744,7 @@ wight-of:
 ## Reusable Mechanism
 
 There must be a reusable mechanism in one configuration system
-to reduce redundancy, here it is:
+to reduce redundancy, here it is.
 Fields defined under `fragments` with a custom name as referring key can be repeatedly referenced with `refer`.
 One fragment can contain several fields.
 
