@@ -62,7 +62,7 @@ class UserSelectingRule(MapOption):
     # WhoField is special, we indicate the base class is valid option,
     # because we need to extract the real value from one-more-layer structure.
     # {'who': {'id-are': [1, 2, 3]}}
-    valid_options = [WhoField, *RuleSet.__subclasses__(), *LetMeCheckRule.__subclasses__()]
+    valid_options = [WhoField, RuleSet, LetMeCheckRule]
 
     def __init__(self, config_value: Dict[str, Any]):
         super().__init__(config_value)

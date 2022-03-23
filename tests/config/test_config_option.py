@@ -69,9 +69,30 @@ class TestAbstractMapOption(TestCase):
         assert_that(calling(MapOption).with_args({}),
                     raises(AssertionError, pattern="at least one field"))
 
-    def test_check_field_validation(self):
+    def test_raise_exception_for_invalid_config_keyword(self):
+        # raise exception for invalid config_keyword
         assert_that(calling(MapOption).with_args({'field': 'field'}),
                     raises(AssertionError, pattern="not a valid field"))
+
+    def test_check_valid_fields_subclass_as_valid(self):
+        class TestField(Field):
+            config_keyword = "test_field"
+            expect_type = str
+
+        class TestSubClassField(TestField):
+            config_keyword = "test_sub_class_field"
+
+        # supress unused warning
+        TestSubClassField.expect_type = str
+
+        class TestOption(MapOption):
+            config_keyword = "test_option"
+            valid_options = [TestField]
+
+        # must also consider the valid option's subclass's config_keyword is valid too
+        option = TestOption({'test_sub_class_field': 's-field', 'test_field': 'field'})
+        assert_that(option.test_field, equal_to('field'))
+        assert_that(option.test_sub_class_field, equal_to('s-field'))
 
     def test_check_option_required_fields(self):
         class TestOption(MapOption):
@@ -79,7 +100,7 @@ class TestAbstractMapOption(TestCase):
                              Field.of("required_field", str, required=True)]
 
         assert_that(calling(TestOption).with_args({"field": "value"}),
-                    raises(AssertionError, pattern="required_field"))
+                    raises(AssertionError, pattern="required"))
 
     def test_check_exist_fields_required_fields(self):
         class TestOption(MapOption):
@@ -102,6 +123,20 @@ class TestAbstractMapOption(TestCase):
 
         assert_that(getattr(TestOption({"field1": "value"}), "field1"), equal_to("value"))
 
+    def test_auto_fill_default_field(self):
+        class TestOption(MapOption):
+            valid_options = [Field.of("p", str),
+                             Field.of("d", str, default_value="default-value")]
+
+        assert_that(TestOption({"p": "value"}).d, equal_to("default-value"))
+
+    def test_do_not_auto_fill_default_field_if_conflict(self):
+        class TestOption(MapOption):
+            valid_options = [Field.of("p", str, conflict_with=["d"]),
+                             Field.of("d", str, default_value="default-value")]
+
+        assert_that(hasattr(TestOption({"p": "value"}), "d"), equal_to(False))
+
 
 class TestAbstractListOption(TestCase):
 
@@ -109,9 +144,58 @@ class TestAbstractListOption(TestCase):
         assert_that(calling(ListOption).with_args({}),
                     raises(AssertionError, pattern="at least one field"))
 
-    def test_check_field_validation(self):
-        assert_that(calling(ListOption).with_args([{'field': 'field'}]),
-                    raises(AssertionError, pattern="not a valid item"))
+    def test_raise_exception_for_invalid_config_keyword(self):
+        # raise exception for invalid config_keyword
+        assert_that(calling(MapOption).with_args({'field': 'field'}),
+                    raises(AssertionError, pattern="not a valid field"))
+
+    def test_check_valid_fields_subclass_as_valid(self):
+        class TestField(Field):
+            config_keyword = "test_field"
+            expect_type = str
+
+        class TestSubClassField(TestField):
+            config_keyword = "test_sub_class_field"
+
+        TestSubClassField.expect_type = str
+
+        class TestOption(MapOption):
+            valid_options = [TestField]
+
+        # must also consider the valid option's subclass's config_keyword is valid too
+        option = TestOption({'test_field': 'field', 'test_sub_class_field': 's-field'})
+        assert_that(option.test_field, equal_to('field'))
+        assert_that(option.test_sub_class_field, equal_to('s-field'))
+
+    def test_check_required_field_constraint(self):
+        class TestOption(ListOption):
+            valid_options = [Field.of("f1", str, required=True),
+                             Field.of("f2", str)]
+
+        assert_that(calling(TestOption).with_args([{"f2": "value"}]),
+                    raises(AssertionError, pattern="requires"))
+
+    def test_check_valid_options_not_allowed_constraints(self):
+        """these three constraints are not allowed in list option"""
+
+        class TestOption(ListOption):
+            valid_options = [Field.of("f2", str, require_with=["f1"])]
+
+        assert_that(calling(TestOption).with_args([{"f2": "value"}]),
+                    raises(AssertionError, pattern="require_with"))
+
+        class TestOption3(ListOption):
+            valid_options = [Field.of("f3", str, conflict_with=["f1"])]
+
+        assert_that(calling(TestOption3).with_args([{"f3": "value"}]),
+                    raises(AssertionError, pattern="conflict_with"))
+
+    def test_check_fields_can_exist_at_most_once_constraint(self):
+        class TestOption(ListOption):
+            valid_options = [Field.of("f3", str, singleton=True)]
+
+        assert_that(calling(TestOption).with_args([{"f3": "value"}, {"f3": "value"}]),
+                    raises(AssertionError, pattern="at most one"))
 
     def test_field_extraction(self):
         class TestOption(ListOption):

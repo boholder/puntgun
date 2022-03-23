@@ -1,8 +1,8 @@
-from typing import Any, List
+from typing import Any, List, Dict
 
 from puntgun import util
 from puntgun.config.config_option import ListOption, Field, MapOption
-from puntgun.config.filter_rule import FilterRule, NameField
+from puntgun.config.filter_rule import FilterRule
 
 
 class RuleSet(ListOption):
@@ -10,57 +10,63 @@ class RuleSet(ListOption):
     Abstract class for representing a rule set.
     """
     config_keyword = "generic-rule-set"
-    logger = util.get_logger(__qualname__)
-
-    def __init__(self, config_value: List[Any]):
-        super().__init__(config_value)
-        self.__check_name_field_must_be_one_if_exists()
-
-    @util.log_error_with(logger)
-    def __check_name_field_must_be_one_if_exists(self):
-        if hasattr(self, "name"):
-            assert len(self.name) == 1, \
-                f"Option [{self}]: can only have one name field, but found {len(self.name)}."
 
 
-RuleSet.valid_options = [NameField, *RuleSet.__subclasses__(), *FilterRule.__subclasses__()]
+RuleSet.valid_options = [Field.of('name', str, singleton=True), RuleSet, FilterRule]
 
 
 class AllOfRuleSet(RuleSet):
     config_keyword = "all-of"
     logger = util.get_logger(__qualname__)
 
-    def __init__(self, config_value: List[Any]):
-        super().__init__(config_value)
-
 
 class AnyOfRuleSet(RuleSet):
     config_keyword = "any-of"
     logger = util.get_logger(__qualname__)
 
-    def __init__(self, config_value: List[Any]):
-        super().__init__(config_value)
-
 
 class WightCondition(MapOption):
     config_keyword = "condition"
     logger = util.get_logger(__qualname__)
-    valid_options = [Field.of("wight", int, required=True), *FilterRule.__subclasses__()]
+    valid_options = [Field.of("wight", int, required=True, singleton=True), FilterRule]
+
+    def __init__(self, config_value: Dict[str, Any]):
+        other_keywords = [key for key in config_value.keys() if key != 'wight']
+        assert len(other_keywords) == 1, \
+            f"Option [{self}]: must have exact one filter rule, but found {len(other_keywords)}."
+
+        # the config_value should be something like:
+        # {"wight":1, "a-filter-rule-keyword": rule-value}
+        # we need to assign that rule's instance to a known attribute,
+        # or we don't know how to access it once exit __init__ method.
+        rule_keyword = other_keywords[0]
+
+        # let the super class build the rule's instance
+        super().__init__(config_value)
+
+        # assign that instance to a known attribute
+        self.rule = getattr(self, rule_keyword)
 
 
 class WightOfRuleSet(RuleSet):
     config_keyword = "wight-of"
     logger = util.get_logger(__qualname__)
-    valid_options = [Field.of("goal", int, required=True), WightCondition]
+    valid_options = [Field.of('name', str, singleton=True),
+                     Field.of("goal", int, required=True, singleton=True),
+                     WightCondition]
 
     def __init__(self, config_value: List[Any]):
         super().__init__(config_value)
-        self.__check_custom_constraints()
+        self.__check_goal_constraints()
 
     @util.log_error_with(logger)
-    def __check_custom_constraints(self):
+    def __check_goal_constraints(self):
+        # the self.goal value type will be a singleton-list after initialized.
+        # extract the element for convenience
+        self.goal = self.goal[0]
+
         sum_of_wight = sum([c.wight for c in self.condition])
-        assert sum_of_wight > self.goal, \
+        assert sum_of_wight >= self.goal, \
             f"Option [{self}]: The sum of all conditions' wight (current:{sum_of_wight}) " \
             f"must be greater than the goal (current:{self.goal}), " \
             f"or you will never trigger this rule set."

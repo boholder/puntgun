@@ -289,9 +289,9 @@ users:
 | field | value |
 |:--:|:-----:|
 | possible | `name` `count` `query` |
-| `name` | custom name of this search rule, string |
-| `count` | the number of tweets to be searched, integer |
-| `query` | a tweet query, string |
+| `name` | optional, custom name of this search rule, string |
+| `count` | optional, number of tweets to be searched, integer, default 100 |
+| `query` | required, a tweet query, string |
 
 #### basic
 
@@ -670,7 +670,7 @@ let-me-check:
 
 | field | value |
 |:--:|:-----:|
-| possible | a `name`, and a list of [Filter Rule](#filter-rule)s and nested [Rule Set](#rule-set)s |
+| possible | a `name`, and other [Filter Rule](#filter-rule)s or nested [Rule Set](#rule-set)s |
 | `name` | optional, the custom name of the rule set |
 
 An [Rule Set](#rule-set) contains a list of [Filter Rule](#filter-rule)s
