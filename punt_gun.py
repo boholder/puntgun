@@ -1,5 +1,5 @@
 from puntgun.hunter import Hunter
-from puntgun.config.hunting_plan import HuntingPlan
+from puntgun.hunting_plan import HuntingPlan
 
 
 def print_banner():
@@ -20,4 +20,5 @@ if __name__ == '__main__':
     trace = hunter.listen_tweeting(query='from:{}'.format(test_user.id))
     print(trace)
 
-# TODO 命令行传入用户过滤参数和配置文件，忽略配置中的用户过滤，实现与其他工具的自动化配合。
+# TODO 变成可发布的命令行工具：
+#  命令行传入用户过滤参数和配置文件，忽略配置中的用户过滤，实现与其他工具的自动化配合。

@@ -1,0 +1,2 @@
+# allow coverage report in coverage/ can be committed
+!.coverage

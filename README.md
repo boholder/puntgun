@@ -1,5 +1,7 @@
 # Punt Gun - a configurable Twitter user blocking script
 
+[![Crates Version](./coverage/converage.svg)](./coverage)
+
 ## How to use
 
 ## Technical details you need to know

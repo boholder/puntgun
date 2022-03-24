@@ -41,6 +41,8 @@ htmlcov/
 .tox/
 .nox/
 .coverage
+# but allowed coverage reports in coverage/ can be committed
+!coverage/.coverage
 .coverage.*
 .cache
 nosetests.xml
