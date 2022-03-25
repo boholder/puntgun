@@ -24,9 +24,9 @@ class HuntingPlan:
 
     @classmethod
     def read_config_file(cls) -> IO:
-        file_name = util.get_input_from_terminal("Select file_name file (./config.yml)")
+        file_name = util.get_input_from_terminal("Select file_name file (./option.yml)")
         if not file_name:
-            file_name = "config.yml"
+            file_name = "option.yml"
 
         try:
             return open(file_name, encoding='utf-8')

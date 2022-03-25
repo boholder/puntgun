@@ -14,7 +14,7 @@ API_KEY_SECRET = 'TWI_API_KEY_SECRET'
 ACCESS_TOKEN = 'TWI_ACCESS_TOKEN'
 ACCESS_TOKEN_SECRET = 'TWI_ACCESS_TOKEN_SECRET'
 
-# additional url params for querying twitter user state api
+# additional url params for querying Twitter user state api
 USER_PARAM_USER_FIELDS = ['id', 'username', 'pinned_tweet_id',  # metadata
                           'created_at', 'description', 'public_metrics', 'protected', 'verified']  # metrics
 USER_PARAM_EXPANSIONS = 'pinned_tweet_id'
@@ -27,6 +27,7 @@ class Hunter:
     Sort of like a DAO, wrapper of the resource accessing,
     and doesn't have decision logic.
     """
+    logger = util.get_logger(__name__)
 
     @staticmethod
     @functools.lru_cache(maxsize=1)
@@ -42,10 +43,10 @@ class Hunter:
         self.id = me.get('id')
         self.username = me.get('username')
 
-        print('[{}] the hunter dressed up.\n'.format(self.username))
+        self.logger.info('[{}] the hunter dressed up.\n'.format(self.username))
 
     def observe(self, user_id='', username='', user_ids=None) -> Union[Response, List[Response]]:
-        """Get user(s) information from Twitter.
+        """Get user(s) information via Twitter Dev API.
         TODO 900 per 15min
         TODO 出错误码时tweepy的响应类型是什么?应该怎么定义我这些函数的响应类型？
         """
@@ -68,19 +69,19 @@ class Hunter:
             raise ValueError(NO_VALUE_PROVIDED)
 
     def find_feeding_place(self, user_id='') -> List[Tweet]:
-        """Get user liked tweets
+        """Get user liked tweets via Twitter Dev API.
         TODO 75 per 15min
         """
         return self.client.get_liked_tweets(user_id)
 
     def listen_tweeting(self, **params) -> List[Tweet]:
-        """Search for tweets
+        """Search for tweets via Twitter Dev API.
         TODO 180 per 15min
         """
         return self.client.search_recent_tweets(user_auth=True, **params)
 
     def shot_down(self, user_id='', user_ids=None) -> Union[bool, List[bool]]:
-        """Block user
+        """Block user via Twitter Dev API.
         TODO 50 per 15min
         """
         if user_id:
@@ -91,7 +92,7 @@ class Hunter:
             raise ValueError(NO_VALUE_PROVIDED)
 
     def ignore(self, user_id='', user_ids=None) -> Union[bool, List[bool]]:
-        """Mute user
+        """Mute user via Twitter Dev API.
         TODO 50 per 15min
         """
         if user_id:
@@ -102,7 +103,7 @@ class Hunter:
             raise ValueError(NO_VALUE_PROVIDED)
 
     def check_decoy(self, count=1) -> List[User]:
-        """Get your followers ids
+        """Get your followers ids via Twitter Dev API.
         TODO 15 per 15min
         TODO 返回的顺序是按时间asc还是desc?
         TODO 函数内部处理分页

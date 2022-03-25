@@ -27,7 +27,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run coverage
-        # the last "coverage run" is for badge creation, that action doesn't have an INFILE config.
+        # the last "coverage run" is for badge creation, that action doesn't have an INFILE option.
         run: |
           coverage run --context=github-ci-action --data-file=${COVERAGE_REPORT_DIR}/.coverage -m pytest tests
           coverage run -m pytest tests

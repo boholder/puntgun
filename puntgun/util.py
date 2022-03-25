@@ -15,7 +15,7 @@ def get_input_from_terminal(key: str) -> str:
     return value
 
 
-# config the logging module
+# option the logging module
 logging.basicConfig(level=logging.INFO,
                     format='[%(levelname)s] %(message)s')
 

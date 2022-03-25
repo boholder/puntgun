@@ -2,8 +2,8 @@ from unittest import TestCase
 
 from hamcrest import assert_that, calling, raises, equal_to, instance_of
 
-from puntgun.config.filter_rule import SearchFilterRule
-from puntgun.config.rule_set import WightOfRuleSet
+from puntgun.option.filter_rule import SearchFilterRule
+from puntgun.option.rule_set import WightOfRuleSet
 
 
 class TestWightOfRuleSet(TestCase):
@@ -17,7 +17,7 @@ class TestWightOfRuleSet(TestCase):
         assert_that(calling(WightOfRuleSet)
                     .with_args([{'goal': 1},
                                 {'condition': {'wight': 1}}]),
-                    raises(AssertionError, pattern="must have exact one filter rule"))
+                    raises(AssertionError, pattern="must have exact one filter option"))
 
     def test_normal_build(self):
         wight_of_rule_set = WightOfRuleSet([{'goal': 1},

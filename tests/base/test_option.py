@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from hamcrest import assert_that, equal_to, calling, raises
 
-from puntgun.config.config_option import Field, MapOption, ListOption
+from puntgun.base.option import Field, MapOption, ListOption
 
 
 class TestAbstractField(TestCase):

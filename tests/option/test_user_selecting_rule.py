@@ -4,11 +4,13 @@ from unittest import TestCase
 
 from hamcrest import assert_that, instance_of
 
-from puntgun.config.user_selecting_rule import WhoField, UserSelectingRule
+from puntgun.hunter import Hunter
+from puntgun.option.user_selecting_rule import WhoField, UserSelectingRule
 
 
 class TestWhoField(WhoField):
     is_init_by_class_attr = True
+
     config_keyword = "test-who-key"
     expect_type = str
 
@@ -16,7 +18,7 @@ class TestWhoField(WhoField):
         super().__init__()
         self.v = raw_config_value
 
-    def query(self, _):
+    def query_users_from(self, client: Hunter):
         return self.v
 
 

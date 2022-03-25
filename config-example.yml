@@ -2,7 +2,7 @@
 # For character escaping content, read this:
 # https://pyyaml.org/wiki/PyYAMLDocumentation#scalars
 #
-# For possible configuration options, see config-manual.md in the root directory,
+# For possible configuration options, see option-manual.md in the root directory,
 # or check the latest version of online manual:
 # https://github.com/boholder/puntgun/blob/main/config-manual.md
 

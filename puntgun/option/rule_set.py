@@ -1,15 +1,15 @@
 from typing import Any, List, Dict
 
 from puntgun import util
-from puntgun.config.config_option import ListOption, Field, MapOption
-from puntgun.config.filter_rule import FilterRule
+from puntgun.base.option import ListOption, Field, MapOption
+from puntgun.option.filter_rule import FilterRule
 
 
 class RuleSet(ListOption):
     """
-    Abstract class for representing a rule set.
+    Abstract class for representing a option set.
     """
-    config_keyword = "generic-rule-set"
+    config_keyword = "generic-option-set"
 
 
 RuleSet.valid_options = [Field.of('name', str, singleton=True), RuleSet, FilterRule]
@@ -33,15 +33,15 @@ class WightCondition(MapOption):
     def __init__(self, config_value: Dict[str, Any]):
         other_keywords = [key for key in config_value.keys() if key != 'wight']
         assert len(other_keywords) == 1, \
-            f"Option [{self}]: must have exact one filter rule, but found {len(other_keywords)}."
+            f"Option [{self}]: must have exact one filter option, but found {len(other_keywords)}."
 
         # the config_value should be something like:
-        # {"wight":1, "a-filter-rule-keyword": rule-value}
-        # we need to assign that rule's instance to a known attribute,
+        # {"wight":1, "a-filter-option-keyword": option-value}
+        # we need to assign that option's instance to a known attribute,
         # or we don't know how to access it once exit __init__ method.
         rule_keyword = other_keywords[0]
 
-        # let the super class build the rule's instance
+        # let the super class build the option's instance
         super().__init__(config_value)
 
         # assign that instance to a known attribute
@@ -69,4 +69,4 @@ class WightOfRuleSet(RuleSet):
         assert sum_of_wight >= self.goal, \
             f"Option [{self}]: The sum of all conditions' wight (current:{sum_of_wight}) " \
             f"must be greater than the goal (current:{self.goal}), " \
-            f"or you will never trigger this rule set."
+            f"or you will never trigger this option set."

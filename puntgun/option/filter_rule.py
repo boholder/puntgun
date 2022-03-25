@@ -1,11 +1,11 @@
 from typing import Any
 
-from puntgun.config.config_option import MapOption, Field, Option
+from puntgun.base.option import MapOption, Field, Option
 
 
 class FilterRule(Option):
     """
-    A filter rule's type can be any of Field, ListOption, MapOption,
+    A filter option's type can be any of Field, ListOption, MapOption,
     so let the subclasses choose their type and left this base class as a mere tag.
     """
 

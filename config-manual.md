@@ -276,7 +276,7 @@ helping the script to make the final decision.
 users:
   who:
     id-are: [ "12345678", "87654321" ]
-  # this is a rule set
+  # this is a option set
   any-of:
     # these two are filter rules
     - search-query: 'tweet-query-string-1'
@@ -686,10 +686,10 @@ users:
     id-are: ["123456789","987654321"]
   all-of:
     - name: "new account"
-    # a filter rule
+    # a filter option
     - user-created:
         after: "2022-01-01" 
-    # a nested rule set
+    # a nested option set
     - any-of:
         - name: "not speak much"
         - user-foer-foing-ratio-less-than: 0.1

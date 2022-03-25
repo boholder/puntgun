@@ -189,7 +189,7 @@ class MapOption(Option):
     def __init__(self, config_value: Dict[str, Any]):
         """
         :param config_value: the value corresponding to the "config_keyword" of this option
-                in the parsed config dictionary.
+                in the parsed option dictionary.
         """
         self.raw_config = config_value
         # we'll get valid option types which exist in both self.valid_options and config_value,
@@ -325,7 +325,7 @@ class ListOption(Option):
     def __init__(self, config_value: List[Dict[str, Any]]):
         """
         :param config_value: the value corresponding to the "config_keyword" of this option
-                in the parsed config dictionary.
+                in the parsed option dictionary.
         """
         self.raw_config = config_value
         self.__check_list_option_constrains_on(self.valid_options)
