@@ -1,7 +1,7 @@
 from typing import Any, List, Dict
 
 from puntgun import util
-from puntgun.base.option import ListOption, Field, MapOption
+from puntgun.base.options import ListOption, Field, MapOption
 from puntgun.option.filter_rule import FilterRule
 
 

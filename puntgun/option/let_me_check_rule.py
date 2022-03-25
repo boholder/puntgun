@@ -1,4 +1,4 @@
-from puntgun.base.option import MapOption
+from puntgun.base.options import MapOption
 
 
 class LetMeCheckRule(MapOption):

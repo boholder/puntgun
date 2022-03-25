@@ -1,8 +1,8 @@
 from typing import List, Dict, Any
 
 from puntgun import util
-from puntgun.base.option import Field, MapOption
-from puntgun.hunter import Hunter
+from puntgun.base.options import Field, MapOption
+from puntgun.spi.twitter_client.hunter import Hunter
 from puntgun.option.let_me_check_rule import LetMeCheckRule
 from puntgun.option.rule_set import RuleSet
 

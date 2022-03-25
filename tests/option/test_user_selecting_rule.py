@@ -4,7 +4,7 @@ from unittest import TestCase
 
 from hamcrest import assert_that, instance_of
 
-from puntgun.hunter import Hunter
+from puntgun.spi.twitter_client.hunter import Hunter
 from puntgun.option.user_selecting_rule import WhoField, UserSelectingRule
 
 
@@ -29,7 +29,7 @@ class TestAbstractWhoField(TestCase):
         assert_that(field.v, instance_of(str))
         assert_that(field.v, "text")
 
-    @unittest.skip("test feasibility when developing")
+    @unittest.skip("test for development")
     def test_inherit_cache(self):
         class A:
             def real_func(self):

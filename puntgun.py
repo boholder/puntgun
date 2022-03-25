@@ -1,21 +1,20 @@
-from puntgun.hunter import Hunter
-from puntgun.hunting_plan import HuntingPlan
+from puntgun.spi.twitter_client.tweepy_hunter import TweepyHunter
 
 
 def print_banner():
     print("""
 ,______________________________________
-|______________________________ [____]  ""-,______..--=====
-Punt Gun - a configurable Twitter\\_____/   ""            |
-             user blocking script    [ ))"------------..__|
+|______________________________ [____]  ""-,___..--=====
+Punt Gun - a configurable Twitter\\_____/   ""         |
+             user blocking script    [ ))"---------..__|
     """)
 
 
 if __name__ == '__main__':
     # print_banner()
-    plan = HuntingPlan()
+    # plan = HuntingPlan()
 
-    hunter = Hunter()
+    hunter = TweepyHunter()
     test_user = hunter.observe(user_id=hunter.id)
     trace = hunter.listen_tweeting(query='from:{}'.format(test_user.id))
     print(trace)

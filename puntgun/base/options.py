@@ -8,7 +8,7 @@ class Option(object):
     """
     Option classes are responsible for checking the validity of user-written
     configuration, and extracting field values from yaml-converted raw dictionary structure,
-    and act as a wrapper for the contained values.
+    and act as a spi for the contained values.
 
     Options can be nested, so there are some class attributes
     that describe relationships between other options and between parent option.
@@ -153,15 +153,12 @@ class Field(Option):
                 f"default value [{cls.default_value}] is not of expect type [{cls.expect_type}]"
 
     @classmethod
-    def build(cls, config_value: Any):
-        cls().__check_expect_type_constraints(config_value)
-        return config_value
-
     @util.log_error_with(logger)
-    def __check_expect_type_constraints(self, value):
-        assert isinstance(value, self.expect_type), \
-            f"Field [{self}]: " \
-            f"given value [{value}] is not of expect type [{self.expect_type}]"
+    def build(cls, config_value: Any):
+        assert isinstance(config_value, cls.expect_type), \
+            f"Field [{cls}]: " \
+            f"given value [{config_value}] is not of expect type [{cls.expect_type}]"
+        return config_value
 
     def __str__(self):
         return self.config_keyword

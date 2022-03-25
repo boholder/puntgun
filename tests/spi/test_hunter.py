@@ -4,11 +4,9 @@ from unittest import TestCase
 
 from hamcrest import assert_that, equal_to
 
-from puntgun.hunter import Hunter
-
 
 class TestHunter(TestCase):
-    @unittest.skip("test feasibility when developing")
+    @unittest.skip("test for development")
     def test_singleton_instance(self):
         class TestHunterClass(object):
             @staticmethod

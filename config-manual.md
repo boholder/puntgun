@@ -375,6 +375,8 @@ the `whitin-days` field can be used to specify a time range from now,
 to specify newly created accounts.
 It can't be used with `before` or `after` fields.
 
+Times your configured are considered at UTC (+0) timezone.
+
 ```yaml
 - user-created:
     after: "2019-01-01 00:00:00"
@@ -396,9 +398,9 @@ due to its highly possible wrongly triggered feature, be careful when using it.
 There are three part of text directly bind
 (can be queried along with Twitter user info query API) with user:
 
-1. user's description (also called profile)
-2. pinned tweet's text
-3. user screen name (the name you see aside the avatar)
+1. user's name (the name you see aside the avatar)
+2. user's description (also called profile)
+3. pinned tweet's text
 
 Let's perform a [regular expression](https://docs.python.org/3/howto/regex.html)
 match on these texts.
@@ -594,7 +596,7 @@ users:
 
 Provides information about the user, including:
 
-* user screen name, username
+* user's name (besides the avatar), screen name (behinds an "@"),
 * following, follower count
 * profile, pinned tweet text
 

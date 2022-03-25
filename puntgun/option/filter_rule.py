@@ -1,6 +1,6 @@
 from typing import Any
 
-from puntgun.base.option import MapOption, Field, Option
+from puntgun.base.options import MapOption, Field, Option
 
 
 class FilterRule(Option):
