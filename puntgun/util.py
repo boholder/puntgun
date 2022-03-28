@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 
 def get_input_from_terminal(key: str) -> str:
@@ -60,3 +60,8 @@ def get_instance_via_config(cls, config_pair: Dict[str, Any]):
             return subclass(value)
     raise ValueError(f"No such who field matches [{keyword}], "
                      f"please fix it in your configuration.")
+
+
+def split_list(lst: list, n: int) -> List[list]:
+    """Split list into n-size sub-lists."""
+    return [lst[i:i + n] for i in range(0, len(lst), n)]

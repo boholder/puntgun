@@ -44,14 +44,15 @@ class User:
         self.pinned_tweet_text = pinned_tweet_text
 
     @staticmethod
-    def build_from_response(response_data: dict, response_includes: dict):
+    def build_from_response(response_data: dict, response_includes_tweets: list):
         # there may be no such user exist corresponding to the given id or username
         if not response_data:
             return User()
 
-        assert response_includes is not None
         public_metrics = response_data['public_metrics']
-        pinned_tweets_text: List[str] = [t["text"] for t in response_includes['tweets']]
+        # TODO 没pinned_tweet的情况？会返回空{}吗
+        pinned_tweets_text: List[str] = [t["text"] for t in response_includes_tweets] \
+            if response_includes_tweets else []
 
         return User(
             uid=response_data['id'],

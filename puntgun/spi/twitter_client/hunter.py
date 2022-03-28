@@ -4,6 +4,7 @@ from typing import List, Union
 import reactivex as rx
 from tweepy import Tweet
 
+from puntgun.model.errors import TwitterClientError, TwitterApiErrors
 from puntgun.model.user import User
 
 
@@ -26,7 +27,11 @@ class Hunter:
         """Get singleton instance of Client."""
         raise NotImplementedError
 
-    def observe(self, user_id='', username='', user_ids=None) -> rx.Observable[User]:
+    def observe(self,
+                user_id: rx.Observable[str] = None,
+                username: rx.Observable[str] = None,
+                user_ids: rx.Observable[List[str]] = None) \
+            -> rx.Observable[Union[User, TwitterApiErrors], TwitterClientError]:
         """Get user(s) information via Twitter Dev API."""
         raise NotImplementedError
 

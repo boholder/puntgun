@@ -4,6 +4,8 @@ from typing import List, Dict, Any, Type
 from puntgun import util
 
 
+# TODO 怎么再简化一下这个初始化流程，多写点注释？
+
 class Option(object):
     """
     Option classes are responsible for checking the validity of user-written

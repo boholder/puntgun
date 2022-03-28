@@ -1,10 +1,16 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union, Tuple
+
+import reactivex as rx
+from reactivex import operators as op
 
 from puntgun import util
 from puntgun.base.options import Field, MapOption
-from puntgun.spi.twitter_client.hunter import Hunter
+from puntgun.model.errors import TwitterClientError, TwitterApiErrors
+from puntgun.model.exchange import Exchange
+from puntgun.model.user import User
 from puntgun.option.let_me_check_rule import LetMeCheckRule
 from puntgun.option.rule_set import RuleSet
+from puntgun.spi.twitter_client.hunter import Hunter
 
 
 class WhoField(Field):
@@ -16,16 +22,15 @@ class WhoField(Field):
     config_keyword = "who"
     required = True
 
-    def __init__(self, *args, **kwargs):
-        super().__init__()
-
-    def query_users_from(self, client: Hunter):
+    def query_users_from(self, client: Hunter) \
+            -> rx.Observable[Union[User, TwitterApiErrors], TwitterClientError]:
         """Let child classes implement their various logic to query user from client."""
         raise NotImplementedError
 
     @classmethod
     @util.log_error_with(logger)
     def build(cls, config_value) -> 'WhoField':
+        """Override the build method to return a WhoField instance."""
         return util.get_instance_via_config(WhoField, config_value)
 
 
@@ -41,8 +46,9 @@ class IdAreWhoField(WhoField):
         super().__init__()
         self.user_ids = config_value if config_value else []
 
-    def query_users_from(self, client: Hunter):
-        return 1
+    def query_users_from(self, client: Hunter) \
+            -> rx.Observable[Union[User, TwitterApiErrors], TwitterClientError]:
+        return client.observe(user_ids=rx.of(self.user_ids))
 
 
 class UserSelectingRule(MapOption):
@@ -56,5 +62,35 @@ class UserSelectingRule(MapOption):
     # {'who': {'id-are': [1, 2, 3]}}
     valid_options = [WhoField, RuleSet, LetMeCheckRule]
 
+    # attributes that will be set after initialization,
+    # indicate their type for static type checking
+    who: WhoField
+    rules: RuleSet
+    let_me_check_rule: LetMeCheckRule
+
     def __init__(self, config_value: Dict[str, Any]):
         super().__init__(config_value)
+
+    def start(self, client: Hunter) \
+            -> Tuple[rx.Observable[Exchange], rx.Observable[TwitterApiErrors]]:
+        """
+        Start user selecting rule.
+        """
+
+        def on_error(error: Exception):
+            self.logger.error(f"UnError when querying user info with user ids from client", error)
+            # can't handle, let this error fail whole program
+            raise error
+
+        # query users from client
+        user_observe = self.who.query_users_from(client)
+        user_observe.subscribe(on_error=on_error)
+
+        exchange_observe = user_observe.pipe(
+            op.filter(lambda x: isinstance(x, User)),
+            op.map(lambda x: Exchange(user=x)))
+
+        api_error_observe = user_observe.pipe(
+            op.filter(lambda x: isinstance(x, TwitterApiErrors)))
+
+        return exchange_observe, api_error_observe

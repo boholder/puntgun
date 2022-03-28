@@ -1,13 +1,14 @@
 import functools
 import os
-from typing import List, Union, Callable, Any
+from typing import List, Union, Callable, Any, Tuple
 
 import reactivex as rx
 import tweepy
+from reactivex import operators as op
 from tweepy import Client, OAuth1UserHandler, Tweet
 
 from puntgun import util
-from puntgun.model.errors import TwitterApiError
+from puntgun.model.errors import TwitterApiErrors, TwitterClientError
 from puntgun.model.user import User
 from puntgun.spi.twitter_client.hunter import Hunter
 
@@ -53,9 +54,21 @@ class TweepyHunter(Hunter):
     def observe(self,
                 user_id: rx.Observable[str] = None,
                 username: rx.Observable[str] = None,
-                user_ids: rx.Observable[str] = None) -> rx.Observable[User]:
+                user_ids: rx.Observable[str] = None) \
+            -> rx.Observable[Union[User, TwitterApiErrors], TwitterClientError]:
         """Given user_id, username or a list of user_id,
         get user(s) information via Twitter Dev API.
+
+        :param user_id: stream of single user id
+        :param username: stream of username
+        :param user_ids: stream of list of user id,
+            one list contains up to 100.
+            Twitter has an API let us to query up to 100 users at once,
+            using user id.
+
+        :return: stream of user(s) information or business errors about Twitter Dev API,
+            business errors won't stop the processing on rest of input stream elements.
+
         TODO 900 per 15min
         TODO 出错误码时tweepy的响应类型是什么?应该怎么定义我这些函数的响应类型？
         """
@@ -82,14 +95,21 @@ class TweepyHunter(Hunter):
                                          **params)
 
         def transform(resp: tweepy.Response) -> User:
-            return User.build_from_response(resp.data, resp.includes)
+            return User.build_from_response(resp.data, resp.includes['tweets'])
+
+        def multi_transform(resp: tweepy.Response) -> List[User]:
+            result = []
+            for i in range(len(resp.data)):
+                result.append(User.build_from_response(resp.data[i], [resp.includes['tweets'][i]]))
+            return result
 
         if user_id:
-            return user_id.pipe(query_api(get_user_by_id, transform))
+            return user_id.pipe(query_and_transform(get_user_by_id, transform))
         elif username:
-            return username.pipe(query_api(get_user_by_username, transform))
+            return username.pipe(query_and_transform(get_user_by_username, transform))
         elif user_ids:
-            return user_ids.pipe(query_api(get_users_by_id, transform))
+            return user_ids.pipe(op.buffer_with_count(100),
+                                 query_and_transform(get_users_by_id, multi_transform))
         else:
             raise ValueError(NO_VALUE_PROVIDED)
 
@@ -136,38 +156,45 @@ class TweepyHunter(Hunter):
         return self.client.get_users_followers(self.id, user_auth=True)
 
 
-def query_api(query_func: Callable[[Any], tweepy.Response],
-              transform_func: Callable[[tweepy.Response], Any]):
+def query_and_transform(query_func: Callable[[Any], tweepy.Response],
+                        transform_func: Callable[[tweepy.Response], Any]):
     """
     A custom rx operator that:
     1. query Twitter Dev API (calling query_func({element_of_stream})).
     2. handle the response via http status code (return? retry? signal error?)
     3. if decide to return the response,
-        transform the response to dependency free data types (calling transform_func).
+        transform the response to custom data types (calling transform_func).
     """
 
     @util.log_error_with(TweepyHunter.logger)
-    def strategy_on_different_response_condition(element):
+    def query(element) -> Tuple[Any, TwitterApiErrors]:
         # It's so sweet that tweepy has inner retry logic for
         # resumable 429 Too Many Request status code.
         # https://github.com/tweepy/tweepy/blob/master/tweepy/client.py#L102-L114
         response = query_func(element)
-        if response.errors:
-            raise TwitterApiError(response.errors)
-        else:
-            return transform_func(query_func(element))
+
+        # One query can be partly succeed,
+        # so one query may result in two ongoing elements.
+        # https://developer.twitter.com/en/support/twitter-api/error-troubleshooting#partial-errors
+        return transform_func(response), TwitterApiErrors(response.errors)
 
     def _query_and_transform(source):
         def subscribe(observer, scheduler=None):
             def on_next(value):
                 try:
-                    observer.on_next(strategy_on_different_response_condition(value))
-                except tweepy.errors.HTTPException as e:
+                    result, errors = query(value)
+
+                    if isinstance(result, list):
+                        [observer.on_next(v) for v in result]
+                    else:
+                        observer.on_next(result)
+
+                    if errors:
+                        observer.on_next(errors)
+                except tweepy.errors.TweepyException as e:
                     # for now, we have no idea how to handle the error tweepy throws out.
-                    observer.on_error(e)
-                except TwitterApiError as e:
-                    # and we also don't know how to handle the business logic error Twitter returns.
-                    observer.on_error(e)
+                    # just wrap it in a custom exception and let it fails the stream.
+                    observer.on_error(TwitterClientError(e))
 
             return source.subscribe(
                 on_next=on_next,
