@@ -1,11 +1,11 @@
 import functools
 import os
-from typing import List, Union, Callable, Any, Tuple
+from typing import List, Callable, Any, Tuple
 
 import reactivex as rx
 import tweepy
 from reactivex import operators as op
-from tweepy import Client, OAuth1UserHandler, Tweet
+from tweepy import Client, OAuth1UserHandler
 
 from puntgun import util
 from puntgun.model.errors import TwitterApiErrors, TwitterClientError
@@ -29,11 +29,13 @@ USER_PARAM_TWITTER_FIELDS = ['text']  # metrics
 
 class TweepyHunter(Hunter):
     """
-    Wrapper of "tweepy" library.
+    Reactive wrapper of "tweepy" library,
+    use reactive streams and custom data types to transform data.
+
     Initializing instance via interact with user through console,
     it requires user to provide secrets like Twitter API key and secret, etc.
     """
-    logger = util.get_logger(__name__)
+    logger = util.get_logger(__qualname__)
 
     @staticmethod
     @functools.lru_cache(maxsize=1)
@@ -55,7 +57,7 @@ class TweepyHunter(Hunter):
                 user_id: rx.Observable[str] = None,
                 username: rx.Observable[str] = None,
                 user_ids: rx.Observable[str] = None) \
-            -> rx.Observable[Union[User, TwitterApiErrors], TwitterClientError]:
+            -> Tuple[rx.Observable[User, TwitterClientError], rx.Observable[TwitterApiErrors]]:
         """Given user_id, username or a list of user_id,
         get user(s) information via Twitter Dev API.
 
@@ -63,14 +65,12 @@ class TweepyHunter(Hunter):
         :param username: stream of username
         :param user_ids: stream of list of user id,
             one list contains up to 100.
-            Twitter has an API let us to query up to 100 users at once,
+            Twitter has an API let us query up to 100 users at once,
             using user id.
 
-        :return: stream of user(s) information or business errors about Twitter Dev API,
-            business errors won't stop the processing on rest of input stream elements.
-
-        TODO 900 per 15min
-        TODO 出错误码时tweepy的响应类型是什么?应该怎么定义我这些函数的响应类型？
+        :return: two streams:
+            1. a stream of user(s) information, may be stopped by client error.
+            2. a stream of Twitter API errors, tells which user(s) information failed to get.
         """
 
         def get_user_by_id(uid) -> tweepy.Response:
@@ -112,48 +112,6 @@ class TweepyHunter(Hunter):
                                  query_and_transform(get_users_by_id, multi_transform))
         else:
             raise ValueError(NO_VALUE_PROVIDED)
-
-    def find_feeding_place(self, user_id='') -> List[Tweet]:
-        """Get user liked tweets via Twitter Dev API.
-        TODO 75 per 15min
-        """
-        return self.client.get_liked_tweets(user_id)
-
-    def listen_tweeting(self, **params) -> List[Tweet]:
-        """Search for tweets via Twitter Dev API.
-        TODO 180 per 15min
-        """
-        return self.client.search_recent_tweets(user_auth=True, **params)
-
-    def shot_down(self, user_id='', user_ids=None) -> Union[bool, List[bool]]:
-        """Block user via Twitter Dev API.
-        TODO 50 per 15min
-        """
-        if user_id:
-            return self.client.block(user_id).data.get("blocking")
-        elif user_ids:
-            return [self.shot_down(user_id=user_id) for user_id in user_ids]
-        else:
-            raise ValueError(NO_VALUE_PROVIDED)
-
-    def ignore(self, user_id='', user_ids=None) -> Union[bool, List[bool]]:
-        """Mute user via Twitter Dev API.
-        TODO 50 per 15min
-        """
-        if user_id:
-            return self.client.mute(user_id).data.get("muting")
-        elif user_ids:
-            return [self.ignore(user_id=user_id) for user_id in user_ids]
-        else:
-            raise ValueError(NO_VALUE_PROVIDED)
-
-    def check_decoy(self, count=1) -> List[User]:
-        """Get your followers ids via Twitter Dev API.
-        TODO 15 per 15min
-        TODO 返回的顺序是按时间asc还是desc?
-        TODO 函数内部处理分页
-        """
-        return self.client.get_users_followers(self.id, user_auth=True)
 
 
 def query_and_transform(query_func: Callable[[Any], tweepy.Response],

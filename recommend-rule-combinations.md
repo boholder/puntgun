@@ -1,6 +1,6 @@
-# Recommend Rule Combination
+# Recommend Rule Combinations
 
-We're trying to use rule combinations to reflect user behaviors.
+We're trying to use rule combinations to tag user behaviors.
 
 ## User Information Metrics
 
@@ -20,7 +20,7 @@ Combining `user-following-more-than` with `user-follower-less-than`,
 you can get a pretty nice complex-rule to mark the "just-watch-not-speak" type user,
 which I used in my previous processing.
 Only post,retweet,reply behavior maybe increase follower number,
-despite of auto-follow-back-when-being-followed.
+despite auto-follow-back-when-being-followed.
 
 (I don't want this type of users to watch my tweets,
 because I suspect some of them are bot,

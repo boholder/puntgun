@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, Tuple
 
 # TODO 应该把这些DTO都包装起来，而且是流类型的。
 import reactivex as rx
@@ -31,7 +31,7 @@ class Hunter:
                 user_id: rx.Observable[str] = None,
                 username: rx.Observable[str] = None,
                 user_ids: rx.Observable[List[str]] = None) \
-            -> rx.Observable[Union[User, TwitterApiErrors], TwitterClientError]:
+            -> Tuple[rx.Observable[User, TwitterClientError], rx.Observable[TwitterApiErrors]]:
         """Get user(s) information via Twitter Dev API."""
         raise NotImplementedError
 

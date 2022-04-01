@@ -1,12 +1,12 @@
-from typing import List, Dict, Any, Union, Tuple
+from typing import List, Dict, Any, Tuple, Callable
 
 import reactivex as rx
 from reactivex import operators as op
 
 from puntgun import util
 from puntgun.base.options import Field, MapOption
+from puntgun.model.context import Context
 from puntgun.model.errors import TwitterClientError, TwitterApiErrors
-from puntgun.model.exchange import Exchange
 from puntgun.model.user import User
 from puntgun.option.let_me_check_rule import LetMeCheckRule
 from puntgun.option.rule_set import RuleSet
@@ -23,7 +23,7 @@ class WhoField(Field):
     required = True
 
     def query_users_from(self, client: Hunter) \
-            -> rx.Observable[Union[User, TwitterApiErrors], TwitterClientError]:
+            -> Tuple[rx.Observable[User, TwitterClientError], rx.Observable[TwitterApiErrors]]:
         """Let child classes implement their various logic to query user from client."""
         raise NotImplementedError
 
@@ -47,7 +47,7 @@ class IdAreWhoField(WhoField):
         self.user_ids = config_value if config_value else []
 
     def query_users_from(self, client: Hunter) \
-            -> rx.Observable[Union[User, TwitterApiErrors], TwitterClientError]:
+            -> Tuple[rx.Observable[User, TwitterClientError], rx.Observable[TwitterApiErrors]]:
         return client.observe(user_ids=rx.of(self.user_ids))
 
 
@@ -68,11 +68,15 @@ class UserSelectingRule(MapOption):
     rules: RuleSet
     let_me_check_rule: LetMeCheckRule
 
-    def __init__(self, config_value: Dict[str, Any]):
+    def __init__(self,
+                 config_value: Dict[str, Any],
+                 action: Callable[[rx.Observable[Context]], rx.Observable[bool]]):
+
         super().__init__(config_value)
+        self.action = action
 
     def start(self, client: Hunter) \
-            -> Tuple[rx.Observable[Exchange], rx.Observable[TwitterApiErrors]]:
+            -> Tuple[rx.Observable[Context], rx.Observable[TwitterApiErrors]]:
         """
         Start user selecting rule.
         """
@@ -88,7 +92,7 @@ class UserSelectingRule(MapOption):
 
         exchange_observe = user_observe.pipe(
             op.filter(lambda x: isinstance(x, User)),
-            op.map(lambda x: Exchange(user=x)))
+            op.map(lambda x: Context(user=x)))
 
         api_error_observe = user_observe.pipe(
             op.filter(lambda x: isinstance(x, TwitterApiErrors)))
