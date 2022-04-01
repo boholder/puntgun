@@ -4,25 +4,26 @@ from typing import List, Dict, Any, Type
 from puntgun import util
 
 
-# TODO 怎么再简化一下这个初始化流程，多写点注释？
-
 class Option(object):
     """
+    Base class of all option classes.
     Option classes are responsible for checking the validity of user-written
-    configuration, and extracting field values from yaml-converted raw dictionary structure,
-    and act as a spi for the contained values.
-
-    Options can be nested, so there are some class attributes
-    that describe relationships between other options and between parent option.
+    configuration amd programming part of option settings,
+    then extracting field values from configuration into attributes,
+    for further judgement use.
     """
 
-    # --- required setting attributes for overriding
+    # --- required setting attributes for overriding ---
     config_keyword: str = "generic-option"
 
-    # --- optional setting attributes for overriding
+    # --- optional setting attributes for overriding ---
 
-    # For map option's inner field,
-    # map option will check these constraint settings when initializing:
+    # Options can be nested into each other, so there are some class attributes
+    # that describe one option's relationship between other brother options and
+    # between its parent option.
+
+    # For map option's inner fields,
+    # parent map option will check these constraint settings when initializing:
 
     # list of ``config_keyword`` that cannot co-exist with this option
     conflict_with: List[str] = []
@@ -31,22 +32,21 @@ class Option(object):
     # if is required in parent option
     required: bool = False
 
-    # For list option's inner field, list option will check these when initializing:
+    # For list option's inner fields, list option will check these when initializing:
 
-    # can exist at most once in the configuration,
-    # fields like "name" can set this to True
+    # Indicate that this field can exist at most once in the configuration,
+    # for example, "name" field (custom name for one option) can set this to True.
+    # It's weird to have this constraint, but we need it.
     singleton: bool = False
 
     @classmethod
     def build(cls, config_value):
         """
-        Return wrapped instance (:class:`ListOption`, :class:`MapOption`)
-        or directly return the input primitive value (Field).
+        Let parent option (:class:`MapOption` and :class:`ListOption`, which has inner fields)
+        can automatically initialize inner fields without knowing details.
 
-        Called by :class:`MapOption` and :class:`ListOption`'s ``__init__`` method
-        to automatically build inner fields,
-        so one parent option (which inherited from these two) doesn't need to
-        manually build their inner fields (has-a).
+        For now, this method return wrapped instance (:class:`NestableOption`)
+        or directly return the input primitive value (:class:`Field`).
 
         But parent options should know exactly what type (instance, or primitive value)
         inner fields will be and how to use them.
@@ -54,49 +54,40 @@ class Option(object):
         raise NotImplementedError
 
     @staticmethod
-    def expand_to_all_immediate_subclasses(parent_options: List[Type['Option']]) -> List[Type['Option']]:
-        subclasses = [Option.expand_to_immediate_subclasses(o) for o in parent_options]
+    def self_and_immediate_subclasses_list(parent_options: List[Type['Option']]) -> List[Type['Option']]:
+        subclasses = [Option.self_and_immediate_subclasses_of(o) for o in parent_options]
         return [o for lst in subclasses for o in lst]
 
     @staticmethod
-    def expand_to_immediate_subclasses(cls: Type['Option']) -> List[Type['Option']]:
-        return [cls] + Option.get_immediate_subclasses_of(cls)
+    def self_and_immediate_subclasses_of(cls: Type['Option']) -> List[Type['Option']]:
+        return [cls] + Option.immediate_subclasses_of(cls)
 
     @staticmethod
-    def get_all_immediate_subclasses_of(parent_options: List[Type['Option']]) -> List[Type['Option']]:
-        exist_possible_subclass_settings = [Option.get_immediate_subclasses_of(o) for o in parent_options]
-        return [o for lst in exist_possible_subclass_settings for o in lst]
-
-    @staticmethod
-    def get_immediate_subclasses_of(cls: Type['Option']) -> List[Type['Option']]:
+    def immediate_subclasses_of(cls: Type['Option']) -> List[Type['Option']]:
         return cls.__subclasses__() if hasattr(cls, "__subclasses__") else []
 
 
 class Field(Option):
     """
-    Represent a basic option that doesn't have inner fields or items,
-    only have a primitive value.
-    Rules in source code use a set of this type to indicate
-    what kind of field is valid inside them.
+    Option that takes only a primitive value to initialize,
+    it may be just acting as a configuration checker,
+    or it can have more complex logic.
 
-    You can define a child class by directly setting class attributes
+    You can define a custom field by inheriting this class and override attributes,
     or using ``of`` metaclass method to generate one.
-    If one field has its own inner fields or have complex logic,
-    I recommend defining class attributes, if that field is just a primitive value,
-    using ``of`` method is more convenient.
 
-    Keep in mind that if you define a field which has inner fields, remember to
-    override ``build`` method to build inner fields on their own, because Field's
-    ``build`` method only directly return the input primitive value.
+    If one field have complex logic, I recommend defining a class for it,
+    and override the build method to return instance instead of raw input value.
+
+    If one field is just holding a primitive value, using ``of`` method is more convenient.
     """
 
     logger = util.get_logger(__qualname__)
 
-    # required settings for overriding
-    config_keyword: str
+    # --- required setting attributes for overriding ---
     expect_type: type
 
-    # optional settings for overriding
+    # --- optional setting attributes for overriding ---
     default_value: object = None
 
     @classmethod
@@ -135,138 +126,144 @@ class Field(Option):
         return NewField()
 
     def __init__(self):
-        Field.__check_setting_constraints(self.__class__)
+        self.__check_setting_constraints()
 
-    @staticmethod
     @util.log_error_with(logger)
-    def __check_setting_constraints(cls: Type['Field']):
-        """Assertions for checking constraints"""
-        assert cls.config_keyword, "Field's \"config_keyword\" must be set"
-        assert cls.expect_type, "Field's \"expect_type\" must be set"
+    def __check_setting_constraints(self):
+        """Assertions for checking constraints set by class attributes."""
 
-        for keyword in cls.require_with:
-            assert keyword not in cls.conflict_with, \
-                f"Field [{cls}]: " \
-                f"keyword [{keyword}] shows in both require_with and conflict_with"
+        assert self.config_keyword, "Field's \"config_keyword\" must be set"
+        assert self.expect_type, "Field's \"expect_type\" must be set"
 
-        if cls.default_value:
-            assert isinstance(cls.default_value, cls.expect_type), \
-                f"Field [{cls}]: " \
-                f"default value [{cls.default_value}] is not of expect type [{cls.expect_type}]"
+        for keyword in self.require_with:
+            assert keyword not in self.conflict_with, \
+                f"Field [{self}]: keyword [{keyword}] shows in both require_with and conflict_with"
+
+        if self.default_value:
+            assert isinstance(self.default_value, self.expect_type), \
+                f"Field [{self}]: default value [{self.default_value}] is not of expect type [{self.expect_type}]"
 
     @classmethod
     @util.log_error_with(logger)
     def build(cls, config_value: Any):
+        # check input's type
         assert isinstance(config_value, cls.expect_type), \
-            f"Field [{cls}]: " \
-            f"given value [{config_value}] is not of expect type [{cls.expect_type}]"
+            f"Field [{cls}]: given value [{config_value}] is not of expect type [{cls.expect_type}]"
+
+        # then directly return the input
         return config_value
 
     def __str__(self):
         return self.config_keyword
 
 
-class MapOption(Option):
-    """
-    Represent a map-like (object-like?) option, ``Action`` for example.
-    You can define a map-like option only by directly setting class attributes.
+class NestableOption(Option):
+    """Option that can have inner fields."""
 
-    * Same field can only appear at most once in configuration.
+    # --- required setting attributes for overriding ---
+    valid_options: List[Type[Option]] = []
+
+    @classmethod
+    def build(cls, config_value):
+        raise NotImplementedError
+
+
+class MapOption(NestableOption):
+    """
+    Represent a map-like (object-like?) option.
+
+    * Same field can appear at most once in configuration.
+
     * If you set some fields' ``required`` attribute,
       these fields must be present in the configuration,
-      which means these fields' ``default_value`` will be ignored and not be automatically filled.
-    * If you set some fields' ``require_with`` attribute, those required fields must
-      be manually, explicitly set in configuration file.
-    *
-    """
-    logger = util.get_logger(__qualname__)
+      i.e. they can't be automatically filled with ``default_value`` if absent.
 
-    # remain for child class to override
-    config_keyword = "generic-map-option"
-    valid_options: List[Type[Option]] = []
+    * If you set some fields' ``require_with`` attribute, those required fields must
+      be present in the configuration.
+    """
+
+    logger = util.get_logger(__qualname__)
 
     def __init__(self, config_value: Dict[str, Any]):
         """
         :param config_value: the value corresponding to the "config_keyword" of this option
                 in the parsed option dictionary.
         """
+
         self.raw_config = config_value
-        # we'll get valid option types which exist in both self.valid_options and config_value,
-        # and all of immediate subclasses of these options.
-        exist_option_settings: List[Type[Option]] = self.__clac_exist_option_settings()
-        self.__check_constraints_of(exist_option_settings)
-        exist_option_settings = self.__add_non_conflict_default_options(exist_option_settings)
-        self.exist_options = self.__extract_exist_options_into_dict(exist_option_settings, config_value)
+
+        exist_option_types: List[Type[Option]] = self.__find_options_exist_in_configuration()
+        exist_option_types = self.__add_non_conflict_default_options(exist_option_types)
+        self.__check_constraints_of(exist_option_types)
+
+        self.exist_options = self.__extract_exist_options(exist_option_types)
 
     @util.log_error_with(logger)
-    def __clac_exist_option_settings(self) -> list[Type[Option]]:
-        """
-        Filter out settings from valid_options which exist in config_value,
-        and add the subclasses of these settings, then return.
-        """
+    def __find_options_exist_in_configuration(self) -> list[Type[Option]]:
+
         assert len(self.raw_config) > 0, \
             f"Option [{self}] must have at least one field."
 
-        # check invalid fields
-        # must also consider the valid option's subclass's config_keyword is valid too
-        valid_keywords = [o.config_keyword for o in Option.expand_to_all_immediate_subclasses(self.valid_options)]
+        # must also consider the valid option's subclass is valid too
+        valid_option_types = Option.self_and_immediate_subclasses_list(self.valid_options)
 
+        valid_keywords = [o.config_keyword for o in valid_option_types]
         exist_keywords = self.raw_config.keys()
-        for exist_field in exist_keywords:
-            assert exist_field in valid_keywords, \
-                f"Option [{self}]: [{exist_field}] is not a valid field."
 
-        # then shrink exist fields to valid fields
-        # and expand this list to include all subclasses of exist options
-        return [field for field in Option.expand_to_all_immediate_subclasses(self.valid_options)
-                if field.config_keyword in exist_keywords]
+        for k in exist_keywords:
+            assert k in valid_keywords, \
+                f"Option [{self}]: [{k}] is not a valid field."
+
+        # return these exist options' type
+        return [t for t in valid_option_types
+                if t.config_keyword in exist_keywords]
 
     @util.log_error_with(logger)
-    def __check_constraints_of(self, exist_option_settings: List[Type[Option]]):
+    def __check_constraints_of(self, exist_types: List[Type[Option]]):
         """
-        Check that all fields aren't violating the constraints themselves made.
+        Check that all fields aren't violating the constraints
+        they made in their attributes.
         """
 
-        # check (option) required fields
-        for field in [field for field in self.valid_options if field.required]:
-            # assert any required field or its subclass is exists in exist_option_settings
-            assert [f for f in exist_option_settings
-                    if f in Option.expand_to_immediate_subclasses(field)], \
-                f"Option [{self}]: requires field [{field}] must be configured, but it's absent."
+        # check option required fields
+        for required_field in [field for field in self.valid_options if field.required]:
+            assert [f for f in exist_types
+                    if f in Option.self_and_immediate_subclasses_of(required_field)], \
+                f"Option [{self}]: field [{required_field}] is required," \
+                f" but absent in configuration."
 
-        exist_keywords = [field.config_keyword for field in exist_option_settings]
+        exist_keywords = [field.config_keyword for field in exist_types]
 
-        # check (exist fields) required fields
-        for field in exist_option_settings:
-            for required_keyword in field.require_with:
-                assert required_keyword in exist_keywords, \
+        for field in exist_types:
+            # check exist fields required fields constraints
+            for required_kwd in field.require_with:
+                assert required_kwd in exist_keywords, \
+                    f"Option [{self}]: field [{field}] requires another field [{required_kwd}]," \
+                    f" but absent in configuration."
+
+            # check exist fields conflict constraints
+            for conflict_kwd in field.conflict_with:
+                assert conflict_kwd not in exist_keywords, \
                     f"Option [{self}]: " \
-                    f"field [{field}] requires another field [{required_keyword}] must be configured, " \
-                    f"but it's absent."
-
-        # check fields conflict constraints
-        for field in exist_option_settings:
-            for conflict_field in field.conflict_with:
-                assert conflict_field not in exist_keywords, \
-                    f"Option [{self}]: " \
-                    f"field [{field}] is conflict with another existing field [{conflict_field}]."
+                    f"field [{field}] is conflict with another existing field [{conflict_kwd}]."
 
     def __add_non_conflict_default_options(self, exist_option_settings: List[Type[Option]]) -> List[Type[Option]]:
         """
         Add valid options which have default value if:
-         1. Not conflict with any of existing options.
-         2. Not already exist in existing options.
-
-        As you can see in __init__ method, I put the constraint check before this method,
-        so this method should not violate existing ``conflict_with`` constraints.
+            1. Not conflict with any of existing options.
+            2. Not already exist in existing options.
         """
-        all_exist_fields_conflict_keywords = [k for f in exist_option_settings for k in f.conflict_with]
-        all_exist_keywords = [f.config_keyword for f in exist_option_settings]
 
-        # for all valid Field type options which have default value
+        all_exist_keywords = [f.config_keyword for f in exist_option_settings]
+        all_exist_fields_conflict_keywords = [k for f in exist_option_settings
+                                              for k in f.conflict_with]
+
+        # for all valid field types which have default value
         for field in [f for f in self.valid_options
                       if isinstance(f, Field) and (f.default_value is not None)]:
+
             keyword = field.config_keyword
+
             # if the field is not conflict with any of existing fields,
             # and not exist in existing fields, add it
             if (keyword not in all_exist_fields_conflict_keywords) \
@@ -276,17 +273,20 @@ class MapOption(Option):
         return exist_option_settings
 
     @util.log_error_with(logger)
-    def __extract_exist_options_into_dict(self, exist_option_settings: List[Type[Option]],
-                                          raw_config: dict) -> Dict[str, Any]:
+    def __extract_exist_options(self, exist_option_settings: List[Type[Option]]) -> Dict[str, Any]:
+
         result = {}
+
         for field in exist_option_settings:
             keyword = field.config_keyword
 
-            # special logic for automatically building a default Field type.
-            if isinstance(field, Field) and keyword not in raw_config:
+            # special logic for automatically building a default Field type,
+            # while it's absent in configuration
+            if isinstance(field, Field) and keyword not in self.raw_config:
                 result[keyword] = field.build(field.default_value)
-            elif keyword in raw_config:
-                result[keyword] = field.build(raw_config.get(keyword))
+
+            elif keyword in self.raw_config:
+                result[keyword] = field.build(self.raw_config.get(keyword))
 
         return result
 
@@ -304,71 +304,43 @@ class MapOption(Option):
             raise AttributeError(f"Option [{self}]: has no attribute [{item}].")
 
 
-class ListOption(Option):
+class ListOption(NestableOption):
     """
-    Represent a list-like option, ``RuleSet`` for example.
+    Represent a list-like option.
 
-    You can define a list-like option only by directly setting class attributes.
+    * Same fields can occur multiple times by default
+      (but can be restricted to at most once).
 
-    * Same fields can occur multiple times, which is different from ``AbstractMapOption``.
-    * Fields' ``conflict_with``, ``required_with``, ``required`` constraints
+    * Fields' ``conflict_with``, ``required_with`` constraints
       are not allowed in this type of option.
     """
 
     logger = util.get_logger(__qualname__)
-
-    # remain for child class to override
-    config_keyword = "generic-list-option"
-    valid_options: List[Type[Option]] = []
 
     def __init__(self, config_value: List[Dict[str, Any]]):
         """
         :param config_value: the value corresponding to the "config_keyword" of this option
                 in the parsed option dictionary.
         """
+        # check programmatic settings before parsing
+        self.__check_invalid_constrain_settings_of_valid_options()
+
         self.raw_config = config_value
-        self.__check_list_option_constrains_on(self.valid_options)
-        exist_option_settings = self.__clac_exist_option_settings()
-        self.exist_options = self.__extract_exist_options_into_dict(exist_option_settings, config_value)
-        self.__check_constraints_on_exist_options(exist_option_settings)
+        exist_option_types = self.__find_options_exist_in_configuration()
+        self.exist_options = self.__extract_exist_options(exist_option_types)
+
+        # this method need to be called after exist_options is initialized,
+        # so that it can check fields' ``singleton`` constraints
+        self.__check_constraints_of(exist_option_types)
 
     @util.log_error_with(logger)
-    def __clac_exist_option_settings(self) -> List[Type[Option]]:
+    def __check_invalid_constrain_settings_of_valid_options(self):
         """
-        Filter out settings from valid_options which exist in config_value.
-        """
-        assert len(self.raw_config) > 0, \
-            f"Option [{self}] must have at least one field."
-
-        # collect items' key in raw_config into a flatted list
-        # for example:
-        # raw_config = [{"item1": a-value}, {"item2": {"inner-field": a-value}]
-        # exist_item_keywords = {"item1", "item2"}
-        exist_keys_list = [item.keys() for item in self.raw_config]
-        exist_item_keywords = set([key for keys in exist_keys_list for key in keys])
-
-        # check invalid fields
-        # must also consider the valid option's subclass's config_keyword is valid too
-        valid_config_keywords = [o.config_keyword for o in
-                                 Option.expand_to_all_immediate_subclasses(self.valid_options)]
-
-        for exist_field in exist_item_keywords:
-            assert exist_field in valid_config_keywords, \
-                f"Option [{self}]: [{exist_field}] is not a valid field."
-
-        # then shrink exist fields to valid fields
-        # and expand this list to include all subclasses of exist options
-        return [field for field in Option.expand_to_all_immediate_subclasses(self.valid_options)
-                if field.config_keyword in exist_item_keywords]
-
-    @util.log_error_with(logger)
-    def __check_list_option_constrains_on(self, valid_options: List[Type[Option]]):
-        """
-        Fields' ``conflict_with``, ``required_with`` constraints
+        Field ``conflict_with``, ``required_with`` constraints
         are not allowed in this type of option.
         """
 
-        for field in valid_options:
+        for field in self.valid_options:
             assert not field.conflict_with, \
                 f"Option [{self}]: field [{field}] has set \"conflict_with\" constraint, " \
                 f"which is not allowed in list-like option."
@@ -378,38 +350,65 @@ class ListOption(Option):
                 f"which is not allowed in list-like option."
 
     @util.log_error_with(logger)
-    def __extract_exist_options_into_dict(self, exist_option_settings: List[Type[Option]],
-                                          raw_config: List[Dict[str, Any]]) -> Dict[str, List[Any]]:
+    def __find_options_exist_in_configuration(self) -> List[Type[Option]]:
+
+        assert len(self.raw_config) > 0, \
+            f"Option [{self}] must have at least one field."
+
+        # collect items' key in raw_config into a flatted list
+        # for example:
+        # raw_config = [{"item1": a-value}, {"item2": {"inner-field": a-value}]
+        # exist_item_keywords = {"item1", "item2"}
+        exist_keys_list = [item.keys() for item in self.raw_config]
+        exist_item_keywords = set([k for keys in exist_keys_list for k in keys])
+
+        # must also consider the valid option's subclass's config_keyword is valid too
+        valid_option_types = Option.self_and_immediate_subclasses_list(self.valid_options)
+
+        valid_config_keywords = [o.config_keyword for o in valid_option_types]
+
+        for exist_field in exist_item_keywords:
+            assert exist_field in valid_config_keywords, \
+                f"Option [{self}]: [{exist_field}] is not a valid field."
+
+        # return these exist options' type
+        return [field for field in valid_option_types
+                if field.config_keyword in exist_item_keywords]
+
+    @util.log_error_with(logger)
+    def __extract_exist_options(self, exist_option_settings: List[Type[Option]]) -> Dict[str, List[Any]]:
         result = defaultdict(list)
         for field in exist_option_settings:
             keyword = field.config_keyword
             # there may be multiple same items with the same config_keyword
-            matched_values = list(filter(lambda x: x is not None, [item.get(keyword) for item in raw_config]))
+            matched_values = list(filter(lambda x: x is not None, [item.get(keyword) for item in self.raw_config]))
 
+            # add all same keyword items' value into one list, under keyword key.
             for value in matched_values:
-                # add all same keyword items' value into one list, under keyword key.
                 result[keyword].append(field.build(value))
 
         return result
 
     @util.log_error_with(logger)
-    def __check_constraints_on_exist_options(self, exist_option_settings: List[Type[Option]]):
+    def __check_constraints_of(self, exist_option_settings: List[Type[Option]]):
         """
-        Check exist options' ``singleton`` constraint.
+        Check exist options' ``required`` and ``singleton`` constraint.
         """
 
-        # check (option) required fields
-        for field in [field for field in self.valid_options if field.required]:
+        # check option required fields
+        for required_field in [field for field in self.valid_options if field.required]:
             # assert any required field or its subclass is exists in exist_option_settings
-            possible_subclasses = field.__subclasses__() if hasattr(field, "__subclasses__") else []
-            assert [f for f in exist_option_settings if f in [field] + possible_subclasses], \
-                f"Option [{self}]: requires field [{field}] must be configured, but it's absent."
+            assert [f for f in exist_option_settings
+                    if f in Option.self_and_immediate_subclasses_of(required_field)], \
+                f"Option [{self}]: field [{required_field}] is required," \
+                f" but absent in configuration."
 
         # check "singleton" constraint
         for settings in [o for o in exist_option_settings if o.singleton]:
-            item_number_of_this_type = len(self.exist_options[settings.config_keyword])
-            assert item_number_of_this_type <= 1, \
-                f"Option [{self}]: can only have at most one [{settings}] item, but found {item_number_of_this_type}."
+            value_number_of_this_type = len(self.exist_options[settings.config_keyword])
+            assert value_number_of_this_type <= 1, \
+                f"Option [{self}]: can only have at most one [{settings}] item," \
+                f" but found {value_number_of_this_type}."
 
     @classmethod
     def build(cls, config_value: List[Dict[str, Any]]):

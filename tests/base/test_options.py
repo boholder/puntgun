@@ -173,7 +173,7 @@ class TestAbstractListOption(TestCase):
                              Field.of("f2", str)]
 
         assert_that(calling(TestOption).with_args([{"f2": "value"}]),
-                    raises(AssertionError, pattern="requires"))
+                    raises(AssertionError, pattern="required"))
 
     def test_check_valid_options_not_allowed_constraints(self):
         """these three constraints are not allowed in list option"""
@@ -184,10 +184,10 @@ class TestAbstractListOption(TestCase):
         assert_that(calling(TestOption).with_args([{"f2": "value"}]),
                     raises(AssertionError, pattern="require_with"))
 
-        class TestOption3(ListOption):
+        class TestOption2(ListOption):
             valid_options = [Field.of("f3", str, conflict_with=["f1"])]
 
-        assert_that(calling(TestOption3).with_args([{"f3": "value"}]),
+        assert_that(calling(TestOption2).with_args([{"f3": "value"}]),
                     raises(AssertionError, pattern="conflict_with"))
 
     def test_check_fields_can_exist_at_most_once_constraint(self):
