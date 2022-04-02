@@ -4,7 +4,7 @@ from unittest import TestCase
 
 from hamcrest import assert_that, instance_of
 
-from puntgun.spi.twitter_client.hunter import Hunter
+from puntgun.client.hunter import Hunter
 from puntgun.option.user_selecting_rule import WhoField, UserSelectingRule
 
 

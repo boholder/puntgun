@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 
 
 class User:
@@ -14,7 +13,7 @@ class User:
     """
 
     def __init__(self,
-                 uid: str = None,
+                 uid: int = None,
                  name: str = None,
                  username: str = None,
                  profile_image_url: str = None,
@@ -26,7 +25,7 @@ class User:
                  followers_count: int = None,
                  following_count: int = None,
                  tweet_count: int = None,
-                 pinned_tweet_id: str = None,
+                 pinned_tweet_id: int = None,
                  pinned_tweet_text: str = None):
         self.id = uid
         self.name = name
@@ -44,31 +43,29 @@ class User:
         self.pinned_tweet_text = pinned_tweet_text
 
     @staticmethod
-    def build_from_response(response_data: dict, response_includes_tweets: list):
+    def build_from_response(resp_data: dict, pinned_tweet_text: str):
         # there may be no such user exist corresponding to the given id or username
-        if not response_data:
+        # in this case, the response.data = None
+        if not resp_data:
             return User()
 
-        public_metrics = response_data['public_metrics']
-        # TODO 没pinned_tweet的情况？会返回空{}吗
-        pinned_tweets_text: List[str] = [t["text"] for t in response_includes_tweets] \
-            if response_includes_tweets else []
+        public_metrics = resp_data['public_metrics']
 
         return User(
-            uid=response_data['id'],
-            name=response_data['name'],
-            username=response_data['username'],
-            profile_image_url=response_data['profile_image_url'],
-            created_at=response_data['created_at'],
-            protected=response_data['protected'],
-            verified=response_data['verified'],
-            location=response_data['location'],
-            description=response_data['description'],
+            uid=resp_data['id'],
+            name=resp_data['name'],
+            username=resp_data['username'],
+            profile_image_url=resp_data['profile_image_url'],
+            created_at=resp_data['created_at'],
+            protected=resp_data['protected'],
+            verified=resp_data['verified'],
+            location=resp_data['location'],
+            description=resp_data['description'],
             followers_count=public_metrics['followers_count'],
             following_count=public_metrics['following_count'],
             tweet_count=public_metrics['tweet_count'],
-            pinned_tweet_id=response_data['pinned_tweet_id'],
-            pinned_tweet_text='\n'.join(pinned_tweets_text))
+            pinned_tweet_id=resp_data['pinned_tweet_id'],
+            pinned_tweet_text=pinned_tweet_text if pinned_tweet_text else '')
 
     def __bool__(self):
-        return self.id
+        return bool(self.id)

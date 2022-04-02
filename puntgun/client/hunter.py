@@ -1,16 +1,15 @@
 from typing import List, Union, Tuple
 
-# TODO 应该把这些DTO都包装起来，而且是流类型的。
 import reactivex as rx
 from tweepy import Tweet
 
-from puntgun.model.errors import TwitterClientError, TwitterApiErrors
+from puntgun.model.errors import TwitterApiError
 from puntgun.model.user import User
 
 
 class Hunter:
     """
-    Interface of python Twitter client libraries (only "tweepy" currently).
+    Proxy interface of python Twitter client libraries (only "tweepy" currently).
     Initialing a Twitter client under one specific Twitter account's
     (which is this script's user's Twitter account) authorization.
     Provides methods for querying Twitter Dev API.
@@ -30,9 +29,15 @@ class Hunter:
     def observe(self,
                 user_id: rx.Observable[str] = None,
                 username: rx.Observable[str] = None,
-                user_ids: rx.Observable[List[str]] = None) \
-            -> Tuple[rx.Observable[User, TwitterClientError], rx.Observable[TwitterApiErrors]]:
-        """Get user(s) information via Twitter Dev API."""
+                usernames: rx.Observable[List[str]] = None,
+                user_ids: rx.Observable[str] = None) \
+            -> Tuple[rx.Observable[User], rx.Observable[TwitterApiError]]:
+        """Given user id(s) or username(s), get user(s) information via Twitter Dev API.
+
+        :return: two streams:
+            1. a stream of user(s) information, may be stopped by client error.
+            2. a stream of Twitter API errors, tells which user(s) information failed to get.
+        """
         raise NotImplementedError
 
     def find_feeding_place(self, user_id='') -> List[Tweet]:

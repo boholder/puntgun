@@ -1,4 +1,5 @@
-from puntgun.spi.twitter_client.tweepy_hunter import TweepyHunter
+from puntgun.client.tweepy_hunter import TweepyHunter
+from puntgun.hunting_plan import HuntingPlan
 
 
 def print_banner():
@@ -11,8 +12,8 @@ Punt Gun - a configurable Twitter\\_____/   ""         |
 
 
 if __name__ == '__main__':
-    # print_banner()
-    # plan = HuntingPlan()
+    print_banner()
+    plan = HuntingPlan()
 
     hunter = TweepyHunter()
     test_user = hunter.observe(user_id=hunter.id)

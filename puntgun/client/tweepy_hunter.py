@@ -1,6 +1,6 @@
 import functools
 import os
-from typing import List, Callable, Any, Tuple
+from typing import List, Callable, Any, Tuple, Union, TypeVar
 
 import reactivex as rx
 import tweepy
@@ -8,28 +8,22 @@ from reactivex import operators as op
 from tweepy import Client, OAuth1UserHandler
 
 from puntgun import util
-from puntgun.model.errors import TwitterApiErrors, TwitterClientError
+from puntgun.client.hunter import Hunter
+from puntgun.model.errors import TwitterApiErrors, TwitterClientError, TwitterApiError
 from puntgun.model.user import User
-from puntgun.spi.twitter_client.hunter import Hunter
 
 NO_VALUE_PROVIDED = 'No value provided.'
 
-# keys for accessing twitter auth api secrets
+# keys for getting twitter auth api secrets from environment variables
 API_KEY = 'TWI_API_KEY'
 API_KEY_SECRET = 'TWI_API_KEY_SECRET'
 ACCESS_TOKEN = 'TWI_ACCESS_TOKEN'
 ACCESS_TOKEN_SECRET = 'TWI_ACCESS_TOKEN_SECRET'
 
-# additional url params for querying Twitter user state api
-USER_PARAM_USER_FIELDS = ['id', 'name', 'username', 'pinned_tweet_id', 'profile_image_url',  # metadata
-                          'created_at', 'description', 'public_metrics', 'protected', 'verified']  # metrics
-USER_PARAM_EXPANSIONS = 'pinned_tweet_id'
-USER_PARAM_TWITTER_FIELDS = ['text']  # metrics
-
 
 class TweepyHunter(Hunter):
     """
-    Reactive wrapper of "tweepy" library,
+    Reactive proxy wrapper of "tweepy" library,
     use reactive streams and custom data types to transform data.
 
     Initializing instance via interact with user through console,
@@ -37,15 +31,22 @@ class TweepyHunter(Hunter):
     """
     logger = util.get_logger(__qualname__)
 
+    # additional url params for querying Twitter user state api
+    user_api_params = {'user_auth': True,
+                       'user_fields': ['id', 'name', 'username', 'pinned_tweet_id', 'profile_image_url',
+                                       'created_at', 'description', 'public_metrics', 'protected', 'verified'],
+                       'expansions': 'pinned_tweet_id',
+                       'tweet_fields': ['text']}
+
     @staticmethod
     @functools.lru_cache(maxsize=1)
     def singleton() -> 'TweepyHunter':
         """Get singleton instance of Hunter"""
-        return TweepyHunter()
+        return TweepyHunter(init_tweepy_client())
 
-    def __init__(self):
+    def __init__(self, client: tweepy.Client):
         """You should only get instance of this class via ``instance`` static method."""
-        self.client = init_tweepy_client()
+        self.client = client
 
         me = self.client.get_me().data
         self.id = me.get('id')
@@ -56,68 +57,95 @@ class TweepyHunter(Hunter):
     def observe(self,
                 user_id: rx.Observable[str] = None,
                 username: rx.Observable[str] = None,
+                usernames: rx.Observable[List[str]] = None,
                 user_ids: rx.Observable[str] = None) \
-            -> Tuple[rx.Observable[User, TwitterClientError], rx.Observable[TwitterApiErrors]]:
-        """Given user_id, username or a list of user_id,
-        get user(s) information via Twitter Dev API.
-
-        :param user_id: stream of single user id
-        :param username: stream of username
-        :param user_ids: stream of list of user id,
-            one list contains up to 100.
-            Twitter has an API let us query up to 100 users at once,
-            using user id.
-
-        :return: two streams:
-            1. a stream of user(s) information, may be stopped by client error.
-            2. a stream of Twitter API errors, tells which user(s) information failed to get.
-        """
-
-        def get_user_by_id(uid) -> tweepy.Response:
-            return self.client.get_user(user_auth=True,
-                                        user_fields=USER_PARAM_USER_FIELDS,
-                                        expansions=USER_PARAM_EXPANSIONS,
-                                        tweet_fields=USER_PARAM_TWITTER_FIELDS,
-                                        user_id=uid)
-
-        def get_user_by_username(uname) -> tweepy.Response:
-            return self.client.get_user(user_auth=True,
-                                        user_fields=USER_PARAM_USER_FIELDS,
-                                        expansions=USER_PARAM_EXPANSIONS,
-                                        tweet_fields=USER_PARAM_TWITTER_FIELDS,
-                                        username=uname)
-
-        def get_users_by_id(**params) -> tweepy.Response:
-            return self.client.get_users(user_auth=True,
-                                         user_fields=USER_PARAM_USER_FIELDS,
-                                         expansions=USER_PARAM_EXPANSIONS,
-                                         tweet_fields=USER_PARAM_TWITTER_FIELDS,
-                                         **params)
+            -> Tuple[rx.Observable[User], rx.Observable[TwitterApiError]]:
 
         def transform(resp: tweepy.Response) -> User:
-            return User.build_from_response(resp.data, resp.includes['tweets'])
+            data = resp.data[0]
+            pinned_tweet_id = data['pinned_tweet_id']
+            # every user can have at most one pinned tweet,
+            # don't know why Twitter API returns a list type
+            # if one user doesn't have pinned tweet, the "includes" field isn't have "tweets" field
+            pinned_tweet_text: str = [t['text'] for t in resp.includes['tweets']][0] if pinned_tweet_id else ''
+
+            return User.build_from_response(data, pinned_tweet_text)
 
         def multi_transform(resp: tweepy.Response) -> List[User]:
             result = []
+            pinned_tweets = resp.includes['tweets'] if hasattr(resp.includes, 'tweets') else []
+
             for i in range(len(resp.data)):
-                result.append(User.build_from_response(resp.data[i], [resp.includes['tweets'][i]]))
+                data = resp.data[i]
+                # find this user's pinned tweet
+                pinned_tweet = [t for t in pinned_tweets if t['id'] == data['pinned_tweet_id']]
+                pinned_tweet_text = pinned_tweet[0]['text'] if pinned_tweet else ''
+
+                result.append(User.build_from_response(data, pinned_tweet_text))
+
             return result
 
         if user_id:
-            return user_id.pipe(query_and_transform(get_user_by_id, transform))
+            return query_and_transform(user_id, self.get_user_by_id, transform)
         elif username:
-            return username.pipe(query_and_transform(get_user_by_username, transform))
+            return query_and_transform(username, self.get_user_by_name, transform)
         elif user_ids:
-            return user_ids.pipe(op.buffer_with_count(100),
-                                 query_and_transform(get_users_by_id, multi_transform))
+            # API allows querying up to 100 users at once
+            return query_and_transform(user_ids.pipe(op.buffer_with_count(100)),
+                                       self.get_users_by_id, multi_transform)
+        elif usernames:
+            return query_and_transform(usernames.pipe(op.buffer_with_count(100)),
+                                       self.get_users_by_name, multi_transform)
         else:
             raise ValueError(NO_VALUE_PROVIDED)
 
+    def get_user_by_id(self, uid: str) -> tweepy.Response:
+        """
+        I find out that it's hard to unit test reactivex,
+        so I extract these methods into class level so that I can call them directly.
+        """
+        return self.client.get_user(user_id=uid, **self.user_api_params)
 
-def query_and_transform(query_func: Callable[[Any], tweepy.Response],
-                        transform_func: Callable[[tweepy.Response], Any]):
+    def get_user_by_name(self, name: str) -> tweepy.Response:
+        return self.client.get_user(username=name, **self.user_api_params)
+
+    def get_users_by_id(self, ids: List[str]) -> tweepy.Response:
+        return self.client.get_users(ids=ids, **self.user_api_params)
+
+    def get_users_by_name(self, names) -> tweepy.Response:
+        return self.client.get_users(usernames=names, **self.user_api_params)
+
+
+T = TypeVar('T')
+R = TypeVar('R')
+
+
+def query_and_transform(source: rx.Observable[T],
+                        query_func: Callable[[T], tweepy.Response],
+                        transform_func: Callable[[tweepy.Response], Any]) \
+        -> Tuple[rx.Observable[R],
+                 rx.Observable[TwitterApiError]]:
+    """
+    Query and transform data into two observables.
+
+    :param source: observable source of data to query
+    :param query_func: function to query data using Twitter API
+    :param transform_func: function to transform data from Twitter API response,
+            one response can be transformed into multiple data
+    :return: two observables of transformed data and errors
+    """
+
+    result = source.pipe(query_api(query_func, transform_func))
+    responses = result.pipe(op.filter(lambda x: not isinstance(x, TwitterApiErrors)))
+    api_errors = result.pipe(op.filter(lambda x: isinstance(x, TwitterApiErrors)))
+    return responses, api_errors
+
+
+def query_api(query_func: Callable[[T], tweepy.Response],
+              transform_func: Callable[[tweepy.Response], Union[R, List[R]]]):
     """
     A custom rx operator that:
+
     1. query Twitter Dev API (calling query_func({element_of_stream})).
     2. handle the response via http status code (return? retry? signal error?)
     3. if decide to return the response,
@@ -125,33 +153,46 @@ def query_and_transform(query_func: Callable[[Any], tweepy.Response],
     """
 
     @util.log_error_with(TweepyHunter.logger)
-    def query(element) -> Tuple[Any, TwitterApiErrors]:
+    def one_query(element) -> Tuple[Any, TwitterApiErrors]:
         # It's so sweet that tweepy has inner retry logic for
         # resumable 429 Too Many Request status code.
         # https://github.com/tweepy/tweepy/blob/master/tweepy/client.py#L102-L114
         response = query_func(element)
+
+        # There may be no such user exist corresponding to the given id or username
+        # in this case, the response.data = None
+        # (write custom data types' __bool__ method to handle this case)
 
         # One query can be partly succeed,
         # so one query may result in two ongoing elements.
         # https://developer.twitter.com/en/support/twitter-api/error-troubleshooting#partial-errors
         return transform_func(response), TwitterApiErrors(response.errors)
 
-    def _query_and_transform(source):
+    def make_query_and_add_results_into_stream(observer, query_value):
+        result, errors = one_query(query_value)
+
+        # add errors and dtos to the stream
+        # the returned observable is mixed with errors and results
+
+        # one query may result in a list of dtos
+        if isinstance(result, list):
+            [observer.on_next(v) for v in result if v]
+        elif result:
+            observer.on_next(result)
+
+        if errors:
+            [observer.on_next(e) for e in errors.errors]
+
+    def _query_api(source):
         def subscribe(observer, scheduler=None):
             def on_next(value):
                 try:
-                    result, errors = query(value)
+                    make_query_and_add_results_into_stream(observer, value)
 
-                    if isinstance(result, list):
-                        [observer.on_next(v) for v in result]
-                    else:
-                        observer.on_next(result)
-
-                    if errors:
-                        observer.on_next(errors)
                 except tweepy.errors.TweepyException as e:
-                    # for now, we have no idea how to handle the error tweepy throws out.
+                    # For now, we have no idea how to handle the error tweepy throws out.
                     # just wrap it in a custom exception and let it fails the stream.
+                    TweepyHunter.logger.error('Client throws error when querying Twitter API', e)
                     observer.on_error(TwitterClientError(e))
 
             return source.subscribe(
@@ -162,10 +203,10 @@ def query_and_transform(query_func: Callable[[Any], tweepy.Response],
 
         return rx.create(subscribe)
 
-    return _query_and_transform
+    return _query_api
 
 
-def init_tweepy_client() -> Client:
+def init_tweepy_client() -> tweepy.Client:
     # consumer key and secret represents the Twitter's authorization about calling its API
     api_key, api_secret = get_consumer_key_and_secret()
     # access token pair to represent the user's authorization about operating the account

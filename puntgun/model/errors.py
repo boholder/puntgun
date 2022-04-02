@@ -3,7 +3,7 @@ from typing import List
 
 
 class TwitterClientError(Exception):
-    """Class for wrapping all Twitter client library errors."""
+    """Class for wrapping all Twitter client library custom errors."""
 
     def __init__(self, client_error: Exception):
         super().__init__(client_error)
@@ -23,14 +23,23 @@ class TwitterApiErrors(Exception):
     """
 
     def __init__(self, resp_errors: List[dict]):
-        self.errors = [TwitterApiErrorItem.build_from_response(e) for e in resp_errors]
+        self.errors = [TwitterApiError.build_from_response(e) for e in resp_errors]
         super().__init__(f"Twitter API returned partial errors: {self.errors}")
 
     def __bool__(self):
         return bool(self.errors)
 
+    def __len__(self):
+        return len(self.errors)
 
-class TwitterApiErrorItem(Exception):
+    def __iter__(self):
+        return iter(self.errors)
+
+    def __getitem__(self, index):
+        return self.errors[index]
+
+
+class TwitterApiError(Exception):
     title = 'generic twitter api error'
 
     def __init__(self, title, ref_url, detail, parameter, value):
@@ -42,26 +51,27 @@ class TwitterApiErrorItem(Exception):
         self.value = value
 
     @staticmethod
-    def build_from_response(response_error: dict):
-        for subclass in TwitterApiErrorItem.__subclasses__():
-            if subclass.title == response_error['title']:
+    def build_from_response(resp_error: dict):
+        # build an accurate error type according to the response content
+        for subclass in TwitterApiError.__subclasses__():
+            if subclass.title == resp_error['title']:
                 return subclass(
-                    title=response_error['title'],
-                    ref_url=response_error['type'],
-                    detail=response_error['detail'],
-                    parameter=response_error['parameter'],
-                    value=response_error['value'])
+                    title=resp_error['title'],
+                    ref_url=resp_error['type'],
+                    detail=resp_error['detail'],
+                    parameter=resp_error['parameter'],
+                    value=resp_error['value'])
 
         # if we haven't written a subclass for given error, return generic error
-        return TwitterApiErrorItem(
-            title=response_error['title'],
-            ref_url=response_error['type'],
-            detail=response_error['detail'],
-            parameter=response_error['parameter'],
-            value=response_error['value'])
+        return TwitterApiError(
+            title=resp_error['title'],
+            ref_url=resp_error['type'],
+            detail=resp_error['detail'],
+            parameter=resp_error['parameter'],
+            value=resp_error['value'])
 
 
-class ResourceNotFound(TwitterApiErrorItem):
+class ResourceNotFoundError(TwitterApiError):
     """
     For example, if you try to query info about a not exist user id,
     this error will be raised.

@@ -1,16 +1,16 @@
 from typing import List, Dict, Any, Tuple, Callable
 
 import reactivex as rx
-from reactivex import operators as op
 
 from puntgun import util
 from puntgun.base.options import Field, MapOption
+from puntgun.client.hunter import Hunter
 from puntgun.model.context import Context
-from puntgun.model.errors import TwitterClientError, TwitterApiErrors
+from puntgun.model.errors import TwitterApiError
+from puntgun.model.report import Report
 from puntgun.model.user import User
 from puntgun.option.let_me_check_rule import LetMeCheckRule
 from puntgun.option.rule_set import RuleSet
-from puntgun.spi.twitter_client.hunter import Hunter
 
 
 class WhoField(Field):
@@ -23,7 +23,7 @@ class WhoField(Field):
     required = True
 
     def query_users_from(self, client: Hunter) \
-            -> Tuple[rx.Observable[User, TwitterClientError], rx.Observable[TwitterApiErrors]]:
+            -> Tuple[rx.Observable[User], rx.Observable[TwitterApiError]]:
         """Let child classes implement their various logic to query user from client."""
         raise NotImplementedError
 
@@ -46,8 +46,7 @@ class IdAreWhoField(WhoField):
         super().__init__()
         self.user_ids = config_value if config_value else []
 
-    def query_users_from(self, client: Hunter) \
-            -> Tuple[rx.Observable[User, TwitterClientError], rx.Observable[TwitterApiErrors]]:
+    def query_users_from(self, client: Hunter):
         return client.observe(user_ids=rx.of(self.user_ids))
 
 
@@ -69,32 +68,25 @@ class UserSelectingRule(MapOption):
     let_me_check_rule: LetMeCheckRule
 
     def __init__(self,
-                 config_value: Dict[str, Any],
-                 action: Callable[[rx.Observable[Context]], rx.Observable[bool]]):
-
+                 config_value: Dict[str, Any]):
         super().__init__(config_value)
         self.action = action
 
     def start(self, client: Hunter) \
-            -> Tuple[rx.Observable[Context], rx.Observable[TwitterApiErrors]]:
+            -> Tuple[rx.Observable[Report], rx.Observable[TwitterApiError]]:
         """
         Start user selecting rule.
         """
 
-        def on_error(error: Exception):
-            self.logger.error(f"UnError when querying user info with user ids from client", error)
-            # can't handle, let this error fail whole program
-            raise error
-
-        # query users from client
-        user_observe = self.who.query_users_from(client)
-        user_observe.subscribe(on_error=on_error)
-
-        exchange_observe = user_observe.pipe(
-            op.filter(lambda x: isinstance(x, User)),
-            op.map(lambda x: Context(user=x)))
-
-        api_error_observe = user_observe.pipe(
-            op.filter(lambda x: isinstance(x, TwitterApiErrors)))
-
-        return exchange_observe, api_error_observe
+        # # query users from client
+        # user_observable, error_observable = self.who.query_users_from(client)
+        # user_observe.subscribe(on_error=on_error)
+        #
+        # exchange_observe = user_observe.pipe(
+        #     op.filter(lambda x: isinstance(x, User)),
+        #     op.map(lambda x: Context(user=x)))
+        #
+        # api_error_observe = user_observe.pipe(
+        #     op.filter(lambda x: isinstance(x, TwitterApiErrors)))
+        #
+        # return exchange_observe, api_error_observe
