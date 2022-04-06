@@ -1,11 +1,10 @@
-from typing import List, Dict, Any, Tuple, Callable
+from typing import List, Dict, Any, Tuple
 
 import reactivex as rx
 
 from puntgun import util
 from puntgun.base.options import Field, MapOption
 from puntgun.client.hunter import Hunter
-from puntgun.model.context import Context
 from puntgun.model.errors import TwitterApiError
 from puntgun.model.report import Report
 from puntgun.model.user import User
@@ -70,7 +69,6 @@ class UserSelectingRule(MapOption):
     def __init__(self,
                  config_value: Dict[str, Any]):
         super().__init__(config_value)
-        self.action = action
 
     def start(self, client: Hunter) \
             -> Tuple[rx.Observable[Report], rx.Observable[TwitterApiError]]:
@@ -80,13 +78,3 @@ class UserSelectingRule(MapOption):
 
         # # query users from client
         # user_observable, error_observable = self.who.query_users_from(client)
-        # user_observe.subscribe(on_error=on_error)
-        #
-        # exchange_observe = user_observe.pipe(
-        #     op.filter(lambda x: isinstance(x, User)),
-        #     op.map(lambda x: Context(user=x)))
-        #
-        # api_error_observe = user_observe.pipe(
-        #     op.filter(lambda x: isinstance(x, TwitterApiErrors)))
-        #
-        # return exchange_observe, api_error_observe

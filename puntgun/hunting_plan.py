@@ -5,7 +5,7 @@ import yaml
 from puntgun import util
 
 
-class HuntingPlan:
+class HuntingPlan(object):
     """
     Parse configuration file content into rules, and hold them.
     """

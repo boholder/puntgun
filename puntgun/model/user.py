@@ -1,7 +1,7 @@
 from datetime import datetime
 
 
-class User:
+class User(object):
     """
     DTO, one instance represent one user's basic information.
 

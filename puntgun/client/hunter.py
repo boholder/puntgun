@@ -7,7 +7,7 @@ from puntgun.model.errors import TwitterApiError
 from puntgun.model.user import User
 
 
-class Hunter:
+class Hunter(object):
     """
     Proxy interface of python Twitter client libraries (only "tweepy" currently).
     Initialing a Twitter client under one specific Twitter account's
