@@ -48,17 +48,17 @@ class TweepyHunter(Hunter):
         """You should only get instance of this class via ``instance`` static method."""
         self.client = client
 
-        me = self.client.get_me().data
-        self.id = me.get('id')
-        self.username = me.get('name')
+        self.me = User.build_from_response(self.client.get_me().data, '')
+        self.id = self.me.id
+        self.name = self.me.name
 
-        self.logger.info('[{}] the hunter dressed up.\n'.format(self.username))
+        self.logger.info('[{}] the hunter dressed up.\n'.format(self.name))
 
     def observe(self,
-                user_id: rx.Observable[str] = None,
+                user_id: rx.Observable[int] = None,
                 username: rx.Observable[str] = None,
                 usernames: rx.Observable[List[str]] = None,
-                user_ids: rx.Observable[str] = None) \
+                user_ids: rx.Observable[int] = None) \
             -> Tuple[rx.Observable[User], rx.Observable[TwitterApiError]]:
 
         def transform(resp: tweepy.Response) -> User:
@@ -99,7 +99,7 @@ class TweepyHunter(Hunter):
         else:
             raise ValueError(NO_VALUE_PROVIDED)
 
-    def get_user_by_id(self, uid: str) -> tweepy.Response:
+    def get_user_by_id(self, uid: int) -> tweepy.Response:
         """
         I find out that it's hard to unit test reactivex,
         so I extract these methods into class level so that I can call them directly.
@@ -109,7 +109,7 @@ class TweepyHunter(Hunter):
     def get_user_by_name(self, name: str) -> tweepy.Response:
         return self.client.get_user(username=name, **self.user_api_params)
 
-    def get_users_by_id(self, ids: List[str]) -> tweepy.Response:
+    def get_users_by_id(self, ids: List[int]) -> tweepy.Response:
         return self.client.get_users(ids=ids, **self.user_api_params)
 
     def get_users_by_name(self, names) -> tweepy.Response:

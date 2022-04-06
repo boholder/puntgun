@@ -66,14 +66,12 @@ and force user to confirm manually on the terminal.
 
 ## Action
 
-Currently, there are two actions: block, mute.
-Each action can have a list of [User Selecting Rule](#user-selecting-rule)s,
+Currently, there are only one action: block.
+One action can have a list of [User Selecting Rule](#user-selecting-rule)s,
 represent multiple groups of target users.
 
-Both of their relative APIs rate of limit is **50 requests per 15 minutes**
-([block API](https://developer.twitter.com/en/docs/twitter-api/users/blocks/api-reference/post-users-user_id-blocking)
-/ [mute API](https://developer.twitter.com/en/docs/twitter-api/users/mutes/api-reference/post-users-user_id-muting)
-).
+[Block API](https://developer.twitter.com/en/docs/twitter-api/users/blocks/api-reference/post-users-user_id-blocking) 
+rate of limit is **50 requests per 15 minutes**.
 
 ```yaml
 block:
@@ -83,11 +81,6 @@ block:
   - users:
       who:
         username-are: [ "Twitter", "TwitterAPI" ]
-
-mute:
-  - users:
-      who:
-        id-are: [ "12345678", "87654321" ]
 ```
 
 ## Rule Description

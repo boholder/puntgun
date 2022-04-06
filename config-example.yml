@@ -82,11 +82,6 @@ block:
               with-origin-tweet: true
             recent-likes: 3
 
-mute:
-  - users:
-      who:
-        id-are: [ "12345678", "87654321" ]
-
 fragments:
   - search-rules:
       - search-query: 'tweet-query-string-1'
