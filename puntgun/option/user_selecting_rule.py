@@ -5,8 +5,8 @@ import reactivex as rx
 from puntgun import util
 from puntgun.base.options import Field, MapOption
 from puntgun.client.hunter import Hunter
+from puntgun.model.decision import Decision
 from puntgun.model.errors import TwitterApiError
-from puntgun.model.report import Report
 from puntgun.model.user import User
 from puntgun.option.let_me_check_rule import LetMeCheckRule
 from puntgun.option.rule_set import RuleSet
@@ -46,13 +46,11 @@ class IdAreWhoField(WhoField):
         self.user_ids = config_value if config_value else []
 
     def query_users_from(self, client: Hunter):
-        return client.observe(user_ids=rx.of(self.user_ids))
+        return client.observe(user_ids=self.user_ids)
 
 
 class UserSelectingRule(MapOption):
-    """
-    Model, a mapping of same name configuration option.
-    """
+
     logger = util.get_logger(__qualname__)
     config_keyword = 'users'
     # WhoField is special, we indicate the base class is valid option,
@@ -71,10 +69,10 @@ class UserSelectingRule(MapOption):
         super().__init__(config_value)
 
     def start(self, client: Hunter) \
-            -> Tuple[rx.Observable[Report], rx.Observable[TwitterApiError]]:
+            -> Tuple[rx.Observable[Decision], rx.Observable[TwitterApiError]]:
         """
         Start user selecting rule.
         """
 
-        # # query users from client
-        # user_observable, error_observable = self.who.query_users_from(client)
+        # query users from client
+        # users, errors = self.who.query_users_from(client)

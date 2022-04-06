@@ -55,10 +55,10 @@ class TweepyHunter(Hunter):
         self.logger.info('[{}] the hunter dressed up.\n'.format(self.name))
 
     def observe(self,
-                user_id: rx.Observable[int] = None,
-                username: rx.Observable[str] = None,
-                usernames: rx.Observable[List[str]] = None,
-                user_ids: rx.Observable[int] = None) \
+                user_id: int = None,
+                username: str = None,
+                user_ids: List[int] = None,
+                usernames: List[str] = None) \
             -> Tuple[rx.Observable[User], rx.Observable[TwitterApiError]]:
 
         def transform(resp: tweepy.Response) -> User:
@@ -86,15 +86,15 @@ class TweepyHunter(Hunter):
             return result
 
         if user_id:
-            return query_and_transform(user_id, self.get_user_by_id, transform)
+            return query_and_transform(rx.of(user_id), self.get_user_by_id, transform)
         elif username:
-            return query_and_transform(username, self.get_user_by_name, transform)
+            return query_and_transform(rx.of(username), self.get_user_by_name, transform)
         elif user_ids:
             # API allows querying up to 100 users at once
-            return query_and_transform(user_ids.pipe(op.buffer_with_count(100)),
+            return query_and_transform(rx.of(user_ids).pipe(op.buffer_with_count(100)),
                                        self.get_users_by_id, multi_transform)
         elif usernames:
-            return query_and_transform(usernames.pipe(op.buffer_with_count(100)),
+            return query_and_transform(rx.of(usernames).pipe(op.buffer_with_count(100)),
                                        self.get_users_by_name, multi_transform)
         else:
             raise ValueError(NO_VALUE_PROVIDED)

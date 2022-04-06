@@ -2,7 +2,6 @@ from datetime import datetime
 from unittest import TestCase
 from unittest.mock import Mock, MagicMock
 
-import reactivex as rx
 import tweepy
 from hamcrest import assert_that, is_
 
@@ -104,7 +103,7 @@ class TestTweepyHunter(TestCase):
         mock_client.get_user = MagicMock(return_value=self.normal_user_response)
         client = TweepyHunter(mock_client)
 
-        users, _ = client.observe(username=rx.just("TestUser"))
+        users, _ = client.observe(username='TestUser')
 
         users.subscribe(on_next=self.assert_normal_user)
         mock_client.get_user.assert_called_once_with(username='TestUser', **TweepyHunter.user_api_params)
@@ -114,7 +113,7 @@ class TestTweepyHunter(TestCase):
         mock_client.get_user = MagicMock(return_value=self.no_pinned_tweet_user_response)
         client = TweepyHunter(mock_client)
 
-        users, _ = client.observe(username=rx.just("NoPinnedTweetUser"))
+        users, _ = client.observe(username='NoPinnedTweetUser')
 
         users.subscribe(on_next=self.assert_no_pinned_tweet_user)
         mock_client.get_user.assert_called_once_with(username='NoPinnedTweetUser', **TweepyHunter.user_api_params)
@@ -124,7 +123,7 @@ class TestTweepyHunter(TestCase):
         mock_client.get_user = MagicMock(return_value=self.no_pinned_tweet_user_response)
         client = TweepyHunter(mock_client)
 
-        _, errors = client.observe(username=rx.just("ErrorUser"))
+        _, errors = client.observe(username='ErrorUser')
 
         errors.subscribe(on_error=self.assert_user_not_exist_error)
         mock_client.get_user.assert_called_once_with(username='ErrorUser', **TweepyHunter.user_api_params)
@@ -137,5 +136,5 @@ class TestTweepyHunter(TestCase):
                 self.assert_no_pinned_tweet_user(user)
 
         client = TweepyHunter.singleton()
-        users, errors = client.observe(usernames=rx.just("TwitterDev", "Twitter"))
+        users, errors = client.observe(usernames=['TwitterDev', 'Twitter'])
         users.subscribe(on_next=consume, on_error=self.assert_user_not_exist_error)

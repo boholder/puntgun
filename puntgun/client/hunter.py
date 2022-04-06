@@ -24,16 +24,20 @@ class Hunter(object):
     # And other information about this user.
     me: User
 
+    # Every query to Twitter API may respond with API errors,
+    # that's why you can see almost every method of this class
+    # returning normal result stream along with error stream.
+
     @staticmethod
     def singleton() -> 'Hunter':
         """Get singleton instance of Client."""
         raise NotImplementedError
 
     def observe(self,
-                user_id: rx.Observable[int] = None,
-                username: rx.Observable[str] = None,
-                usernames: rx.Observable[List[str]] = None,
-                user_ids: rx.Observable[int] = None) \
+                user_id: int = None,
+                username: str = None,
+                user_ids: List[int] = None,
+                usernames: List[str] = None) \
             -> Tuple[rx.Observable[User], rx.Observable[TwitterApiError]]:
         """Given user id(s) or username(s), get user(s) information.
 
@@ -64,16 +68,4 @@ class Hunter(object):
 
     def check_decoy(self, recent: int) -> Tuple[rx.Observable[User], rx.Observable[TwitterApiError]]:
         """Get your followers' user ids."""
-        raise NotImplementedError
-
-    def ignore(self, user_id='') -> Tuple[rx.Observable[bool], rx.Observable[TwitterApiError]]:
-        """Mute single user. TODO delay to future"""
-        raise NotImplementedError
-
-    def group_by_ignored(self, users: rx.Observable[User]) -> Tuple[rx.Observable[User], rx.Observable[User]]:
-        """
-        Group input users according to whether they have been muted by you.
-        :returns: two streams: muted, not muted.
-        TODO delay to future
-        """
         raise NotImplementedError
