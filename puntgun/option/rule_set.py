@@ -1,15 +1,27 @@
-from typing import Any, List, Dict
+from typing import Any, List, Dict, Tuple
+
+import reactivex as rx
+from reactivex import operators as op
 
 from puntgun import util
 from puntgun.base.options import ListOption, Field, MapOption
+from puntgun.model.context import Context
+from puntgun.model.decision import Decision
+from puntgun.model.errors import TwitterApiError
+from puntgun.model.user import User
 from puntgun.option.filter_rule import FilterRule
 
 
 class RuleSet(ListOption):
     """
-    Abstract class for representing a option set.
+    Contains a list of FilterRule objects.
     """
     config_keyword = "generic-option-set"
+
+    def judge(self, users: rx.Observable[User]) \
+            -> Tuple[rx.Observable[Decision], rx.Observable[TwitterApiError]]:
+        """Judge given users with inner rules. """
+        raise NotImplementedError
 
 
 RuleSet.valid_options = [Field.of('name', str, singleton=True), RuleSet, FilterRule]
@@ -19,10 +31,19 @@ class AllOfRuleSet(RuleSet):
     config_keyword = "all-of"
     logger = util.get_logger(__qualname__)
 
+    def judge(self, users: rx.Observable[Context]) \
+            -> Tuple[rx.Observable[Decision], rx.Observable[TwitterApiError]]:
+        pass
+
 
 class AnyOfRuleSet(RuleSet):
     config_keyword = "any-of"
     logger = util.get_logger(__qualname__)
+
+    def judge(self, users: rx.Observable[User]) \
+            -> Tuple[rx.Observable[Decision], rx.Observable[TwitterApiError]]:
+        pass
+    # TODO 如何并发并适时取消？取消的rule调用的请求还会继续运行吗？
 
 
 class WightCondition(MapOption):
@@ -57,16 +78,21 @@ class WightOfRuleSet(RuleSet):
 
     def __init__(self, config_value: List[Any]):
         super().__init__(config_value)
-        self.__check_goal_constraints()
 
-    @util.log_error_with(logger)
-    def __check_goal_constraints(self):
         # the self.goal value type will be a singleton-list after initialized.
         # extract the element for convenience
         self.goal = self.goal[0]
 
+        self.__check_goal_constraints()
+
+    @util.log_error_with(logger)
+    def __check_goal_constraints(self):
         sum_of_wight = sum([c.wight for c in self.condition])
         assert sum_of_wight >= self.goal, \
             f"Option [{self}]: The sum of all conditions' wight (current:{sum_of_wight}) " \
             f"must be greater than the goal (current:{self.goal}), " \
             f"or you will never trigger this option set."
+
+    def judge(self, users: rx.Observable[User]) \
+            -> Tuple[rx.Observable[Decision], rx.Observable[TwitterApiError]]:
+        pass
