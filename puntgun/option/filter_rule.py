@@ -1,6 +1,7 @@
-import asyncio
+import datetime
 from abc import ABC
-from typing import Any, Tuple
+from datetime import datetime as dt
+from typing import Any, Tuple, Dict
 
 import reactivex as rx
 
@@ -11,25 +12,38 @@ from puntgun.model.errors import TwitterApiError
 
 class FilterRule(Option, ABC):
     """
-    A filter option's type can be any of Field, ListOption, MapOption,
-    so let the subclasses choose their type
+    Let the subclasses choose their type
     and left this base class as merely a tag.
     """
 
-    def judge(self, context: rx.Observable[Context]) \
-            -> rx.Observable[asyncio.Future[bool]]:
+
+class ImmediateFilterRule(FilterRule, ABC):
+    """
+    A filter rule that can make judgment
+    without querying other resource (which takes time).
+    """
+
+    def judge(self, context: Context) -> bool:
         """
         Check if given context triggers rule.
-
-        Since 1. checking process may need to acquire some extra resources vai API,
-        2. some type of RuleSet will cancel this process
-        if other brother rules (rules under same RuleSet) return their result earlier.
-        The process's controlling is wrapped in Future type.
         """
         raise NotImplementedError
 
 
-class SearchFilterRule(MapOption, FilterRule):
+class DelayedFilterRule(FilterRule, ABC):
+    """
+    A filter rule that needs to make judgment
+    with querying other resource (which takes time).
+    """
+
+    def judge(self, context: Context) -> Tuple[bool, TwitterApiError]:
+        """
+        Check if given context triggers rule.
+        """
+        raise NotImplementedError
+
+
+class SearchFilterRule(MapOption, DelayedFilterRule, FilterRule):
     """
     Perform a tweet search with given parameters on potential user.
     Triggered if search result of potential user isn't empty.
@@ -40,12 +54,12 @@ class SearchFilterRule(MapOption, FilterRule):
                      Field.of('count', int, default_value=100),
                      Field.of('query', str, required=True)]
 
-    def judge(self, context: Context) \
-            -> Tuple[rx.Observable[bool], rx.Observable[TwitterApiError]]:
+    def judge(self, context: Context) -> Tuple[bool, TwitterApiError]:
+        """"""
         pass
 
 
-class SearchQueryFilterRule(Field, FilterRule):
+class SearchQueryFilterRule(Field, DelayedFilterRule, FilterRule):
     """
     Convenient :class:`SearchFilterRule` to search query,
     ``count`` default set to 100.
@@ -65,3 +79,33 @@ class SearchQueryFilterRule(Field, FilterRule):
         # And after initializing, it will be treated as SearchFilterRule,
         # because we return a SearchFilterRule instance here.
         return SearchFilterRule.build({'query': config_value, 'count': 100})
+
+
+class UserCreatedFilterRule(MapOption, ImmediateFilterRule, FilterRule):
+    """
+    The rule for judging user's creation time.
+    """
+    config_keyword = 'user-created'
+    valid_options = [Field.of('before', str, default_value=dt.utcnow().strftime('%Y-%m-%d')),
+                     Field.of('after', str, default_value='2000-01-01'),
+                     Field.of('within_days', int, conflict_with=['before', 'after'])]
+
+    def __init__(self, config_value: Dict[str, Any]):
+        super().__init__(config_value)
+
+        # if no 'within_days' field,
+        # convert input time string to datetime format
+        if not hasattr(self, 'within_days'):
+            self.before = dt.fromisoformat(self.before)
+            self.after = dt.fromisoformat(self.after)
+
+            assert self.before >= self.after, \
+                f'Option [{self}]: "before" ({self.before}) should be after "after" ({self.after})'
+
+    def judge(self, context: Context) -> bool:
+        created_time = context.user.created_at
+
+        if hasattr(self, 'within_days'):
+            return dt.utcnow() - datetime.timedelta(days=self.within_days) <= created_time
+        else:
+            return self.after <= created_time <= self.before
