@@ -1,25 +1,51 @@
-from puntgun.client.tweepy_hunter import TweepyHunter
-from puntgun.hunting_plan import HuntingPlan
 import fire
+
+
+class Command(object):
+    @staticmethod
+    def pow(config_file='config.yml', block_following=False):
+        """Check & block/mute users base on the given configuration file.
+
+        :param config_file: the configuration file to use.
+        :param block_following: whether to block users that you are following.
+        """
+        print_banner()
+        print(f'start blocking:{config_file}')
+
+    @staticmethod
+    def rebirth(report_file='report.yml'):
+        """Unblock/mute users in the given report file that this tool generated before."""
+        print(f'start unblocking users in:{report_file}')
+
+    @staticmethod
+    def check():
+        """Perform a dry run on the given file, for checking file's syntactic correctness etc."""
+        return PreCheckCommand()
+
+
+class PreCheckCommand(object):
+    @staticmethod
+    def config(config_file='config.yml'):
+        """Check the syntactic correctness of the given configuration file,
+        run test cases if the file contains."""
+        # TODO 配置文件里可配套写测试用例和预期结果
+        print(f"check rule file:{config_file}")
+
+    @staticmethod
+    def report(report_file='report.yml'):
+        """Show a brief of the given report file, number of blocked users for example."""
+        print(f"check old record file:{report_file}")
 
 
 def print_banner():
     print("""
 ,______________________________________
 |______________________________ [____]  ""-,___..--=====
-Punt Gun - a configurable Twitter\\_____/   ""         |
+Punt Gun - a configurable Twitter \\_____/   ""         |
              user blocking script    [ ))"---------..__|
     """)
 
 
 if __name__ == '__main__':
-    print_banner()
-    plan = HuntingPlan()
-
-    hunter = TweepyHunter()
-    test_user = hunter.observe(user_id=hunter.id)
-    trace = hunter.listen_tweeting(query='from:{}'.format(test_user.id))
-    print(trace)
-
-# TODO 变成可发布的命令行工具：
-#  命令行传入用户过滤参数和配置文件，忽略配置中的用户过滤，实现与其他工具的自动化配合。
+    # expose subcommands
+    fire.Fire(Command)

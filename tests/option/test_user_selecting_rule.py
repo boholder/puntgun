@@ -11,7 +11,7 @@ from puntgun.option.user_selecting_rule import WhoField, UserSelectingRule
 class TestWhoField(WhoField):
     is_init_by_class_attr = True
 
-    config_keyword = "test-who-key"
+    config_keyword = 'test-who-key'
     expect_type = str
 
     def __init__(self, raw_config_value):
@@ -24,12 +24,12 @@ class TestWhoField(WhoField):
 
 class TestAbstractWhoField(TestCase):
     def test_get_instance_via_config(self):
-        field = WhoField.build({"test-who-key": "text"})
+        field = WhoField.build({'test-who-key': 'text'})
         assert_that(isinstance(field, TestWhoField))
         assert_that(field.v, instance_of(str))
-        assert_that(field.v, "text")
+        assert_that(field.v, 'text')
 
-    @unittest.skip("test for development")
+    @unittest.skip('test for development')
     def test_inherit_cache(self):
         class A:
             def real_func(self):

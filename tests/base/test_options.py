@@ -8,10 +8,10 @@ from puntgun.base.options import Field, MapOption, ListOption
 class TestAbstractField(TestCase):
     def test_check_same_field_in_two_constraints(self):
         class TestField(Field):
-            config_keyword = "test_field"
+            config_keyword = 'test_field'
             expect_type = str
-            conflict_with = ["same"]
-            require_with = ["same"]
+            conflict_with = ['same']
+            require_with = ['same']
             is_init_by_class_attr = True
 
             def __init__(self):

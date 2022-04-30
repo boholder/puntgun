@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Callable, Any
 
 import reactivex as rx
 from reactivex import operators as op
@@ -6,6 +6,78 @@ from reactivex import operators as op
 from puntgun.model.errors import TwitterApiError
 from puntgun.model.tweet import Tweet
 from puntgun.model.user import User
+
+
+class MixedResultProcessingWrapper(object):
+    """
+    In Current design, requesting on Hunter's method, i.e. on Twitter Dev API,
+    will result in an observable mixing DTOs constructed from successful responses with request failure errors.
+
+    Note that this type of error is business logic error (api error),
+    corresponding to querying on single target (user, tweet...),
+    which is recoverable, just record it and move to next target.
+    While there is another type of error, client error,
+    which is not recoverable and will stop the observable, same as regular "error" definition in Rx.
+
+    We'll use the RxPY's group_by operator to separate these two types of results,
+    decorating with input operators, and consuming with observers, declaratively.
+
+    It is because of the inability to assign a value to the grouped observables
+    and return them as return values that this class exists for processing grouped observables.
+    """
+
+    def __init__(self, result_observable: rx.Observable):
+        self.observable = result_observable
+        self.__error_observers = []
+        self.__model_observers = []
+        self.__error_operators = []
+        self.__model_operators = []
+
+    def pipe_on_model(self, *operators: Callable[[Any], Any]):
+        self.__model_operators.extend(operators)
+        return self
+
+    def subscribe_on_model(self, *observers: rx.Observer):
+        self.__model_observers.extend(observers)
+        return self
+
+    def pipe_on_error(self, *operators: Callable[[Any], Any]):
+        self.__error_operators.extend(operators)
+        return self
+
+    def subscribe_on_error(self, *observers: rx.Observer):
+        self.__error_observers.extend(observers)
+        return self
+
+    def wire(self):
+        """
+        Begin to actually consuming Twitter APIs response.
+        (In Rx, the whole observable stream will be started
+        once there are subscribers (observers) waiting for.)
+        """
+
+        def sub(grp: rx.GroupedObservable):
+            src = grp.underlying_observable
+            ops = self.__model_operators
+            obs = self.__model_observers
+
+            # check group_by predicate below —— errors will be put into True group
+            if grp.key:
+                ops = self.__error_operators
+                obs = self.__error_observers
+
+            after = src.pipe(*ops) if ops else src
+            [after.subscribe(o) for o in obs]
+
+        self.observable \
+            .pipe(op.group_by(lambda x: isinstance(x, TwitterApiError))) \
+            .subscribe(sub)
+
+    def clean(self):
+        self.__error_observers = []
+        self.__error_operators = []
+        self.__model_observers = []
+        self.__model_operators = []
 
 
 class Hunter(object):
@@ -39,7 +111,7 @@ class Hunter(object):
                 username: str = None,
                 user_ids: List[int] = None,
                 usernames: List[str] = None) \
-            -> Tuple[rx.Observable[User], rx.Observable[TwitterApiError]]:
+            -> MixedResultProcessingWrapper:
         """Given user id(s) or username(s), get user(s) information.
 
         :returns: two streams:
@@ -70,41 +142,3 @@ class Hunter(object):
     def check_decoy(self, recent: int) -> Tuple[rx.Observable[User], rx.Observable[TwitterApiError]]:
         """Get your followers' user ids."""
         raise NotImplementedError
-
-
-class MixedResultSubscribingWrapper(object):
-    """
-    In Current design, requesting on Hunter's method, i.e. on Twitter Dev API,
-    will result in an observable mixing DTOs constructed from successful responses with request failure errors.
-
-    Note that this type of error is business logic error (api error),
-    corresponding to querying on single target (user, tweet...),
-    which is recoverable, just record it and move to next target.
-    While there is another type of error, client error,
-    which is not recoverable and will stop the observable, same as regular "error" definition in Rx.
-
-    We'll use the RxPY's group_by operator to separate these two types of results,
-    and subscribe each of them with an input observer.
-    """
-
-    def __init__(self, result_observable: rx.Observable):
-        self.observable = result_observable
-        self.error_observer = None
-        self.model_observer = None
-
-    def on_model(self, observer: rx.Observer):
-        self.model_observer = observer
-        return self
-
-    def on_error(self, observer: rx.Observer):
-        self.error_observer = observer
-        return self
-
-    def subscribe(self):
-        def sub(grp: rx.GroupedObservable):
-            if grp.key:
-                grp.underlying_observable.subscribe(self.error_observer)
-            else:
-                grp.underlying_observable.subscribe(self.model_observer)
-
-        self.observable.pipe(op.group_by(lambda x: isinstance(x, TwitterApiError))).subscribe(sub)

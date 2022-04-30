@@ -14,7 +14,7 @@ class Option(object):
     """
 
     # --- required setting attributes for overriding ---
-    config_keyword: str = "generic-option"
+    config_keyword: str = 'generic-option'
 
     # --- optional setting attributes for overriding ---
 

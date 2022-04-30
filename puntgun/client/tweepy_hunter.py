@@ -8,7 +8,7 @@ from reactivex import operators as op
 from tweepy import Client, OAuth1UserHandler
 
 from puntgun import util
-from puntgun.client.hunter import Hunter, MixedResultSubscribingWrapper
+from puntgun.client.hunter import Hunter, MixedResultProcessingWrapper
 from puntgun.model.errors import TwitterApiErrors, TwitterClientError
 from puntgun.model.user import User
 
@@ -59,7 +59,7 @@ class TweepyHunter(Hunter):
                 username: str = None,
                 user_ids: List[int] = None,
                 usernames: List[str] = None) \
-            -> MixedResultSubscribingWrapper:
+            -> MixedResultProcessingWrapper:
         """Query user information."""
 
         def transform(resp: tweepy.Response) -> User:
@@ -118,7 +118,7 @@ R = TypeVar('R')
 def query_then_transform(source: rx.Observable[T],
                          query_func: Callable[[T], tweepy.Response],
                          transform_func: Callable[[tweepy.Response], Any]) \
-        -> MixedResultSubscribingWrapper:
+        -> MixedResultProcessingWrapper:
     """
     Query Twitter Dev API and transform response into two observables.
 
@@ -128,7 +128,7 @@ def query_then_transform(source: rx.Observable[T],
             one response can be transformed into multiple data
     :return: two observables of transformed data and errors
     """
-    return MixedResultSubscribingWrapper(source.pipe(query_api_operator(query_func, transform_func)))
+    return MixedResultProcessingWrapper(source.pipe(query_api_operator(query_func, transform_func)))
 
 
 def query_api_operator(query_func: Callable[[T], tweepy.Response],

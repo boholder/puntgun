@@ -3,6 +3,7 @@ from typing import Union
 from unittest import TestCase
 from unittest.mock import Mock, MagicMock
 
+import reactivex as rx
 import tweepy
 from hamcrest import assert_that, is_
 
@@ -55,7 +56,9 @@ def run_stream(test_user_name: Union[list, str], mock_response, user_assert_func
         mock_tweepy_client.get_user = MagicMock(return_value=mock_response)
         result = TweepyHunter(mock_tweepy_client).observe(username=test_user_name)
 
-    result.on_model(user_assert_func).on_error(error_assert_func).subscribe()
+    result.subscribe_on_model(rx.Observer(on_next=user_assert_func)) \
+        .subscribe_on_error(rx.Observer(on_next=error_assert_func)) \
+        .wire()
 
 
 # These test data based on real responses of Twitter API
@@ -125,6 +128,7 @@ def assert_normal_user(user: User):
     assert_that(user.protected, is_(False))
     assert_that(user.verified, is_(True))
     assert_that(user.pinned_tweet_text, is_('pinned tweet'))
+    print("assert normal user success")
 
 
 def assert_no_pinned_tweet_user(user: User):
@@ -142,6 +146,7 @@ def assert_no_pinned_tweet_user(user: User):
     assert_that(user.protected, is_(False))
     assert_that(user.verified, is_(False))
     assert_that(user.pinned_tweet_text, is_(''))
+    print("assert no pinned tweet user success")
 
 
 def assert_user_not_exist_error(error: Exception):
@@ -151,6 +156,7 @@ def assert_user_not_exist_error(error: Exception):
     assert_that(error.value, is_('ErrorUser'))
     assert_that(error.detail, is_('Could not find user with username: [ErrorUser].'))
     assert_that(error.ref_url, is_('https://api.twitter.com/2/problems/resource-not-found'))
+    print("assert user not exist error success")
 
 
 def assert_users(user: User):

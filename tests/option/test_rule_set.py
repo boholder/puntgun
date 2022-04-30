@@ -11,13 +11,13 @@ class TestWightOfRuleSet(TestCase):
         assert_that(calling(WightOfRuleSet)
                     .with_args([{'goal': 10},
                                 {'condition': {'wight': 1, 'search-query': 'query-string'}}]),
-                    raises(AssertionError, pattern="must be greater than the goal"))
+                    raises(AssertionError, pattern='must be greater than the goal'))
 
     def test_condition_config_leak_of_rule(self):
         assert_that(calling(WightOfRuleSet)
                     .with_args([{'goal': 1},
                                 {'condition': {'wight': 1}}]),
-                    raises(AssertionError, pattern="must have exact one filter option"))
+                    raises(AssertionError, pattern='must have exact one filter option'))
 
     def test_normal_build(self):
         wight_of_rule_set = WightOfRuleSet([{'goal': 1},

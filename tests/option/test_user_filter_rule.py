@@ -13,7 +13,7 @@ class TestUserCreated(TestCase):
     def test_check_time_order(self):
         assert_that(calling(UserCreatedFilterRule)
                     .with_args({'before': '2018-01-01', 'after': '2020-01-01'}),
-                    raises(AssertionError, pattern="should be after"))
+                    raises(AssertionError, pattern='should be after'))
 
     def test_convert_when_building(self):
         rule = UserCreatedFilterRule({'before': '2020-01-01', 'after': '2018-01-01 12:00:00'})
