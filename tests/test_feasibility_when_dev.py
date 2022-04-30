@@ -44,6 +44,7 @@ class TestLibrary(TestCase):
             .subscribe(on_next=lambda x: print(x),
                        on_error=lambda e: print('error number:', e))
 
+    @unittest.skip('test for development')
     def test_observable_emit_time(self):
         def rule1(value):
             print(f'rule 1 begin on:{value}')
@@ -81,3 +82,28 @@ class TestLibrary(TestCase):
         rx.range(1, 4).pipe(
             op.map(judge_on_one_context)
         ).subscribe(lambda x: x.subscribe(lambda t: print(f'==={t}===')))
+
+    # @unittest.skip('test for development')
+    def test_rx_group_by(self):
+        class A(object):
+            def __init__(self, name):
+                self.name = name
+
+        class B(object):
+            def __init__(self, name):
+                self.name = name
+
+        a = 1
+
+        def assignment(grp):
+            nonlocal a
+            if grp.key:
+                a = grp.underlying_observable
+                return a
+            else:
+                b = grp.underlying_observable.subscribe(lambda x: print(f'b:{x.name}'))
+                return b
+
+        rx.of(A('a1'), A('a2'), B('b1'), B('b2'), A('a3'), B('b3')).pipe(
+            op.group_by(lambda x: isinstance(x, A)),
+        ).subscribe(assignment)

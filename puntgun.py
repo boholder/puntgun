@@ -1,5 +1,6 @@
 from puntgun.client.tweepy_hunter import TweepyHunter
 from puntgun.hunting_plan import HuntingPlan
+import fire
 
 
 def print_banner():

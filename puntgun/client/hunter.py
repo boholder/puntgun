@@ -1,9 +1,10 @@
 from typing import List, Tuple
 
 import reactivex as rx
+from reactivex import operators as op
 
-from puntgun.model.Tweet import Tweet
 from puntgun.model.errors import TwitterApiError
+from puntgun.model.tweet import Tweet
 from puntgun.model.user import User
 
 
@@ -69,3 +70,41 @@ class Hunter(object):
     def check_decoy(self, recent: int) -> Tuple[rx.Observable[User], rx.Observable[TwitterApiError]]:
         """Get your followers' user ids."""
         raise NotImplementedError
+
+
+class MixedResultSubscribingWrapper(object):
+    """
+    In Current design, requesting on Hunter's method, i.e. on Twitter Dev API,
+    will result in an observable mixing DTOs constructed from successful responses with request failure errors.
+
+    Note that this type of error is business logic error (api error),
+    corresponding to querying on single target (user, tweet...),
+    which is recoverable, just record it and move to next target.
+    While there is another type of error, client error,
+    which is not recoverable and will stop the observable, same as regular "error" definition in Rx.
+
+    We'll use the RxPY's group_by operator to separate these two types of results,
+    and subscribe each of them with an input observer.
+    """
+
+    def __init__(self, result_observable: rx.Observable):
+        self.observable = result_observable
+        self.error_observer = None
+        self.model_observer = None
+
+    def on_model(self, observer: rx.Observer):
+        self.model_observer = observer
+        return self
+
+    def on_error(self, observer: rx.Observer):
+        self.error_observer = observer
+        return self
+
+    def subscribe(self):
+        def sub(grp: rx.GroupedObservable):
+            if grp.key:
+                grp.underlying_observable.subscribe(self.error_observer)
+            else:
+                grp.underlying_observable.subscribe(self.model_observer)
+
+        self.observable.pipe(op.group_by(lambda x: isinstance(x, TwitterApiError))).subscribe(sub)
