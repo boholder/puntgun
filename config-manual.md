@@ -439,7 +439,7 @@ user_texts_match: '[\\u1F100-\\u1F1E5]'
 | `less_than` | number |
 | `more_than` | number |
 
-Two fields can be used together or separately.
+Two fields can be used together or separately. Edge case (equal) result in False.
 
 ```yaml
 - user_follower:
@@ -461,14 +461,17 @@ Shorten version:
 | `less_than` | number |
 | `more_than` | number |
 
-Two fields can be used together or separately.
-There is a simple format: `user_following_more_than`.
+Two fields can be used together or separately. Edge case (equal) result in False.
 
 ```yaml
 - user_following:
     more_than: 100
     less_than: 1000
+```
 
+Shorten version:
+
+```yaml
 - user_following_more_than: 10
 ```
 
@@ -480,15 +483,18 @@ There is a simple format: `user_following_more_than`.
 | `less_than` | number |
 | `more_than` | number |
 
-Two fields can be used together or separately.
-There is a simple format: `user_foer_foing_ratio_less_than`.
+Two fields can be used together or separately. Edge case (equal) result in False.
 
 ```yaml
 - user_foer_foing_ratio:
     more_than: 0.1  # 1 follower / 10 following
     less_than: 10.0 # 10 follower / 1 following
+```
 
-# 1 follower / 100 following, that tells something
+Shorten version:
+
+```yaml
+# 1 follower / 100 following, this ratio tells something
 - user_foer_foing_ratio_less_than: 0.01 
 ```
 
@@ -500,7 +506,7 @@ There is a simple format: `user_foer_foing_ratio_less_than`.
 | `less_than` | number |
 | `more_than` | number |
 
-Two fields can be used together or separately.
+Two fields can be used together or separately. Edge case (equal) result in False.
 There is a simple format: `user_tweet_count_less_than`.
 Just notice that this count includes both post and retweet.
 

@@ -8,13 +8,13 @@ from hamcrest import assert_that, calling, raises, is_
 from puntgun.model.context import Context
 from puntgun.model.user import User
 from puntgun.option.filter_rule import UserCreatedFilterRule, UserTextsMatchFilterRule, UserCreatedAfterFilterRule, \
-    UserCreatedWithinDaysFilterRule
+    UserCreatedWithinDaysFilterRule, NumberComparingFilterRule, UserFollowerFilterRule, UserFollowerLessThanFilterRule, \
+    UserFollowingMoreThanFilterRule, UserFollowingFilterRule
 
 
-class TestUserCreated(TestCase):
+class TestUserCreatedFilterRule(TestCase):
     def test_check_time_order(self):
-        assert_that(calling(UserCreatedFilterRule.build)
-                    .with_args({'before': '2018-01-01', 'after': '2020-01-01'}),
+        assert_that(calling(UserCreatedFilterRule.build).with_args({'before': '2018-01-01', 'after': '2020-01-01'}),
                     raises(AssertionError, pattern='should be after'))
 
     def test_convert_when_building(self):
@@ -105,3 +105,54 @@ class TestUserTextsMatchFilterRule(TestCase):
     def user_texts_are(texts: List[str]):
         words = [t if t else '' for t in texts[0:3]]
         return Context(User(name=words[0], description=words[1], pinned_tweet_text=words[2]))
+
+
+class NumberComparingFilterRuleTestCase(TestCase):
+    def setUp(self) -> None:
+        self.build_func = lambda config: NumberComparingFilterRule.build(config)
+        self.judge_func = lambda rule, num: rule.judge_number(num)
+
+    def test_check_number_order(self):
+        assert_that(calling(self.build_func).with_args({'less_than': 10, 'more_than': 20}),
+                    raises(AssertionError, pattern='should be bigger than'))
+
+    def test_less_than(self):
+        rule = self.build_func({'less_than': 10})
+        assert_that(self.judge_func(rule, 5), is_(True))
+        assert_that(self.judge_func(rule, 20), is_(False))
+
+    def test_more_than(self):
+        rule = self.build_func({'more_than': 10})
+        assert_that(self.judge_func(rule, 20), is_(True))
+        assert_that(self.judge_func(rule, 5), is_(False))
+
+    def test_less_more(self):
+        rule = self.build_func({'less_than': 20, 'more_than': 10})
+        assert_that(self.judge_func(rule, 15), is_(True))
+        assert_that(self.judge_func(rule, 5), is_(False))
+        assert_that(self.judge_func(rule, 25), is_(False))
+        # edge case (equal) result in False.
+        assert_that(self.judge_func(rule, 10), is_(False))
+        assert_that(self.judge_func(rule, 20), is_(False))
+
+
+class TestUserFollowerFilterRule(NumberComparingFilterRuleTestCase):
+    def setUp(self) -> None:
+        self.build_func = lambda config: UserFollowerFilterRule.build(config)
+        self.judge_func = lambda rule, num: rule.judge(Context(User(followers_count=num)))
+
+    def test_shorten_less_than(self):
+        rule = UserFollowerLessThanFilterRule.build(10)
+        assert_that(self.judge_func(rule, 5), is_(True))
+        assert_that(self.judge_func(rule, 20), is_(False))
+
+
+class TestUserFollowingFilterRule(NumberComparingFilterRuleTestCase):
+    def setUp(self) -> None:
+        self.build_func = lambda config: UserFollowingFilterRule.build(config)
+        self.judge_func = lambda rule, num: rule.judge(Context(User(following_count=num)))
+
+    def test_shorten_more_than(self):
+        rule = UserFollowingMoreThanFilterRule.build(10)
+        assert_that(self.judge_func(rule, 20), is_(True))
+        assert_that(self.judge_func(rule, 5), is_(False))

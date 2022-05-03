@@ -1,5 +1,6 @@
 import datetime
 import re
+import sys
 from abc import ABC
 from datetime import datetime as dt
 from typing import Any, Tuple, Dict
@@ -81,7 +82,9 @@ class SearchQueryFilterRule(Field, DelayedFilterRule, FilterRule):
         return SearchFilterRule.build({'query': config_value, 'count': 100})
 
 
-class TimeComparingFilterRule(MapOption, ImmediateFilterRule):
+class TimeComparingFilterRule(MapOption):
+    """Reusable for time-related filter rules."""
+
     valid_options = [Field.of('before', str, default_value=dt.utcnow().strftime('%Y-%m-%d')),
                      Field.of('after', str, default_value='2000-01-01'),
                      Field.of('within_days', int, conflict_with=['before', 'after'])]
@@ -98,13 +101,11 @@ class TimeComparingFilterRule(MapOption, ImmediateFilterRule):
             assert self.before >= self.after, \
                 f'Option [{self}]: "before" ({self.before}) should be after "after" ({self.after})'
 
-    def judge(self, context: Context) -> bool:
-        created_time = context.user.created_at
-
+    def judge_time(self, target_time: datetime) -> bool:
         if hasattr(self, 'within_days'):
-            return dt.utcnow() - datetime.timedelta(days=self.within_days) <= created_time
+            return dt.utcnow() - datetime.timedelta(days=self.within_days) <= target_time
         else:
-            return self.after <= created_time <= self.before
+            return self.after <= target_time <= self.before
 
 
 class UserCreatedFilterRule(TimeComparingFilterRule, ImmediateFilterRule, FilterRule):
@@ -113,15 +114,18 @@ class UserCreatedFilterRule(TimeComparingFilterRule, ImmediateFilterRule, Filter
     """
     config_keyword = 'user_created'
 
+    def judge(self, context: Context) -> bool:
+        return self.judge_time(context.user.created_at)
+
 
 class UserCreatedAfterFilterRule(Field, ImmediateFilterRule, FilterRule):
     """Shorten version of UserCreatedFilterRule"""
 
-    def judge(self, context: Context) -> bool:
-        raise NotImplementedError
-
     config_keyword = 'user_created_after'
     expect_type = str
+
+    def judge(self, context: Context) -> bool:
+        raise NotImplementedError
 
     @classmethod
     def build(cls, config_value: Any):
@@ -131,11 +135,11 @@ class UserCreatedAfterFilterRule(Field, ImmediateFilterRule, FilterRule):
 class UserCreatedWithinDaysFilterRule(Field, ImmediateFilterRule, FilterRule):
     """Shorten version of UserCreatedFilterRule"""
 
-    def judge(self, context: Context) -> bool:
-        raise NotImplementedError
-
     config_keyword = 'user_created_within_days'
     expect_type = int
+
+    def judge(self, context: Context) -> bool:
+        raise NotImplementedError
 
     @classmethod
     def build(cls, config_value: Any):
@@ -163,5 +167,55 @@ class UserTextsMatchFilterRule(Field, ImmediateFilterRule, FilterRule):
                    [context.user.name, context.user.description, context.user.pinned_tweet_text])
 
 
-class NumberComparingFilterRule(Field, ImmediateFilterRule):
-    pass
+class NumberComparingFilterRule(MapOption):
+    """Reusable for number-related filter rules."""
+
+    valid_options = [Field.of('less_than', int, default_value=sys.maxsize),
+                     Field.of('more_than', int, default_value=-sys.maxsize - 1)]
+
+    def __init__(self, config_value: Dict[str, Any]):
+        super().__init__(config_value)
+
+        assert self.less_than >= self.more_than, \
+            f'Option [{self}]: "more_than" ({self.more_than}) should be bigger than "less_than" ({self.less_than})'
+
+    def judge_number(self, num: int) -> bool:
+        return self.more_than < num < self.less_than
+
+
+class UserFollowerFilterRule(NumberComparingFilterRule, ImmediateFilterRule, FilterRule):
+    config_keyword = 'user_follower'
+
+    def judge(self, context: Context) -> bool:
+        return self.judge_number(context.user.followers_count)
+
+
+class UserFollowerLessThanFilterRule(Field, ImmediateFilterRule, FilterRule):
+    config_keyword = 'user_follower_less_than'
+    expect_type = int
+
+    def judge(self, context: Context) -> bool:
+        raise NotImplementedError
+
+    @classmethod
+    def build(cls, config_value: Any):
+        return UserFollowerFilterRule.build({'less_than': config_value})
+
+
+class UserFollowingFilterRule(NumberComparingFilterRule, ImmediateFilterRule, FilterRule):
+    config_keyword = 'user_following'
+
+    def judge(self, context: Context) -> bool:
+        return self.judge_number(context.user.following_count)
+
+
+class UserFollowingMoreThanFilterRule(Field, ImmediateFilterRule, FilterRule):
+    config_keyword = 'user_following_more_than'
+    expect_type = int
+
+    def judge(self, context: Context) -> bool:
+        raise NotImplementedError
+
+    @classmethod
+    def build(cls, config_value: Any):
+        return UserFollowingFilterRule.build({'more_than': config_value})
