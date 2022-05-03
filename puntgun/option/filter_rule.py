@@ -1,4 +1,5 @@
 import datetime
+import re
 from abc import ABC
 from datetime import datetime as dt
 from typing import Any, Tuple, Dict
@@ -12,15 +13,15 @@ from puntgun.model.errors import TwitterApiError
 
 class FilterRule(Option, ABC):
     """
-    Let the subclasses choose their type
-    and left this base class as merely a tag.
+    Let the subclasses choose their type and left this base class as merely a tag.
     """
+    # TODO 单个rule抛异常不应该影响其他rule，更不能断掉程序，抛个自定义RuleError
+    # TODO 在解析plan(init)时rule抛异常，说明输入有问题，直接断掉程序。
 
 
 class ImmediateFilterRule(FilterRule, ABC):
     """
-    A filter rule that can make judgment
-    without querying other resource (which takes time).
+    A filter rule that can make judgment without querying other resource.
     """
 
     def judge(self, context: Context) -> bool:
@@ -32,8 +33,7 @@ class ImmediateFilterRule(FilterRule, ABC):
 
 class DelayedFilterRule(FilterRule, ABC):
     """
-    A filter rule that needs to make judgment
-    with querying other resource (which takes time).
+    A filter rule that needs to make judgment with querying other resource (which takes time).
     """
 
     def judge(self, context: Context) -> Tuple[bool, TwitterApiError]:
@@ -109,3 +109,24 @@ class UserCreatedFilterRule(MapOption, ImmediateFilterRule, FilterRule):
             return dt.utcnow() - datetime.timedelta(days=self.within_days) <= created_time
         else:
             return self.after <= created_time <= self.before
+
+
+class UserTextsMatchFilterRule(Field, ImmediateFilterRule, FilterRule):
+    """
+    The rule for judging user's text match.
+    """
+    config_keyword = 'user-texts-match'
+    expect_type = str
+
+    def __init__(self, config_value: str):
+        super().__init__()
+        self.regex = re.compile(config_value)
+
+    @classmethod
+    def build(cls, config_value: Any):
+        """Override the Field class's build method."""
+        return cls(super().build(config_value))
+
+    def judge(self, context: Context) -> bool:
+        return any(self.regex.search(text) for text in
+                   [context.user.name, context.user.description, context.user.pinned_tweet_text])

@@ -7,36 +7,36 @@ For character escaping content, read [this part](https://pyyaml.org/wiki/PyYAMLD
 ## Index
 
 * [Script Behavior Settings](#script-behavior-settings)
-  * [manually-confirm](#manually-confirm)
+    * [manually-confirm](#manually-confirm)
 * [Action](#action)
 * [Rules](#rule-description)
-  * [User Selecting Rule](#user-selecting-rule)
-    * [who](#who)
-    * [id-are](#id-are)
-    * [username-are](#username-are)
-    * [are-my-follower](#are-my-follower)
-    * [hit-search-results-of](#hit-search-results-of)
-    * [agree-with-tweet](#agree-with-tweet)
-  * [Filter Rule](#filter-rule)
-    * [search](#search)
-    * [user-*](#user-something)
-      * [user-created](#user-created)
-      * [user-texts-match](#user-texts-match)
-      * [user-follower](#user-follower)
-      * [user-following](#user-following)
-      * [user-foer-foing-ratio](#user-foer-foing-ratio)
-      * [user-tweet-count](#user-tweet-count)
-      * [user-recent-speaking-ratio](#user-recent-speaking-ratio)
-    * [last-active-time](#last-active-time)
-  * [Let-me-check Rule](#let-me-check-rule)
-    * [user-info](#user-info)
-    * [recent-tweets](#recent-tweets)
-    * [recent-replies](#recent-replies)
-    * [recent-likes](#recent-likes)
+    * [User Selecting Rule](#user-selecting-rule)
+        * [who](#who)
+        * [id-are](#id-are)
+        * [username-are](#username-are)
+        * [are-my-follower](#are-my-follower)
+        * [hit-search-results-of](#hit-search-results-of)
+        * [agree-with-tweet](#agree-with-tweet)
+    * [Filter Rule](#filter-rule)
+        * [search](#search)
+        * [user-*](#user-something)
+            * [user-created](#user-created)
+            * [user-texts-match](#user-texts-match)
+            * [user-follower](#user-follower)
+            * [user-following](#user-following)
+            * [user-foer-foing-ratio](#user-foer-foing-ratio)
+            * [user-tweet-count](#user-tweet-count)
+            * [user-recent-speaking-ratio](#user-recent-speaking-ratio)
+        * [last-active-time](#last-active-time)
+    * [Let-me-check Rule](#let-me-check-rule)
+        * [user-info](#user-info)
+        * [recent-tweets](#recent-tweets)
+        * [recent-replies](#recent-replies)
+        * [recent-likes](#recent-likes)
 * [Rule Set](#rule-set)
-  * [all-of](#all-of)
-  * [any-of](#any-of)
-  * [wight-of](#wight-of)
+    * [all-of](#all-of)
+    * [any-of](#any-of)
+    * [wight-of](#wight-of)
 * [Reusable Mechanism](#reusable-mechanism)
 
 ## Script Behavior Settings
@@ -70,7 +70,7 @@ Currently, there are only one action: block.
 One action can have a list of [User Selecting Rule](#user-selecting-rule)s,
 represent multiple groups of target users.
 
-[Block API](https://developer.twitter.com/en/docs/twitter-api/users/blocks/api-reference/post-users-user_id-blocking) 
+[Block API](https://developer.twitter.com/en/docs/twitter-api/users/blocks/api-reference/post-users-user_id-blocking)
 rate of limit is **50 requests per 15 minutes**.
 
 ```yaml
@@ -88,20 +88,20 @@ block:
 The rules work together like:
 
 1. An [Action](#action) can have multiple [User Selecting Rule](#user-selecting-rule)s,
-we've mentioned above.
+   we've mentioned above.
 
 2. A [User Selecting Rule](#user-selecting-rule) specifies a group of users,
-it's the start of a processing stream.
+   it's the start of a processing stream.
 
 3. An optional [Rule Set](#rule-set) contains multiple rigid [Filter Rule](#filter-rule)s
-and nested [Rule Set](#rule-set), driven by relationships between various data
-(e.g. `follower-less-than: {a number}`).
-One [User Selecting Rule](#user-selecting-rule) can have 0~1 [Rule Set](#rule-set) as further filter chain.
-[User Selecting Rule](#user-selecting-rule)'s result user group is passed through these filters,
-and users who satisfy the conditions will be blocked/muted.
+   and nested [Rule Set](#rule-set), driven by relationships between various data
+   (e.g. `follower-less-than: {a number}`).
+   One [User Selecting Rule](#user-selecting-rule) can have 0~1 [Rule Set](#rule-set) as further filter chain.
+   [User Selecting Rule](#user-selecting-rule)'s result user group is passed through these filters,
+   and users who satisfy the conditions will be blocked/muted.
 
 4. An optional [Let-me-check Rule](#let-me-check-rule) allows you to check for
-users who didn't trigger the filter rule by your self and manually decide their fate.
+   users who didn't trigger the filter rule by your self and manually decide their fate.
 
 Here this is a sample complete example:
 
@@ -112,7 +112,7 @@ block:
         id-are: [ "12345678", "87654321" ]
       all-of:
         - follower-less-than: 10
-      let-me-check: ["user-info"]
+      let-me-check: [ "user-info" ]
 ```
 
 ## User Selecting Rule
@@ -130,7 +130,7 @@ block:
         id-are: [ "12345678", "87654321" ]
       all-of: # optional
         - follower-less-than: 10
-      let-me-check: ["user-info"] # optional
+      let-me-check: [ "user-info" ] # optional
 ```
 
 ### who
@@ -173,7 +173,8 @@ users:
 
 ### username-are
 
-Specify a list of [username](https://help.twitter.com/en/managing-your-account/change-twitter-handle) (also called "handle").
+Specify a list of [username](https://help.twitter.com/en/managing-your-account/change-twitter-handle) (also called "
+handle").
 
 It's easy to get it, just remove the first "@" symbol.
 But same as above, manually typing down them is awkward, not recommended.
@@ -243,12 +244,12 @@ accounting to official documentation.
 If you choose the search rule:
 
 * Please try it manually on client before running script,
-**make sure only that one tweet hit** your query criteria.
-The script will blindly pick the first one from query response.
+  **make sure only that one tweet hit** your query criteria.
+  The script will blindly pick the first one from query response.
 
 * And please make sure the script can search that tweet (7-days-time-limit etc.).
-If the script can't find it via searching, you can try to find that tweet's id,
-and use the `id` field instead.
+  If the script can't find it via searching, you can try to find that tweet's id,
+  and use the `id` field instead.
 
 ```yaml
 users:
@@ -288,7 +289,9 @@ users:
 
 #### basic
 
-This rule is basically maps [the Twitter Tweet Search API](https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-recent).
+This rule is basically
+maps [the Twitter Tweet Search API](https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-recent)
+.
 According to official documentation, the query length is limited up to 512 characters,
 and can only search the last 7 days of tweets with Essential Twitter API permission.
 
@@ -302,7 +305,8 @@ so calculate the number of query you need to send by your own.
 
 Check [this guide](https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query)
 for how to write a search `query` string.
-For character escaping concern when writing query, read [this documentation](https://pyyaml.org/wiki/PyYAMLDocumentation#scalars).
+For character escaping concern when writing query,
+read [this documentation](https://pyyaml.org/wiki/PyYAMLDocumentation#scalars).
 (It's better to test it before running the script.)
 
 If search query result is not empty, triggered.
@@ -310,7 +314,8 @@ If search query result is not empty, triggered.
 #### more
 
 You can save your api query volume by integrating search query rules to minimum number.
-The rate of limit of [tweet searching API](https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-recent)
+The rate of limit
+of [tweet searching API](https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-recent)
 is **180 requests per 15 minutes** with Essential Twitter API permission.
 
 When used as a further filter rule (not under [who](#who) field),
@@ -325,21 +330,21 @@ you just need to specify the `query` string, the `count` is set to 100 by defaul
 I'd like to tell you more about how to write a proper `query` string:
 
 * Be careful to construct the query string, example 1 below may wrongly hit something like
-`"I like coffee, and I don't hate cats, I love them"` which is not what you want.
+  `"I like coffee, and I don't hate cats, I love them"` which is not what you want.
 
 * My suggestion? Use long accurate (quoted by double quotation mark) query keyword, like example 2.
 
 * Or use highly emotive and offensive keywords,
-which means you hate the user who just use these words to express themselves. like example 3.
+  which means you hate the user who just use these words to express themselves. like example 3.
 
 ```yaml
 - search:
     name: hate coffee or cats
     query: '"hate" "coffee" OR "cats"'
     count: 100
-          
+
 - search-query: '"收留无家可归的乌克兰小姐姐"'
-  
+
 - search-query: '"son of a b*tch"'
 ```
 
@@ -395,16 +400,23 @@ There are three part of text directly bind
 2. user's description (also called profile)
 3. pinned tweet's text
 
-Let's perform a [regular expression](https://docs.python.org/3/howto/regex.html)
-match on these texts.
-If any of them matches the given expression, the rule triggered.
-Simple, yet powerful.
+This rule independently performs [python regular expression](https://docs.python.org/3/howto/regex.html) match on
+each of these texts.
+If any part of them matches the given expression, the rule triggered. Simple, yet powerful.
+The script will not automatically anchor the expression with `^$`.
 
 You can test your regular expression on [this website](https://regex101.com/).
-Also, be careful of character escaping concern, for both yaml part and python part.
+Also, be careful of character escaping concern,
+for both yaml context (quote the expression with single/double quote characters)
+and python regex context (with [backslash character](https://docs.python.org/3/howto/regex.html#the-backslash-plague)).
 
 ```yaml
-user-texts-match: '[\u1F100-\u1F1E5]'
+# note that if you quote the expression in yaml,
+# you should use double backslash for python regex escaping
+user-texts-match: '[\\u1F100-\\u1F1E5]'
+
+# it's same as above without quote and double backslash
+# user-texts-match: [\u1F100-\u1F1E5]
 ```
 
 #### user-follower
@@ -485,7 +497,7 @@ Just notice that this count includes both post and retweet.
 - user-tweet-count:
     more-than: 100
     less-than: 1000
-    
+
 - user-tweet-count-less-than: 10
 ```
 
@@ -540,12 +552,12 @@ It can't be used with `before` or `after` fields.
 You can set the `ignore` field to judge the 2nd (`ignore=1`), 3rd (`ignore=2`)... last active time.
 It's useful when you already know the last activity of user,
 for example you specified the target user group by [agree-with-tweet](#agree-with-tweet) rule,
-so "agree with that fresh tweet" will be at least one of the last activity of the user.  
+so "agree with that fresh tweet" will be at least one of the last activity of the user.
 
 ```yaml
 last-active-time:
-    ignore: 1
-    within-days: 7
+  ignore: 1
+  within-days: 7
 ```
 
 ## Let-me-check Rule
@@ -570,12 +582,12 @@ who do not trigger the filter rules, and make the final decision on them.
 
 The different fields determine what information the script will print to the terminal for your judgment.
 This rule can override the [manually-confirm](#manually-confirm) settings,
-and force you to integrate with the script.  
+and force you to integrate with the script.
 
 ```yaml
 users:
   who:
-    id-are: ["123456789","987654321"]
+    id-are: [ "123456789","987654321" ]
   let-me-check:
     user-info: true
     recent-tweets: 3
@@ -678,12 +690,12 @@ You can optionally give a rule set a custom name with `name` field.
 ```yaml
 users:
   who:
-    id-are: ["123456789","987654321"]
+    id-are: [ "123456789","987654321" ]
   all-of:
     - name: "new account"
     # a filter option
     - user-created:
-        after: "2022-01-01" 
+        after: "2022-01-01"
     # a nested option set
     - any-of:
         - name: "not speak much"
@@ -722,18 +734,18 @@ the `wight-of` rule triggered.
 wight-of:
   - goal: 2
   - condition:
-    - wight: 2
-    - user-foer-foing-ratio-less-than: 0.1
+      - wight: 2
+      - user-foer-foing-ratio-less-than: 0.1
   - condition:
-    - wight: 1
-    - user-tweet-count-less-than: 10
+      - wight: 1
+      - user-tweet-count-less-than: 10
   - condition:
-    - wight: 1
-    - any-of:
-        - user-recent-speaking-ratio-less-than: 0.05
-        - last-active-time:
-            ignore: 1
-            before: "2022-01-01"
+      - wight: 1
+      - any-of:
+          - user-recent-speaking-ratio-less-than: 0.05
+          - last-active-time:
+              ignore: 1
+              before: "2022-01-01"
 ```
 
 ## Reusable Mechanism
@@ -766,12 +778,12 @@ block:
             # more-than: 10
             # less-than: 100
             refer: numeric-fields
-        
+
 fragments:
   - search-rules:
       - search-query: 'tweet-query-string-1'
       - search-query: 'tweet-query-string-2'
-        
+
   - numeric-fields:
       more-than: 10
       less-than: 1000
