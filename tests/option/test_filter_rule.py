@@ -7,14 +7,14 @@ from puntgun.option.filter_rule import SearchFilterRule, SearchQueryFilterRule
 
 class TestSearchFilterRule(TestCase):
     def test_build_one(self):
-        rule = SearchFilterRule.build({'name': 'option!', 'query': 'q-text'})
+        rule = SearchFilterRule.build({'name': 'option!', 'query': 'q_text'})
         assert_that(rule.name, equal_to('option!'))
         assert_that(rule.count, equal_to(100))
-        assert_that(rule.query, equal_to('q-text'))
+        assert_that(rule.query, equal_to('q_text'))
 
 
 class TestSearchQueryFilterRule(TestCase):
     def test_build_one(self):
-        rule = SearchQueryFilterRule.build('q-text')
+        rule = SearchQueryFilterRule.build('q_text')
         assert_that(rule.count, equal_to(100))
-        assert_that(rule.query, equal_to('q-text'))
+        assert_that(rule.query, equal_to('q_text'))

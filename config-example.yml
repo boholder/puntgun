@@ -10,7 +10,7 @@
 # script behavior settings
 # ========================
 
-manually-confirm: false
+manually_confirm: false
 
 # ========================
 # rules
@@ -19,74 +19,74 @@ manually-confirm: false
 block:
   - users:
       who:
-        id-are: [ "12345678", "87654321" ]
+        id_are: [ "12345678", "87654321" ]
 
   - users:
       who:
-        username-are: [ "Twitter", "TwitterAPI" ]
+        username_are: [ "Twitter", "TwitterAPI" ]
 
   - users:
       who:
-        are-my-follower:
+        are_my_follower:
           recent: 100
 
   - users:
       who:
-        hit-search-results-of:
+        hit_search_results_of:
           - search:
               name: hate coffee or cats
               query: '"hate" "coffee" OR "cats"'
               count: 100
-          - search-query: '"收留无家可归的乌克兰小姐姐"'
-          - search-query: '"son of a b*tch"'
+          - search_query: '"收留无家可归的乌克兰小姐姐"'
+          - search_query: '"son of a b*tch"'
 
   - users:
       who:
-        agree-with-tweet:
+        agree_with_tweet:
           id: "12345678"
-          search-query: 'text-text-text'
+          search_query: 'text_text_text'
 
   - users:
       who:
-        id-are: [ "12345678", "87654321" ]
-      any-of:
-        - search-query: 'text-text-text'
-        - all-of:
-            - user-created:
+        id_are: [ "12345678", "87654321" ]
+      any_of:
+        - search_query: 'text_text_text'
+        - all_of:
+            - user_created:
                 after: "2019-01-01 00:00:00"
                 before: "2020-01-01"
-            - user-texts-match: '[\u1F100-\u1F1E5]'
-            - user-follower:
-                more-than: 1
-                less-than: 1000
-            - user-following:
-                more-than: 1
-                less-than: 1000
+            - user_texts_match: '[\u1F100-\u1F1E5]'
+            - user_follower:
+                more_than: 1
+                less_than: 1000
+            - user_following:
+                more_than: 1
+                less_than: 1000
             # follower / following
-            - user-foer-foing-ratio:
-                more-than: 0.1 # 1 follower / 10 following
-                less-than: 3 # 3 follower / 1 following
-            - user-tweet-count:
-                more-than: 1
-                less-than: 100
-            - user-recent-speaking-ratio:
+            - user_foer_foing_ratio:
+                more_than: 0.1 # 1 follower / 10 following
+                less_than: 3 # 3 follower / 1 following
+            - user_tweet_count:
+                more_than: 1
+                less_than: 100
+            - user_recent_speaking_ratio:
                 recent: 100
-                more-than: 0.05 # 5 post / 95 retweet in 100 tweets
-                less-than: 0.9 # 90 post / 10 retweet in 100 tweets
+                more_than: 0.05 # 5 post / 95 retweet in 100 tweets
+                less_than: 0.9 # 90 post / 10 retweet in 100 tweets
 
-        - let-me-check:
-            user-info: ture
-            recent-tweets: 3
-            recent-replies:
+        - let_me_check:
+            user_info: ture
+            recent_tweets: 3
+            recent_replies:
               count: 3
-              with-origin-tweet: true
-            recent-likes: 3
+              with_origin_tweet: true
+            recent_likes: 3
 
 fragments:
-  - search-rules:
-      - search-query: 'tweet-query-string-1'
-      - search-query: 'tweet-query-string-2'
+  - search_rules:
+      - search_query: 'tweet_query_string-1'
+      - search_query: 'tweet_query_string-2'
 
-  - numeric-fields:
-      more-than: 10
-      less-than: 1000
+  - numeric_fields:
+      more_than: 10
+      less_than: 1000

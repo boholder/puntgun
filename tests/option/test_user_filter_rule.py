@@ -7,32 +7,38 @@ from hamcrest import assert_that, calling, raises, is_
 
 from puntgun.model.context import Context
 from puntgun.model.user import User
-from puntgun.option.filter_rule import UserCreatedFilterRule, UserTextsMatchFilterRule
+from puntgun.option.filter_rule import UserCreatedFilterRule, UserTextsMatchFilterRule, UserCreatedAfterFilterRule, \
+    UserCreatedWithinDaysFilterRule
 
 
 class TestUserCreated(TestCase):
     def test_check_time_order(self):
-        assert_that(calling(UserCreatedFilterRule)
+        assert_that(calling(UserCreatedFilterRule.build)
                     .with_args({'before': '2018-01-01', 'after': '2020-01-01'}),
                     raises(AssertionError, pattern='should be after'))
 
     def test_convert_when_building(self):
-        rule = UserCreatedFilterRule({'before': '2020-01-01', 'after': '2018-01-01 12:00:00'})
+        rule = UserCreatedFilterRule.build({'before': '2020-01-01', 'after': '2018-01-01 12:00:00'})
         assert_that(rule.before, is_(dt.fromisoformat('2020-01-01 00:00:00')))
         assert_that(rule.after, is_(dt.fromisoformat('2018-01-01 12:00:00')))
 
     def test_before(self):
-        rule = UserCreatedFilterRule({'before': '2018-01-01'})
+        rule = UserCreatedFilterRule.build({'before': '2018-01-01'})
         assert_that(rule.judge(self.user_create_at('2020-01-01')), is_(False))
         assert_that(rule.judge(self.user_create_at('2015-01-01')), is_(True))
 
     def test_after(self):
-        rule = UserCreatedFilterRule({'after': '2018-01-01'})
+        self.assert_after(UserCreatedFilterRule.build({'after': '2018-01-01'}))
+
+    def test_shorten_after(self):
+        self.assert_after(UserCreatedAfterFilterRule.build('2018-01-01'))
+
+    def assert_after(self, rule):
         assert_that(rule.judge(self.user_create_at('2020-01-01')), is_(True))
         assert_that(rule.judge(self.user_create_at('2015-01-01')), is_(False))
 
     def test_before_after(self):
-        rule = UserCreatedFilterRule({'after': '2018-01-01 12:30:40', 'before': '2020-01-01 12:30:50'})
+        rule = UserCreatedFilterRule.build({'after': '2018-01-01 12:30:40', 'before': '2020-01-01 12:30:50'})
         # edge cases are True
         assert_that(rule.judge(self.user_create_at('2020-01-01 12:30:40')), is_(True))
         assert_that(rule.judge(self.user_create_at('2018-01-01 12:30:50')), is_(True))
@@ -40,7 +46,13 @@ class TestUserCreated(TestCase):
         assert_that(rule.judge(self.user_create_at('2019-01-01 00:00:00')), is_(True))
 
     def test_within_days(self):
-        rule = UserCreatedFilterRule({'within_days': 10})
+        self.assert_within_days(UserCreatedFilterRule.build({'within_days': 10}))
+
+    def test_shorten_within_days(self):
+        self.assert_within_days(UserCreatedWithinDaysFilterRule.build(10))
+
+    @staticmethod
+    def assert_within_days(rule):
         now = dt.utcnow()
         assert_that(rule.judge(Context(User(created_at=now - datetime.timedelta(days=5)))), is_(True))
         assert_that(rule.judge(Context(User(created_at=now - datetime.timedelta(days=20)))), is_(False))

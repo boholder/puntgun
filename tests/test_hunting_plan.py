@@ -22,7 +22,7 @@ map:
                 - inner: text
             - item2: text
             - item3:
-                inner-field: text
+                inner_field: text
         """
         parsed = HuntingPlan.parse_yaml_config(yaml_string)
         self.assertIsInstance(parsed.get("list"), list)

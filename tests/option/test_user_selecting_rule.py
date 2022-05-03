@@ -11,7 +11,7 @@ from puntgun.option.user_selecting_rule import WhoField, UserSelectingRule
 class TestWhoField(WhoField):
     is_init_by_class_attr = True
 
-    config_keyword = 'test-who-key'
+    config_keyword = 'test_who_key'
     expect_type = str
 
     def __init__(self, raw_config_value):
@@ -24,7 +24,7 @@ class TestWhoField(WhoField):
 
 class TestAbstractWhoField(TestCase):
     def test_get_instance_via_config(self):
-        field = WhoField.build({'test-who-key': 'text'})
+        field = WhoField.build({'test_who_key': 'text'})
         assert_that(isinstance(field, TestWhoField))
         assert_that(field.v, instance_of(str))
         assert_that(field.v, 'text')
@@ -62,7 +62,7 @@ class TestAbstractWhoField(TestCase):
 
 class TestUserSelectingRule(TestCase):
     def test_config_parsing(self):
-        config = {"who": {"test-who-key": "text"}}
+        config = {"who": {"test_who_key": "text"}}
         user_selecting_rule = UserSelectingRule(config)
         assert_that(user_selecting_rule.who, instance_of(TestWhoField))
         assert_that(user_selecting_rule.who.v, "text")

@@ -19,8 +19,8 @@ class TestHunterResultWrapper(TestCase):
     def test_error_consume(self):
         build_test_data() \
             .pipe_on_error(op.map(lambda x: x.title),
-                           op.map(lambda x: f'{x}-a')) \
-            .subscribe_on_error(lambda x: assert_that(x, is_('title-a'))) \
+                           op.map(lambda x: f'{x}_a')) \
+            .subscribe_on_error(lambda x: assert_that(x, is_('title_a'))) \
             .wire()
 
 

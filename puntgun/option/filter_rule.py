@@ -69,7 +69,7 @@ class SearchQueryFilterRule(Field, DelayedFilterRule, FilterRule):
         """"""
         raise NotImplementedError
 
-    config_keyword = 'search-query'
+    config_keyword = 'search_query'
     expect_type = str
 
     @classmethod
@@ -81,11 +81,7 @@ class SearchQueryFilterRule(Field, DelayedFilterRule, FilterRule):
         return SearchFilterRule.build({'query': config_value, 'count': 100})
 
 
-class UserCreatedFilterRule(MapOption, ImmediateFilterRule, FilterRule):
-    """
-    The rule for judging user's creation time.
-    """
-    config_keyword = 'user-created'
+class TimeComparingFilterRule(MapOption, ImmediateFilterRule):
     valid_options = [Field.of('before', str, default_value=dt.utcnow().strftime('%Y-%m-%d')),
                      Field.of('after', str, default_value='2000-01-01'),
                      Field.of('within_days', int, conflict_with=['before', 'after'])]
@@ -111,11 +107,46 @@ class UserCreatedFilterRule(MapOption, ImmediateFilterRule, FilterRule):
             return self.after <= created_time <= self.before
 
 
+class UserCreatedFilterRule(TimeComparingFilterRule, ImmediateFilterRule, FilterRule):
+    """
+    The rule for judging user's creation time.
+    """
+    config_keyword = 'user_created'
+
+
+class UserCreatedAfterFilterRule(Field, ImmediateFilterRule, FilterRule):
+    """Shorten version of UserCreatedFilterRule"""
+
+    def judge(self, context: Context) -> bool:
+        raise NotImplementedError
+
+    config_keyword = 'user_created_after'
+    expect_type = str
+
+    @classmethod
+    def build(cls, config_value: Any):
+        return UserCreatedFilterRule.build({'after': config_value})
+
+
+class UserCreatedWithinDaysFilterRule(Field, ImmediateFilterRule, FilterRule):
+    """Shorten version of UserCreatedFilterRule"""
+
+    def judge(self, context: Context) -> bool:
+        raise NotImplementedError
+
+    config_keyword = 'user_created_within_days'
+    expect_type = int
+
+    @classmethod
+    def build(cls, config_value: Any):
+        return UserCreatedFilterRule.build({'within_days': config_value})
+
+
 class UserTextsMatchFilterRule(Field, ImmediateFilterRule, FilterRule):
     """
     The rule for judging user's text match.
     """
-    config_keyword = 'user-texts-match'
+    config_keyword = 'user_texts_match'
     expect_type = str
 
     def __init__(self, config_value: str):
@@ -130,3 +161,7 @@ class UserTextsMatchFilterRule(Field, ImmediateFilterRule, FilterRule):
     def judge(self, context: Context) -> bool:
         return any(self.regex.search(text) for text in
                    [context.user.name, context.user.description, context.user.pinned_tweet_text])
+
+
+class NumberComparingFilterRule(Field, ImmediateFilterRule):
+    pass

@@ -35,10 +35,10 @@ class WhoField(Field):
 
 class IdAreWhoField(WhoField):
     """
-    "id-are" user selecting option.
+    "id_are" user selecting option.
     """
     is_init_by_class_attr = True
-    config_keyword = "id-are"
+    config_keyword = "id_are"
     expect_type = List[str]
 
     def __init__(self, config_value: Any):
@@ -55,7 +55,7 @@ class UserSelectingRule(MapOption):
     config_keyword = 'users'
     # WhoField is special, we indicate the base class is valid option,
     # because we need to extract the real value from one-more-layer structure.
-    # {'who': {'id-are': [1, 2, 3]}}
+    # {'who': {'id_are': [1, 2, 3]}}
     valid_options = [WhoField, RuleSet, LetMeCheckRule]
 
     # attributes that will be set after initialization,

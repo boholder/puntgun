@@ -16,7 +16,7 @@ class RuleSet(ListOption):
     """
     Contains a list of FilterRule objects.
     """
-    config_keyword = "generic-option-set"
+    config_keyword = "generic_option_set"
 
     def judge(self, users: rx.Observable[User]) \
             -> Tuple[rx.Observable[Decision], rx.Observable[TwitterApiError]]:
@@ -28,7 +28,7 @@ RuleSet.valid_options = [Field.of('name', str, singleton=True), RuleSet, FilterR
 
 
 class AllOfRuleSet(RuleSet):
-    config_keyword = "all-of"
+    config_keyword = "all_of"
     logger = util.get_logger(__qualname__)
 
     def judge(self, users: rx.Observable[Context]) \
@@ -37,7 +37,7 @@ class AllOfRuleSet(RuleSet):
 
 
 class AnyOfRuleSet(RuleSet):
-    config_keyword = "any-of"
+    config_keyword = "any_of"
     logger = util.get_logger(__qualname__)
 
     def judge(self, users: rx.Observable[User]) \
@@ -57,7 +57,7 @@ class WightCondition(MapOption):
             f"Option [{self}]: must have exact one filter option, but found {len(other_keywords)}."
 
         # the config_value should be something like:
-        # {"wight":1, "a-filter-option-keyword": option-value}
+        # {"wight":1, "a_filter_option_keyword": option_value}
         # we need to assign that option's instance to a known attribute,
         # or we don't know how to access it once exit __init__ method.
         rule_keyword = other_keywords[0]
@@ -70,7 +70,7 @@ class WightCondition(MapOption):
 
 
 class WightOfRuleSet(RuleSet):
-    config_keyword = "wight-of"
+    config_keyword = "wight_of"
     logger = util.get_logger(__qualname__)
     valid_options = [Field.of('name', str, singleton=True),
                      Field.of("goal", int, required=True, singleton=True),

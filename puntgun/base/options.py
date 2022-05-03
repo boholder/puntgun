@@ -14,7 +14,7 @@ class Option(object):
     """
 
     # --- required setting attributes for overriding ---
-    config_keyword: str = 'generic-option'
+    config_keyword: str = 'generic_option'
 
     # --- optional setting attributes for overriding ---
 
@@ -357,7 +357,7 @@ class ListOption(NestableOption):
 
         # collect items' key in raw_config into a flatted list
         # for example:
-        # raw_config = [{"item1": a-value}, {"item2": {"inner-field": a-value}]
+        # raw_config = [{"item1": a_value}, {"item2": {"inner_field": a_value}]
         # exist_item_keywords = {"item1", "item2"}
         exist_keys_list = [item.keys() for item in self.raw_config]
         exist_item_keywords = set([k for keys in exist_keys_list for k in keys])

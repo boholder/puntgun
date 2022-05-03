@@ -90,9 +90,9 @@ class TestAbstractMapOption(TestCase):
             valid_options = [TestField]
 
         # must also consider the valid option's subclass's config_keyword is valid too
-        option = TestOption({'test_sub_class_field': 's-field', 'test_field': 'field'})
+        option = TestOption({'test_sub_class_field': 's_field', 'test_field': 'field'})
         assert_that(option.test_field, equal_to('field'))
-        assert_that(option.test_sub_class_field, equal_to('s-field'))
+        assert_that(option.test_sub_class_field, equal_to('s_field'))
 
     def test_check_option_required_fields(self):
         class TestOption(MapOption):
@@ -126,14 +126,14 @@ class TestAbstractMapOption(TestCase):
     def test_auto_fill_default_field(self):
         class TestOption(MapOption):
             valid_options = [Field.of("p", str),
-                             Field.of("d", str, default_value="default-value")]
+                             Field.of("d", str, default_value="default_value")]
 
-        assert_that(TestOption({"p": "value"}).d, equal_to("default-value"))
+        assert_that(TestOption({"p": "value"}).d, equal_to("default_value"))
 
     def test_do_not_auto_fill_default_field_if_conflict(self):
         class TestOption(MapOption):
             valid_options = [Field.of("p", str, conflict_with=["d"]),
-                             Field.of("d", str, default_value="default-value")]
+                             Field.of("d", str, default_value="default_value")]
 
         assert_that(hasattr(TestOption({"p": "value"}), "d"), equal_to(False))
 
@@ -163,9 +163,9 @@ class TestAbstractListOption(TestCase):
             valid_options = [TestField]
 
         # must also consider the valid option's subclass's config_keyword is valid too
-        option = TestOption({'test_field': 'field', 'test_sub_class_field': 's-field'})
+        option = TestOption({'test_field': 'field', 'test_sub_class_field': 's_field'})
         assert_that(option.test_field, equal_to('field'))
-        assert_that(option.test_sub_class_field, equal_to('s-field'))
+        assert_that(option.test_sub_class_field, equal_to('s_field'))
 
     def test_check_required_field_constraint(self):
         class TestOption(ListOption):
