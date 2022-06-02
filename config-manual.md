@@ -436,8 +436,8 @@ user_texts_match: '[\\u1F100-\\u1F1E5]'
 | field | value |
 |:--:|:-----:|
 | possible | `less_than` `more_than` |
-| `less_than` | number |
-| `more_than` | number |
+| `less_than` | integer |
+| `more_than` | integer |
 
 Two fields can be used together or separately. Edge case (equal) result in False.
 
@@ -458,8 +458,8 @@ Shorten version:
 | field | value |
 |:--:|:-----:|
 | possible | `less_than` `more_than` |
-| `less_than` | number |
-| `more_than` | number |
+| `less_than` | integer |
+| `more_than` | integer |
 
 Two fields can be used together or separately. Edge case (equal) result in False.
 
@@ -480,8 +480,8 @@ Shorten version:
 | field | value |
 |:--:|:-----:|
 | possible | `less_than` `more_than` |
-| `less_than` | number |
-| `more_than` | number |
+| `less_than` | float |
+| `more_than` | float |
 
 Two fields can be used together or separately. Edge case (equal) result in False.
 

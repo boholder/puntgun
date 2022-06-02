@@ -7,10 +7,10 @@ import tweepy
 from reactivex import operators as op
 from tweepy import Client, OAuth1UserHandler
 
-from puntgun import util
-from puntgun.client.hunter import Hunter, MixedResultProcessingWrapper
-from puntgun.model.errors import TwitterApiErrors, TwitterClientError
-from puntgun.model.user import User
+from puntgun.old import util
+from puntgun.old.client.hunter import Hunter, MixedResultProcessingWrapper
+from puntgun.old.model.errors import TwitterApiErrors, TwitterClientError
+from puntgun.old.model.user import User
 
 NO_VALUE_PROVIDED = 'No value provided.'
 

@@ -1,7 +1,7 @@
 import unittest
 from unittest import TestCase
 
-from puntgun.client.tweepy_hunter import TweepyHunter
+from puntgun.old.client import TweepyHunter
 
 
 class TestTweepyUserApi(TestCase):

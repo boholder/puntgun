@@ -1,4 +1,4 @@
-from puntgun.model.user import User
+from puntgun.old.model.user import User
 
 
 class Context(object):

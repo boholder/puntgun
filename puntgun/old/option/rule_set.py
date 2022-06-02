@@ -1,15 +1,14 @@
 from typing import Any, List, Dict, Tuple
 
 import reactivex as rx
-from reactivex import operators as op
 
-from puntgun import util
-from puntgun.base.options import ListOption, Field, MapOption
-from puntgun.model.context import Context
-from puntgun.model.decision import Decision
-from puntgun.model.errors import TwitterApiError
-from puntgun.model.user import User
-from puntgun.option.filter_rule import FilterRule
+from puntgun.old import util
+from puntgun.old.base.options import ListOption, Field, MapOption
+from puntgun.old.model.context import Context
+from puntgun.old.model.decision import Decision
+from puntgun.old.model.errors import TwitterApiError
+from puntgun.old.model.user import User
+from puntgun.old.option.filter_rule import FilterRule
 
 
 class RuleSet(ListOption):
@@ -33,6 +32,7 @@ class AllOfRuleSet(RuleSet):
 
     def judge(self, users: rx.Observable[Context]) \
             -> Tuple[rx.Observable[Decision], rx.Observable[TwitterApiError]]:
+        """"""
         pass
 
 
@@ -95,4 +95,5 @@ class WightOfRuleSet(RuleSet):
 
     def judge(self, users: rx.Observable[User]) \
             -> Tuple[rx.Observable[Decision], rx.Observable[TwitterApiError]]:
+        """"""
         pass

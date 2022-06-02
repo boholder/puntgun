@@ -5,11 +5,11 @@ from unittest import TestCase
 
 from hamcrest import assert_that, calling, raises, is_
 
-from puntgun.model.context import Context
-from puntgun.model.user import User
-from puntgun.option.filter_rule import UserCreatedFilterRule, UserTextsMatchFilterRule, UserCreatedAfterFilterRule, \
-    UserCreatedWithinDaysFilterRule, NumberComparingFilterRule, UserFollowerFilterRule, UserFollowerLessThanFilterRule, \
-    UserFollowingMoreThanFilterRule, UserFollowingFilterRule
+from puntgun.old.model import Context
+from puntgun.old.model import User
+from puntgun.old.option.filter_rule import UserCreatedFilterRule, UserTextsMatchFilterRule, UserCreatedAfterFilterRule, \
+    UserCreatedWithinDaysFilterRule, IntComparingFilterRule, UserFollowerFilterRule, UserFollowerLessThanFilterRule, \
+    UserFollowingMoreThanFilterRule, UserFollowingFilterRule, FloatComparingFilterRule
 
 
 class TestUserCreatedFilterRule(TestCase):
@@ -107,36 +107,38 @@ class TestUserTextsMatchFilterRule(TestCase):
         return Context(User(name=words[0], description=words[1], pinned_tweet_text=words[2]))
 
 
-class NumberComparingFilterRuleTestCase(TestCase):
+class IntComparingFilterRuleTestCase(TestCase):
     def setUp(self) -> None:
-        self.build_func = lambda config: NumberComparingFilterRule.build(config)
+        self.build_func = lambda config: IntComparingFilterRule.build(config)
         self.judge_func = lambda rule, num: rule.judge_number(num)
+        # convert number type for passing rule option value type check
+        self.num = lambda x: x
 
     def test_check_number_order(self):
-        assert_that(calling(self.build_func).with_args({'less_than': 10, 'more_than': 20}),
+        assert_that(calling(self.build_func).with_args({'less_than': self.num(10), 'more_than': self.num(20)}),
                     raises(AssertionError, pattern='should be bigger than'))
 
     def test_less_than(self):
-        rule = self.build_func({'less_than': 10})
-        assert_that(self.judge_func(rule, 5), is_(True))
-        assert_that(self.judge_func(rule, 20), is_(False))
+        rule = self.build_func({'less_than': self.num(10)})
+        assert_that(self.judge_func(rule, self.num(5)), is_(True))
+        assert_that(self.judge_func(rule, self.num(20)), is_(False))
 
     def test_more_than(self):
-        rule = self.build_func({'more_than': 10})
-        assert_that(self.judge_func(rule, 20), is_(True))
-        assert_that(self.judge_func(rule, 5), is_(False))
+        rule = self.build_func({'more_than': self.num(10)})
+        assert_that(self.judge_func(rule, self.num(20)), is_(True))
+        assert_that(self.judge_func(rule, self.num(5)), is_(False))
 
     def test_less_more(self):
-        rule = self.build_func({'less_than': 20, 'more_than': 10})
-        assert_that(self.judge_func(rule, 15), is_(True))
-        assert_that(self.judge_func(rule, 5), is_(False))
-        assert_that(self.judge_func(rule, 25), is_(False))
+        rule = self.build_func({'less_than': self.num(20), 'more_than': self.num(10)})
+        assert_that(self.judge_func(rule, self.num(15)), is_(True))
+        assert_that(self.judge_func(rule, self.num(5)), is_(False))
+        assert_that(self.judge_func(rule, self.num(25)), is_(False))
         # edge case (equal) result in False.
-        assert_that(self.judge_func(rule, 10), is_(False))
-        assert_that(self.judge_func(rule, 20), is_(False))
+        assert_that(self.judge_func(rule, self.num(10)), is_(False))
+        assert_that(self.judge_func(rule, self.num(20)), is_(False))
 
 
-class TestUserFollowerFilterRule(NumberComparingFilterRuleTestCase):
+class TestUserFollowerFilterRule(IntComparingFilterRuleTestCase):
     def setUp(self) -> None:
         self.build_func = lambda config: UserFollowerFilterRule.build(config)
         self.judge_func = lambda rule, num: rule.judge(Context(User(followers_count=num)))
@@ -147,7 +149,7 @@ class TestUserFollowerFilterRule(NumberComparingFilterRuleTestCase):
         assert_that(self.judge_func(rule, 20), is_(False))
 
 
-class TestUserFollowingFilterRule(NumberComparingFilterRuleTestCase):
+class TestUserFollowingFilterRule(IntComparingFilterRuleTestCase):
     def setUp(self) -> None:
         self.build_func = lambda config: UserFollowingFilterRule.build(config)
         self.judge_func = lambda rule, num: rule.judge(Context(User(following_count=num)))
@@ -156,3 +158,10 @@ class TestUserFollowingFilterRule(NumberComparingFilterRuleTestCase):
         rule = UserFollowingMoreThanFilterRule.build(10)
         assert_that(self.judge_func(rule, 20), is_(True))
         assert_that(self.judge_func(rule, 5), is_(False))
+
+
+class FloatComparingFilterRuleTestCase(IntComparingFilterRuleTestCase):
+    def setUp(self) -> None:
+        self.build_func = lambda config: FloatComparingFilterRule.build(config)
+        self.judge_func = lambda rule, num: rule.judge_number(num)
+        self.num = lambda x: float(x)

@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from hamcrest import assert_that, equal_to
 
-from puntgun.option.filter_rule import SearchFilterRule, SearchQueryFilterRule
+from puntgun.old.option.filter_rule import SearchFilterRule, SearchQueryFilterRule
 
 
 class TestSearchFilterRule(TestCase):

@@ -3,9 +3,9 @@ from typing import List, Tuple, Callable, Any
 import reactivex as rx
 from reactivex import operators as op
 
-from puntgun.model.errors import TwitterApiError
-from puntgun.model.tweet import Tweet
-from puntgun.model.user import User
+from puntgun.old.model.errors import TwitterApiError
+from puntgun.old.model.tweet import Tweet
+from puntgun.old.model.user import User
 
 
 class MixedResultProcessingWrapper(object):

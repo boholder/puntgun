@@ -2,14 +2,14 @@ from typing import List, Dict, Any, Tuple
 
 import reactivex as rx
 
-from puntgun import util
-from puntgun.base.options import Field, MapOption
-from puntgun.client.hunter import Hunter
-from puntgun.model.decision import Decision
-from puntgun.model.errors import TwitterApiError
-from puntgun.model.user import User
-from puntgun.option.let_me_check_rule import LetMeCheckRule
-from puntgun.option.rule_set import RuleSet
+from puntgun.old import util
+from puntgun.old.base.options import Field, MapOption
+from puntgun.old.client.hunter import Hunter
+from puntgun.old.model.decision import Decision
+from puntgun.old.model.errors import TwitterApiError
+from puntgun.old.model.user import User
+from puntgun.old.option.let_me_check_rule import LetMeCheckRule
+from puntgun.old.option.rule_set import RuleSet
 
 
 class WhoField(Field):

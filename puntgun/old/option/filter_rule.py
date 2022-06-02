@@ -7,9 +7,9 @@ from typing import Any, Tuple, Dict
 
 import reactivex as rx
 
-from puntgun.base.options import MapOption, Field, Option
-from puntgun.model.context import Context
-from puntgun.model.errors import TwitterApiError
+from puntgun.old.base.options import MapOption, Field, Option
+from puntgun.old.model.context import Context
+from puntgun.old.model.errors import TwitterApiError
 
 
 class FilterRule(Option, ABC):
@@ -167,7 +167,7 @@ class UserTextsMatchFilterRule(Field, ImmediateFilterRule, FilterRule):
                    [context.user.name, context.user.description, context.user.pinned_tweet_text])
 
 
-class NumberComparingFilterRule(MapOption):
+class IntComparingFilterRule(MapOption):
     """Reusable for number-related filter rules."""
 
     valid_options = [Field.of('less_than', int, default_value=sys.maxsize),
@@ -183,7 +183,7 @@ class NumberComparingFilterRule(MapOption):
         return self.more_than < num < self.less_than
 
 
-class UserFollowerFilterRule(NumberComparingFilterRule, ImmediateFilterRule, FilterRule):
+class UserFollowerFilterRule(IntComparingFilterRule, ImmediateFilterRule, FilterRule):
     config_keyword = 'user_follower'
 
     def judge(self, context: Context) -> bool:
@@ -202,7 +202,7 @@ class UserFollowerLessThanFilterRule(Field, ImmediateFilterRule, FilterRule):
         return UserFollowerFilterRule.build({'less_than': config_value})
 
 
-class UserFollowingFilterRule(NumberComparingFilterRule, ImmediateFilterRule, FilterRule):
+class UserFollowingFilterRule(IntComparingFilterRule, ImmediateFilterRule, FilterRule):
     config_keyword = 'user_following'
 
     def judge(self, context: Context) -> bool:
@@ -219,3 +219,19 @@ class UserFollowingMoreThanFilterRule(Field, ImmediateFilterRule, FilterRule):
     @classmethod
     def build(cls, config_value: Any):
         return UserFollowingFilterRule.build({'more_than': config_value})
+
+
+class FloatComparingFilterRule(MapOption):
+    """Reusable for number-related filter rules."""
+
+    valid_options = [Field.of('less_than', float, default_value=float(sys.maxsize)),
+                     Field.of('more_than', float, default_value=float(-sys.maxsize))]
+
+    def __init__(self, config_value: Dict[str, Any]):
+        super().__init__(config_value)
+
+        assert self.less_than >= self.more_than, \
+            f'Option [{self}]: "more_than" ({self.more_than}) should be bigger than "less_than" ({self.less_than})'
+
+    def judge_number(self, num: float) -> bool:
+        return self.more_than < num < self.less_than

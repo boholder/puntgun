@@ -2,8 +2,8 @@ from unittest import TestCase
 
 from hamcrest import assert_that, calling, raises, equal_to, instance_of
 
-from puntgun.option.filter_rule import SearchFilterRule
-from puntgun.option.rule_set import WightOfRuleSet
+from puntgun.old.option.filter_rule import SearchFilterRule
+from puntgun.old.option.rule_set import WightOfRuleSet
 
 
 class TestWightOfRuleSet(TestCase):
