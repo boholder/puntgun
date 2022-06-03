@@ -1,4 +1,4 @@
-# Punt Gun - a configurable Twitter user blocking script
+# Punt Gun - a configurable automation command line tool for Twitter
 
 [![unit test coverage badge](./coverage/converage.svg)](./coverage)
 
