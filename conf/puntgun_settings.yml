@@ -1,0 +1,9 @@
+# The settings for the program behavior itself.
+# Can be overridden in the user-writen configuration file.
+
+
+name: bob
+list:
+  - a: 123
+  - a: 789
+  - b: 456

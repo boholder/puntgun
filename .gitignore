@@ -156,5 +156,14 @@ cython_debug/
 # draw.io template files
 *.drawio.bkp
 
-# pdm local project-level config file https://pdm.fming.dev/
+# pdm local project-level config_parsing file https://pdm.fming.dev/
 .pdm.toml
+
+# Ignore dynaconf secret files
+conf/.secrets.*
+
+# Ignore encrypted key files
+conf/.puntgun_rsa4096
+
+# Ignore unit test generated files
+tests/conf/test_pri_key_file

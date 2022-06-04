@@ -7,11 +7,14 @@ authors = [{ name = "boholder", email = "bottleholder@anche.no" }]
 dependencies = [
     "tweepy~=4.10.0",
     "reactivex~=4.0.0",
-    "dynaconf~=3.1.8"
+    "dynaconf~=3.1.8",
+    "fire>=0.4.0",
+    "cryptography>=37.0.2",
+    "from-root>=1.0.2",
 ]
 
 # TODO reactivex 4.0.0 requires python version <3.11
-requires-python = "==3.10"
+requires-python = ">=3.10,<3.11"
 license = { text = "MIT" }
 
 [tool.pdm]
@@ -27,7 +30,8 @@ build-backend = "pdm.pep517.api"
 [tool.pdm.dev-dependencies]
 test = [
     "pytest",
-    "pylint",
     "PyHamcrest",
+    # coverage 6.4 will cause PDM to fail
+    # https://github.com/pdm-project/pdm/issues/1111
     "coverage<6.4",
 ]

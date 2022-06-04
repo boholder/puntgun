@@ -3,7 +3,7 @@ import fire
 
 class Command(object):
     @staticmethod
-    def pow(config_file='config.yml', block_following=False):
+    def pow(config_file='config_parsing.yml', block_following=False):
         """Check & block/mute users base on the given configuration file.
 
         :param config_file: the configuration file to use.
@@ -25,7 +25,7 @@ class Command(object):
 
 class PreCheckCommand(object):
     @staticmethod
-    def config(config_file='config.yml'):
+    def config(config_file='config_parsing.yml'):
         """Check the syntactic correctness of the given configuration file,
         run test cases if the file contains."""
         # TODO 配置文件里可配套写测试用例和预期结果
