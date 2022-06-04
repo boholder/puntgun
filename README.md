@@ -17,4 +17,4 @@ What's more, you can only [search for last 7 days tweets](https://developer.twit
 
 ### Details about secrets encryption
 
-Currently, we use the [RSA4096](https://en.wikipedia.org/wiki/RSA_(cryptosystem)) with the [Cryptography](https://github.com/pyca/cryptography/) python cryptographic library for processing secrets to prevent them being saved into configuration file in plain-text format. For implementation details, check [this source file](puntgun/conf/secrets.py). For Cryptography's security limitation, check [this document](https://cryptography.io/en/latest/limitations/).
+Currently, we use the [RSA4096](https://en.wikipedia.org/wiki/RSA_(cryptosystem)) with the [Cryptography](https://github.com/pyca/cryptography/) python cryptographic library for processing secrets to prevent them being saved into configuration file in plain-text format. For implementation details, check [this source file](puntgun/conf/encrypto.py). For Cryptography's security limitation, check [this document](https://cryptography.io/en/latest/limitations/).

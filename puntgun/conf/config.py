@@ -1,6 +1,7 @@
 from dynaconf import Dynaconf
 from from_root import from_root
 
+# where to find the config file
 config_dir_path = from_root('conf')
 config_dir_str: str = str(config_dir_path.absolute())
 

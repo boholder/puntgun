@@ -1,37 +1,25 @@
-[project]
+[tool.poetry]
 name = "puntgun"
-version = "0.0.1"
+version = "0.1.0"
 description = "A configurable automation command line tool for Twitter."
-authors = [{ name = "boholder", email = "bottleholder@anche.no" }]
+authors = ["boholder <bottleholder@anche.no>"]
+license = "MIT"
 
-dependencies = [
-    "tweepy~=4.10.0",
-    "reactivex~=4.0.0",
-    "dynaconf~=3.1.8",
-    "fire>=0.4.0",
-    "cryptography>=37.0.2",
-    "from-root>=1.0.2",
-]
+[tool.poetry.dependencies]
+python = ">=3.10,<3.11"
+dynaconf = "^3.1.8"
+tweepy = "^4.10.0"
+reactivex = "^4.0.0"
+fire = "^0.4.0"
+from-root = "^1.0.2"
+cryptography = "^37.0.2"
 
-# TODO reactivex 4.0.0 requires python version <3.11
-requires-python = ">=3.10,<3.11"
-license = { text = "MIT" }
+[tool.poetry.dev-dependencies]
+pytest = "^7.1.2"
+PyHamcrest = "^2.0.3"
+coverage = "^6.4.1"
 
-[tool.pdm]
-[[tool.pdm.source]]
-name = "pypi"
-url = "https://pypi.org/simple"
-verify_ssl = true
 
 [build-system]
-requires = ["pdm-pep517"]
-build-backend = "pdm.pep517.api"
-
-[tool.pdm.dev-dependencies]
-test = [
-    "pytest",
-    "PyHamcrest",
-    # coverage 6.4 will cause PDM to fail
-    # https://github.com/pdm-project/pdm/issues/1111
-    "coverage<6.4",
-]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
