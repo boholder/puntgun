@@ -16,12 +16,11 @@ pri_key_file_str = str(pri_key_file_path.absolute())
 secrets_config_file_path = config_dir_path.joinpath('.secrets.yml')
 
 # tool settings on the "global" level
-tool_config_files = [config_dir_str + 'puntgun_settings.yml',
+tool_config_files = [str(config_dir_path.joinpath('settings.yml').absolute()),
                      str(secrets_config_file_path.absolute())]
 
 # environment variables' prefix
-# make sure strangers can't search and find this tool by the environment variable name
-environment_variables_prefix = ''.join(list(map(chr, [80, 79, 87, 68, 69, 82])))
+environment_variables_prefix = 'BULLET'
 
 settings = Dynaconf(
     envvar_prefix=environment_variables_prefix,
@@ -29,4 +28,5 @@ settings = Dynaconf(
 )
 
 # settings.configure(settings_files=static_config_files + ['conf/a.yml'])
+# https://www.dynaconf.com/settings_files/#yaml-caveats
 # https://loguru.readthedocs.io/en/stable/api/logger.html#loguru._logger.Logger.configure

@@ -3,14 +3,16 @@ import fire
 
 class Command(object):
     @staticmethod
-    def pow(config_file='config_parsing.yml', block_following=False):
+    def pow(plan_file='', config_file='', secrets_file='', block_following=False):
         """Check & block/mute users base on the given configuration file.
 
-        :param config_file: the configuration file to use.
+        :param plan_file: the plan configuration file this time.
+        :param config_file: the tool behavior configuration file.
+        :param secrets_file: the file containing the plaintext secrets.
         :param block_following: whether to block users that you are following.
         """
         print_banner()
-        print(f'start blocking:{config_file}')
+        print(f'start blocking:{plan_file}')
 
     @staticmethod
     def rebirth(report_file='report.yml'):

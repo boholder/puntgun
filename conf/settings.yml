@@ -1,0 +1,5 @@
+# The settings of the tool itself.
+# Can be overridden by the same-name ones in the user-writen plan configuration file
+# or in the environment variables.
+
+name: bob
