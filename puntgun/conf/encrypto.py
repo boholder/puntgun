@@ -1,4 +1,5 @@
 # Methods that access, modify, and save secrets that need to be encrypted, as well as private key itself.
+import functools
 from pathlib import Path
 
 from cryptography.hazmat.primitives import serialization, hashes
@@ -33,6 +34,11 @@ def dump_private_key(pri_key: RSAPrivateKey, pwd: str, file_path: Path = pri_key
             format=serialization.PrivateFormat.PKCS8,
             encryption_algorithm=serialization.BestAvailableEncryption(bytes(pwd, 'utf-8'))
         ))
+
+
+@functools.lru_cache(maxsize=1)
+def load_public_key(pwd: str, file_path: Path = pri_key_file_path):
+    return load_private_key(pwd, file_path).public_key()
 
 
 def load_private_key(pwd: str, file_path: Path = pri_key_file_path):

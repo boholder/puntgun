@@ -166,4 +166,5 @@ conf/.secrets.*
 conf/.puntgun_rsa4096
 
 # Ignore unit test generated files
-tests/conf/test_pri_key_file
+tests/**/test_*_file
+tests/**/test_*_file.*
