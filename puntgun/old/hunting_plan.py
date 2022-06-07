@@ -2,7 +2,7 @@ from typing import IO, Union
 
 import yaml
 
-from puntgun.old import util
+import util
 
 
 class HuntingPlan(object):

@@ -13,6 +13,7 @@ reactivex = "^4.0.0"
 fire = "^0.4.0"
 from-root = "^1.0.2"
 cryptography = "^37.0.2"
+loguru = "^0.6.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"

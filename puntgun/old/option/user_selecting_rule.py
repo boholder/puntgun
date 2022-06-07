@@ -2,7 +2,7 @@ from typing import List, Dict, Any, Tuple
 
 import reactivex as rx
 
-from puntgun.old import util
+import util
 from puntgun.old.base.options import Field, MapOption
 from puntgun.old.client.hunter import Hunter
 from puntgun.old.model.decision import Decision

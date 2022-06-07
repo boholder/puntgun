@@ -2,7 +2,7 @@ from typing import Any, List, Dict, Tuple
 
 import reactivex as rx
 
-from puntgun.old import util
+import util
 from puntgun.old.base.options import ListOption, Field, MapOption
 from puntgun.old.model.context import Context
 from puntgun.old.model.decision import Decision

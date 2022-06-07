@@ -1,16 +1,17 @@
+"""Util methods for many modules."""
 import logging
 from typing import Dict, Any, List
 
 
 def get_input_from_terminal(key: str) -> str:
-    key_loop = True
+    loop = True
     value = ''
-    while key_loop:
+    while loop:
         value = input('{}:'.format(key))
         # default yes
         confirm = input('confirm?([y]/n)')
         if not confirm or confirm.lower() == 'y':
-            key_loop = False
+            loop = False
 
     return value
 

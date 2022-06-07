@@ -1,7 +1,7 @@
 from collections import defaultdict
 from typing import List, Dict, Any, Type
 
-from puntgun.old import util
+import util
 
 
 class Option(object):
