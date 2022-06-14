@@ -271,7 +271,7 @@ dev = ["pre-commit", "tox", "pytest-asyncio"]
 
 [[package]]
 name = "reactivex"
-version = "4.0.0"
+version = "4.0.2"
 description = "ReactiveX (Rx) for Python"
 category = "main"
 optional = false
@@ -391,7 +391,7 @@ dev = ["pytest (>=4.6.2)", "black (>=19.3b0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "03fb3639d1630c9a4deac955bbd49d758be65177153332a922b8256e4f4755c3"
+content-hash = "3b45902574284d1a534b00b653ebe75a68a873808cc62d49c07f9213c8c3a0a0"
 
 [metadata.files]
 atomicwrites = [
@@ -593,8 +593,8 @@ pytest-mock = [
     {file = "pytest_mock-3.7.0-py3-none-any.whl", hash = "sha256:6cff27cec936bf81dc5ee87f07132b807bcda51106b5ec4b90a04331cba76231"},
 ]
 reactivex = [
-    {file = "ReactiveX-4.0.0-py3-none-any.whl", hash = "sha256:3805af5106f16754f5c258a1fb29b002b3c878a73b0402cd6fd027f16ee1b32e"},
-    {file = "ReactiveX-4.0.0.tar.gz", hash = "sha256:1f47df018e0d0c7aa3dff56c5155429bd244b53297a69a9fdef76fc8db7144d7"},
+    {file = "reactivex-4.0.2-py3-none-any.whl", hash = "sha256:04d17b55652caf8b6c911f7588b4fe8fa69b6fc48e312e0e3462597fb93bb588"},
+    {file = "reactivex-4.0.2.tar.gz", hash = "sha256:e4db0f7b1646c2198fb7cceade05be7d2e1bd8c0284ae5dffdae449055400310"},
 ]
 requests = [
     {file = "requests-2.27.1-py2.py3-none-any.whl", hash = "sha256:f22fa1e554c9ddfd16e6e41ac79759e17be9e492b3587efa038054674760e72d"},
