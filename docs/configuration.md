@@ -7,7 +7,7 @@ nav_order: 1
 
 This page is describing configurations of the tool itself, i.e. the contents of [/conf/settings.yml](/conf/settings.yml).
 For all available Plan configurations, please check [the plan configuration document page](plan-configuration.md).
-The tool is using [Dynaconf](https://www.dynaconf.com/) as the configuration parsing library.
+The tool is using the [Dynaconf](https://www.dynaconf.com/) as the configuration parsing library.
 
 ## Loading Priority
 
@@ -26,14 +26,14 @@ You can set the tool configurations via [setting environment variables](https://
 
 ```text
 # setting in configuration file (yaml)
-size: 20 ga.
+caliber: 20 ga.
 # variable in environment
-BULLET_SIZE="20 ga."
+export BULLET_CALIBER="20 ga."
 ```
 
 ## Setting via configuration file
 
-The default configuration is written in yaml format (you may want to learn about [yaml's syntax](https://yaml.org/)), but you can also use [other supported formats](https://www.dynaconf.com/settings_files/#supported-formats) like .toml, .ini, .json. In this page we'll use yaml format for displaying. The default configuration files are located at [/conf](/conf) directory when you download the tool.
+The default configuration is written in yaml format (you may want to learn about [yaml's syntax](https://yaml.org/)), but you can also use [other supported formats](https://www.dynaconf.com/settings_files/#supported-formats) like .toml, .ini, .json. In this page we'll use yaml format.
 
 ## Secrets
 
@@ -46,7 +46,7 @@ Essentially we make the tool a third-party application that can access the Twitt
 
 ### Registering a Twitter API credential
 
-When the tool is first launched there is interactive guide procedure instructing you on how to register and save your credentials, if you don't want to try it right away you can just skip this step.
+When the tool is first launched there is interactive guide procedure instructing you on how to register and save your credentials, if you don't want to try it right away you can skip this part.
 
 For registering a credential, first you need a Twitter account (you already have one I guess), and you need to bind a phone number with that account. You can do unbind after get the credential, and the credential will remain valid. But Twitter already saved a new line of record about your phone inside the user table, now it's up to you whether you want to continue or not.
 

@@ -1,5 +1,4 @@
 """All the loaded settings and global variables for many modules to use."""
-
 from dynaconf import Dynaconf
 from from_root import from_root
 
@@ -25,8 +24,14 @@ environment_variables_prefix = 'BULLET'
 settings = Dynaconf(
     envvar_prefix=environment_variables_prefix,
     settings_files=tool_config_files,
+    apply_default_on_none=True
 )
 
 # settings.configure(settings_files=static_config_files + ['conf/a.yml'])
 # https://www.dynaconf.com/settings_files/#yaml-caveats
 # https://loguru.readthedocs.io/en/stable/api/logger.html#loguru._logger.Logger.configure
+
+# try:
+#     print(settings.get('name'))
+# except Exception as e:
+#     print(e)

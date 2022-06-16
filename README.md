@@ -1,7 +1,9 @@
-# Punt Gun - a configurable automation command line tool for Twitter
+# puntgun - a configurable automation command line tool for Twitter
 
 [![unit test coverage badge](./coverage/converage.svg)](./coverage)
 [![visitor badge](https://boholder-visitor-badge.glitch.me/badge?page_id=puntgun-readme)](https://github.com/jwenjian/visitor-badge)
+
+This tool was originally conceived as a configurable automatic Twitter account blocker. What could be a better name for it than [the punt gun](https://en.wikipedia.org/wiki/Punt_gun), a special hunting weapon used to kill a large number of waterfowl in one shot. But that type of gun is a huge threat to the natural environment, and fortunately this tool only inherits the meaning of its origin, even to the benefit of the social platform environment (or at least to the mental health of its users).
 
 ## Usage
 
@@ -22,6 +24,6 @@ When the tool is running, the secrets will stay inside a client object instance 
 
 ## Disclaimer
 
-There always has to be such a statement. (Where else would I need to put it?)
+There always has to be such a statement (where else would I need to put it?). Hopefully our unit tests are sufficient to avoid tragedies caused by faulty logic. However, we have the cheek to state that such errors are still covered by the disclaimer, although we will still suffer from a guilty conscience and do our best to fix them if these god-forbidden things happen:
 
-This tool may have unrecoverable (or very difficult to recover) effects on Twitter accounts (if your plan configuration is too crazy). The maintainers of this tool are not responsible for any damage caused by the use of this tool. (Hopefully our unit tests are sufficient to avoid tragedy.)
+> This tool may have unrecoverable (or very difficult to recover) effects on users' Twitter accounts (for example, if your plan configuration is too crazy, it happens). The maintainers of this tool are not responsible for any damage caused by the use of this tool.

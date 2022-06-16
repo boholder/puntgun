@@ -3,7 +3,7 @@ import fire
 
 class Command(object):
     @staticmethod
-    def pow(plan_file='', config_file='', secrets_file='', block_following=False):
+    def fire(plan_file='', config_file='', secrets_file='', block_following=False):
         """Check & block/mute users base on the given configuration file.
 
         :param plan_file: the plan configuration file this time.
