@@ -6,8 +6,8 @@ import util
 from puntgun.old.base.options import ListOption, Field, MapOption
 from puntgun.old.model.context import Context
 from puntgun.old.model.decision import Decision
-from puntgun.old.model.errors import TwitterApiError
-from puntgun.old.model.user import User
+from model.errors import TwitterApiError
+from user import User
 from puntgun.old.option.filter_rule import FilterRule
 
 

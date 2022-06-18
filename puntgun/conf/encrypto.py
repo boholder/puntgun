@@ -6,8 +6,8 @@ from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPublicKey
 from loguru import logger
 
-from puntgun import util
-from puntgun.conf import config
+import util
+from conf import config
 
 encrypt_padding = padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None)
 
@@ -59,7 +59,7 @@ and rerun this tool for initializing things again.
     else:
         print(f"""
 It seems that you haven't generated a private key for encrypting secrets before.
-Let us generate one for you, 
+Let's generate one for you, 
 but we need you to set a password for protecting that private key.
 The strength of this password should be the same as your Twitter account password.
 And you should remember this password for using this tool in the future.

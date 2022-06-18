@@ -6,8 +6,8 @@ import util
 from puntgun.old.base.options import Field, MapOption
 from puntgun.old.client.hunter import Hunter
 from puntgun.old.model.decision import Decision
-from puntgun.old.model.errors import TwitterApiError
-from puntgun.old.model.user import User
+from model.errors import TwitterApiError
+from user import User
 from puntgun.old.option.let_me_check_rule import LetMeCheckRule
 from puntgun.old.option.rule_set import RuleSet
 

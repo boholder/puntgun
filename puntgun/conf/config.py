@@ -13,10 +13,11 @@ pri_key_file_str = str(pri_key_file_path.absolute())
 
 # encrypted secrets are stored into this file
 secrets_config_file_path = config_dir_path.joinpath('.secrets.yml')
+secrets_config_file_str = str(secrets_config_file_path.absolute())
 
 # tool settings on the "global" level
 tool_config_files = [str(config_dir_path.joinpath('settings.yml').absolute()),
-                     str(secrets_config_file_path.absolute())]
+                     secrets_config_file_str]
 
 # environment variables' prefix
 environment_variables_prefix = 'BULLET'

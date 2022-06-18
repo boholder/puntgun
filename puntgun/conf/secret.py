@@ -5,9 +5,9 @@ from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPubl
 from loguru import logger
 from tweepy import OAuth1UserHandler
 
-from puntgun import util
-from puntgun.conf import config
-from puntgun.conf.encrypto import encrypt, decrypt, load_or_generate_private_key, load_or_generate_public_key
+import util
+from conf import config
+from conf.encrypto import encrypt, decrypt, load_or_generate_public_key, load_or_generate_private_key
 
 # names of secrets in the secret settings file
 twitter_api_key_name = 'AK'
@@ -18,12 +18,20 @@ twitter_access_token_secret_name = 'ATS'
 
 class TwitterAPISecrets(object):
     def __init__(self, key: str, secret: str):
-        # Unfortunately, there is no additional information to verify validation of inputs.
-        if not key:
-            logger.info(f"Invalid api key: {key}")
+        # Checking the length is a trick:
+        #
+        # Both loading secrets from environment variables and from setting file
+        # are involved using dynaconf library, and secrets keys in two ways are same after dynaconf loading.
+        # (from env: BULLET_SEC --dynaconf--> sec, from settings: SEC --dynaconf--> sec)
+        #
+        # So dynaconf couldn't recognize where the secrets from,
+        # but in env var secrets are plaintext format while in settings file are cipher text.
+        #
+        # Thankfully these two format have a significant difference - the length.
+        # plaintexts length are below 50 characters, but I'll set to 100 for compatibility.
+        if not key or len(key) > 100:
             raise ValueError
-        if not secret:
-            logger.info(f"Invalid api key secret: {secret}")
+        if not secret or len(secret) > 100:
             raise ValueError
 
         self.key = key
@@ -35,8 +43,7 @@ class TwitterAPISecrets(object):
                                  load_settings_from_environment_variables(twitter_api_key_secret_name))
 
     @staticmethod
-    def from_settings():
-        pri_key = load_or_generate_private_key()
+    def from_settings(pri_key: RSAPrivateKey):
         return TwitterAPISecrets(load_and_decrypt_secret_from_settings(pri_key, twitter_api_key_name),
                                  load_and_decrypt_secret_from_settings(pri_key, twitter_api_key_secret_name))
 
@@ -67,16 +74,15 @@ Feel free to terminate this tool if you don't want to register right now.
 (Don't forget to clean the clipboard after copying and pasting secrets to here.)
 """)
 
-        return TwitterAPISecrets(util.get_input_from_terminal('Api key'), util.get_input_from_terminal('Api secret'))
+        return TwitterAPISecrets(util.get_input_from_terminal('Api key'),
+                                 util.get_input_from_terminal('Api key secret'))
 
 
 class TwitterAccessTokenSecrets(object):
     def __init__(self, token: str, secret: str):
-        if not token:
-            logger.info(f"Invalid access token: {token}")
+        if not token or len(token) > 100:
             raise ValueError
-        if not secret:
-            logger.info(f"Invalid access token secret: {secret}")
+        if not secret or len(secret) > 100:
             raise ValueError
 
         self.token = token
@@ -88,8 +94,7 @@ class TwitterAccessTokenSecrets(object):
                                          load_settings_from_environment_variables(twitter_access_token_secret_name))
 
     @staticmethod
-    def from_settings():
-        pri_key = load_or_generate_private_key()
+    def from_settings(pri_key: RSAPrivateKey):
         return TwitterAccessTokenSecrets(
             load_and_decrypt_secret_from_settings(pri_key, twitter_access_token_name),
             load_and_decrypt_secret_from_settings(pri_key, twitter_access_token_secret_name))
@@ -115,58 +120,85 @@ enter them back to here. Again, feel free to terminate this tool if you don't wa
         return TwitterAccessTokenSecrets(*oauth1_user_handler.get_access_token(pin))
 
 
-def load_or_request_all_secrets():
-    api_secrets = load_or_request_api_secrets()
-    access_token_secrets = load_or_request_access_token_secrets(api_secrets)
+def load_or_request_all_secrets(pri_key):
+    api_secrets = load_or_request_api_secrets(pri_key)
+    access_token_secrets = load_or_request_access_token_secrets(api_secrets, pri_key)
+
+    # Save the secrets into file if they are not saved yet.
     # Must save them at once because saving method will override the existing file.
-    encrypt_and_save_secrets_into_file(load_or_generate_public_key(),
-                                       config.secrets_config_file_path,
-                                       **{twitter_api_key_name: api_secrets.key,
-                                          twitter_api_key_secret_name: api_secrets.secret,
-                                          twitter_access_token_name: access_token_secrets.token,
-                                          twitter_access_token_secret_name: access_token_secrets.secret
-                                          })
-    # Will do the save process every time when the program starts, but no better way to do it.
-    logger.info("All secrets are saved into file.")
-    return api_secrets, access_token_secrets
+    if not secrets_config_file_valid():
+        print(f"""
+Before running the pipeline, we'd save secrets into a secret configuration file,
+so next time you running this tool you needn't enter these annoying unreadable tokens again.
+And we'll encrypt them before saving, it's time to load your private key.   
+""")
+        encrypt_and_save_secrets_into_file(load_or_generate_public_key(),
+                                           config.secrets_config_file_path,
+                                           **{twitter_api_key_name: api_secrets.key,
+                                              twitter_api_key_secret_name: api_secrets.secret,
+                                              twitter_access_token_name: access_token_secrets.token,
+                                              twitter_access_token_secret_name: access_token_secrets.secret
+                                              })
+        print(f"Secrets saved into file.\n({config.secrets_config_file_str})")
+    return {'ak': api_secrets.key,
+            'aks': api_secrets.secret,
+            'at': access_token_secrets.token,
+            'ats': access_token_secrets.secret}
 
 
-def load_or_request_api_secrets():
+def load_or_request_api_secrets(pri_key: RSAPrivateKey = None):
     try:
         return TwitterAPISecrets.from_environment()
     except ValueError:
         logger.info("Failed to load api secrets from environment")
-    try:
-        return TwitterAPISecrets.from_settings()
-    except (ValueError, TypeError):
-        logger.info("Failed to load api secrets from settings, trying to get API secrets from input")
-        return TwitterAPISecrets.from_input()
+
+    if secrets_config_file_valid():
+        logger.info("Found previous secrets config file")
+        try:
+            if not pri_key:
+                pri_key = load_or_generate_private_key()
+            return TwitterAPISecrets.from_settings(pri_key)
+        except (ValueError, TypeError):
+            logger.info("Failed to load api secrets from settings, trying to get API secrets from input")
+
+    return TwitterAPISecrets.from_input()
 
 
-def load_or_request_access_token_secrets(api_secrets: TwitterAPISecrets):
+def load_or_request_access_token_secrets(api_secrets: TwitterAPISecrets, pri_key: RSAPrivateKey = None):
     try:
         return TwitterAccessTokenSecrets.from_environment()
     except ValueError:
         logger.info('Failed to load access token secrets from environment')
-    try:
-        return TwitterAccessTokenSecrets.from_settings()
-    except (ValueError, TypeError):
-        logger.info("Failed to load access token secrets from settings, trying to get access token secrets from input")
-        # here we need the api secrets to generate new access token.
-        return TwitterAccessTokenSecrets.from_input(api_secrets)
+
+    if secrets_config_file_valid():
+        logger.info("Found previous secrets config file")
+        try:
+            if not pri_key:
+                pri_key = load_or_generate_private_key()
+            return TwitterAccessTokenSecrets.from_settings(pri_key)
+        except (ValueError, TypeError):
+            logger.info("Failed to load access token secrets from settings,"
+                        " trying to get access token secrets from input")
+
+    # here we need the api secrets to generate new access token.
+    return TwitterAccessTokenSecrets.from_input(api_secrets)
 
 
 # == low level ==
 
-def load_settings_from_environment_variables(name: str, dynaconf_settings=config.settings):
+def load_settings_from_environment_variables(name: str, dynaconf_settings=None):
     """
     Secrets stored as environment variables can be loaded by dynaconf.
     In this case they are stored in plaintext.
     """
+    if not dynaconf_settings:
+        dynaconf_settings = config.settings
     return dynaconf_settings.get(name)
 
 
-def load_and_decrypt_secret_from_settings(private_key: RSAPrivateKey, name: str, dynaconf_settings=config.settings):
+def load_and_decrypt_secret_from_settings(private_key: RSAPrivateKey, name: str, dynaconf_settings=None):
+    if not dynaconf_settings:
+        dynaconf_settings = config.settings
     return decrypt(private_key, binascii.unhexlify(dynaconf_settings.get(name)))
 
 
@@ -184,3 +216,11 @@ def encrypt_and_save_secrets_into_file(public_key: RSAPublicKey,
     with open(file_path, 'w', encoding='utf-8') as f:
         # if we do not add '\n' at the tail, all items are printed into one line
         f.writelines(f'{key}: {transform(value)}\n' for key, value in kwargs.items())
+
+
+def secrets_config_file_valid():
+    def not_empty_or_has_only_blank_characters():
+        with open(config.secrets_config_file_path, 'r', encoding='utf-8') as f:
+            return bool(f.read().strip())
+
+    return config.secrets_config_file_path.exists() and not_empty_or_has_only_blank_characters()

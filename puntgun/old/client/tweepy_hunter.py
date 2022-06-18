@@ -9,8 +9,8 @@ from tweepy import Client, OAuth1UserHandler
 
 import util
 from puntgun.old.client.hunter import Hunter, MixedResultProcessingWrapper
-from puntgun.old.model.errors import TwitterApiErrors, TwitterClientError
-from puntgun.old.model.user import User
+from model.errors import TwitterApiErrors, TwitterClientError
+from user import User
 
 NO_VALUE_PROVIDED = 'No value provided.'
 
@@ -48,7 +48,7 @@ class TweepyHunter(Hunter):
         """You should only get instance of this class via ``instance`` static method."""
         self.client = client
 
-        self.me = User.build_from_response(self.client.get_me().data[0], '')
+        self.me = User.from_response(self.client.get_me().data[0], '')
         self.id = self.me.id
         self.name = self.me.name
 
@@ -70,7 +70,7 @@ class TweepyHunter(Hunter):
             # if one user doesn't have pinned tweet, the "includes" field isn't have "tweets" field
             pinned_tweet_text: str = [t['text'] for t in resp.includes['tweets']][0] if pinned_tweet_id else ''
 
-            return User.build_from_response(data, pinned_tweet_text)
+            return User.from_response(data, pinned_tweet_text)
 
         def multi_transform(resp: tweepy.Response) -> List[User]:
             def data_to_user(_data: dict) -> User:
@@ -78,7 +78,7 @@ class TweepyHunter(Hunter):
                 pinned_tweet = [t for t in pinned_tweets if t['id'] == _data['pinned_tweet_id']]
                 pinned_tweet_text = pinned_tweet[0]['text'] if pinned_tweet else ''
 
-                return User.build_from_response(_data, pinned_tweet_text)
+                return User.from_response(_data, pinned_tweet_text)
 
             pinned_tweets = resp.includes['tweets'] if 'tweets' in resp.includes else []
 

@@ -9,7 +9,7 @@ import reactivex as rx
 
 from puntgun.old.base.options import MapOption, Field, Option
 from puntgun.old.model.context import Context
-from puntgun.old.model.errors import TwitterApiError
+from model.errors import TwitterApiError
 
 
 class FilterRule(Option, ABC):

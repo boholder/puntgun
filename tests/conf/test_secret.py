@@ -4,6 +4,7 @@ import pytest
 import tweepy
 from dynaconf import Dynaconf
 
+from conf import secret
 from puntgun.conf.encrypto import generate_private_key
 from puntgun.conf.secret import encrypt_and_save_secrets_into_file, load_and_decrypt_secret_from_settings, \
     load_or_request_api_secrets, load_or_request_access_token_secrets, TwitterAPISecrets
@@ -21,33 +22,55 @@ def test_secrets_save_and_load_via_settings_file(tmp_path):
     assert load_and_decrypt_secret_from_settings(private_key, 'b', settings) == 'another'
 
 
+def test_secrets_config_file_exists_check(monkeypatch, tmp_path):
+    fake_secrets_setting_file = tmp_path.joinpath('s.yml')
+    monkeypatch.setattr('conf.config.secrets_config_file_path', fake_secrets_setting_file)
+
+    def save_content_to_file(content):
+        with open(fake_secrets_setting_file, 'w', encoding='utf-8') as f:
+            f.write(content)
+
+    # blank = invalid
+    save_content_to_file('   \n\t')
+    assert secret.secrets_config_file_valid() is False
+    # has content = valid
+    save_content_to_file('not empty')
+    assert secret.secrets_config_file_valid() is True
+    # not exist = invalid
+    monkeypatch.setattr('conf.config.secrets_config_file_path', tmp_path.joinpath('b.yml'))
+    assert secret.secrets_config_file_valid() is False
+
+
 @pytest.fixture
-def mock_secret_config_file(mock_private_key_file, monkeypatch, tmp_path):
+def mock_secrets_config_file(mock_private_key_file, monkeypatch, tmp_path):
     secrets_setting_file = tmp_path.joinpath('s.yml')
     # load the private key for decrypt secrets
     monkeypatch.setattr('builtins.input', Mock(side_effect=['pwd', 'y']))
     # change the settings to load test configuration file
-    monkeypatch.setattr('puntgun.conf.secret.load_and_decrypt_secret_from_settings.__defaults__',
-                        (Dynaconf(settings_files=str(secrets_setting_file.absolute())),))
+    monkeypatch.setattr('conf.config.secrets_config_file_path', secrets_setting_file)
+    monkeypatch.setattr('conf.config.settings', Dynaconf(settings_files=str(secrets_setting_file.absolute())))
 
-    def func(**kwargs):
+    def save_content_to_file(**kwargs):
         encrypt_and_save_secrets_into_file(mock_private_key_file[1].public_key(), secrets_setting_file, **kwargs)
 
-    return func
+    return save_content_to_file
 
 
 class TestLoadApiSecretsInteractively:
 
-    def test_from_env(self, monkeypatch):
+    def test_load_from_env(self, monkeypatch, tmp_path):
         monkeypatch.setenv('BULLET_AK', 'key')
         monkeypatch.setenv('BULLET_AKS', 'secret')
+        # avoid real existing secret config file's disturbance
+        # let dynaconf reload environment variables
+        monkeypatch.setattr('conf.config.settings', Dynaconf(envvar_prefix='BULLET'))
         self.assert_result()
 
-    def test_from_settings(self, mock_secret_config_file):
-        mock_secret_config_file(ak='key', aks='secret')
+    def test_load_from_settings(self, mock_secrets_config_file):
+        mock_secrets_config_file(ak='key', aks='secret')
         self.assert_result()
 
-    def test_from_input(self, monkeypatch, mock_private_key_file):
+    def test_load_from_input(self, monkeypatch, mock_private_key_file):
         # load the private key, then enter two secrets
         monkeypatch.setattr('builtins.input', Mock(side_effect=['pwd', 'y', 'key', 'y', 'secret', 'y']))
         self.assert_result()
@@ -61,16 +84,19 @@ class TestLoadApiSecretsInteractively:
 
 class TestLoadAccessTokenSecretsInteractively:
 
-    def test_load_from_env(self, monkeypatch):
+    def test_load_from_env(self, monkeypatch, tmp_path):
         monkeypatch.setenv('BULLET_AT', 'key')
         monkeypatch.setenv('BULLET_ATS', 'secret')
+        # avoid real existing secret config file's disturbance
+        # let dynaconf reload environment variables
+        monkeypatch.setattr('conf.config.settings', Dynaconf(envvar_prefix='BULLET'))
         self.assert_result()
 
-    def test_load_from_settings(self, mock_secret_config_file):
-        mock_secret_config_file(at='key', ats='secret')
+    def test_load_from_settings(self, mock_secrets_config_file):
+        mock_secrets_config_file(at='key', ats='secret')
         self.assert_result()
 
-    def test_from_input(self, monkeypatch, mock_private_key_file):
+    def test_load_from_input(self, monkeypatch, mock_private_key_file):
         # load the private key, then enter the pin
         monkeypatch.setattr('builtins.input', Mock(side_effect=['pwd', 'y', 'PIN-PIN-PIN', 'y']))
         monkeypatch.setattr(tweepy.auth.OAuth1UserHandler, 'get_authorization_url', lambda _: 'url-here')
