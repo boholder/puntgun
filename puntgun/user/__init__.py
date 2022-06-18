@@ -65,3 +65,5 @@ class User(BaseModel):
 
     def __bool__(self):
         return bool(self.id)
+
+# TODO 在顶层用set的方式控制所有 source rule 返回的用户流，过滤成唯一的流。

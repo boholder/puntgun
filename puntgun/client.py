@@ -1,4 +1,5 @@
 import functools
+from typing import List, Callable, Any
 
 import tweepy
 from loguru import logger
@@ -7,9 +8,6 @@ from conf.encrypto import load_or_generate_private_key
 from conf.secret import load_or_request_all_secrets
 from recorder import Recorder, Recordable
 from user import User
-
-"""Various specific errors for this project."""
-from typing import List, Callable, Any
 
 
 class TwitterClientError(Exception):
@@ -25,8 +23,8 @@ class TwitterApiErrors(Exception, Recordable):
 
     https://developer.twitter.com/en/support/twitter-api/error-troubleshooting#partial-errors
 
-    Corresponding to one API query's response,
-    contains a list of :class:`puntgun.client.TwitterApiError`.
+    Corresponding to errors returned with one API query's response,
+    contains a list of :class:`TwitterApiError`.
     """
 
     def __init__(self, query_func_name: str, query_params, resp_errors: List[dict]):
@@ -55,6 +53,7 @@ class TwitterApiErrors(Exception, Recordable):
 
 
 class TwitterApiError(Exception):
+    """Corresponding to one https://developer.twitter.com/en/support/twitter-api/error-troubleshooting#partial-errors"""
     title = 'generic twitter api error'
 
     def __init__(self, title, ref_url, detail, parameter, value):
@@ -119,9 +118,25 @@ def record_errors(tweepy_invoking: Callable[[Any], tweepy.Response]):
 
 
 class Client(object):
-    """ Adapter of :class:`tweepy.Client` for handling requests and responses to the Twitter API. """
+    """
+    Adapter of :class:`tweepy.Client` for handling requests and responses to the Twitter API.
 
-    # additional url params for querying Twitter user state api
+    Due to the rate limit set by the Twitter API,
+    and tweepy will actively sleep and wait for the next attempt when hit the limit,
+    the methods in this class are blocking.
+
+    So here is the solution:
+      1. One invocation on methods will send only **one** request to the Twitter API, makes the invocation "atomic".
+      2. This class doesn't care about the terrible blocking, let the caller handle it.
+
+    Ref:
+      * https://developer.twitter.com/en/docs/twitter-api/rate-limits
+      * It's so sweet that tweepy has inner retry logic for resumable 429 Too Many Request status code.
+        https://github.com/tweepy/tweepy/blob/master/tweepy/client.py#L102-L114
+    """
+
+    # additional url params for querying Twitter user state api,
+    # for letting the API know which fields we want to get.
     __user_api_params = {'user_auth': True,
                          'user_fields': ['id', 'name', 'username', 'pinned_tweet_id', 'profile_image_url',
                                          'created_at', 'description', 'public_metrics', 'protected', 'verified'],
@@ -146,27 +161,29 @@ class Client(object):
                                     access_token_secret=secrets['ats']))
 
     def get_users_by_usernames(self, names: List[str]):
-        """https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-by"""
+        """
+        Calling :meth:`tweepy.Client.get_users`.
+        https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-by
+        """
+        if len(names) > 100:
+            raise ValueError('at most 100 usernames per request')
 
         @record_errors
-        def get_users(**kwargs):
+        def get_users_by_name(**kwargs):
             return self.clt.get_users(**kwargs)
 
-        def one_query(n):
-            return self.__user_resp_to_user_instances(get_users(usernames=n, **self.__user_api_params))
-
-        result_list = [one_query(g) for g in self.__split_to_one_hundred(names)]
-        # flatten it
-        return [u for sub in result_list for u in sub]
+        return self.__user_resp_to_user_instances(get_users_by_name(usernames=names, **self.__user_api_params))
 
     @staticmethod
     def __user_resp_to_user_instances(resp: tweepy.Response):
+        """Build a list of :class:`User` instances from one response."""
         if not resp.data:
             return []
 
         pinned_tweets = resp.includes['tweets'] if 'tweets' in resp.includes else []
 
         def resp_to_user(data: dict) -> User:
+            """Build one user instance"""
             # find this user's pinned tweet
             # Twitter's response doesn't guarantee the order of pinned tweets,
             # because there are users who don't have pinned tweets:
@@ -177,9 +194,3 @@ class Client(object):
             return User.from_response(data, pinned_tweet_text)
 
         return [resp_to_user(d) for d in resp.data]
-
-    @staticmethod
-    def __split_to_one_hundred(lst: list):
-        """Some Twitter API limits the number of usernames in a single request to 100."""
-        for i in range(0, len(lst), 100):
-            yield lst[i:i + 100]

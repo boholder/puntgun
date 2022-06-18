@@ -8,12 +8,6 @@ from hamcrest import assert_that, is_
 from client import Client, ResourceNotFoundError
 from user import User
 
-
-def test_one_hundred_split():
-    actual = list(Client._Client__split_to_one_hundred(['a'] * 100 + ['b']))
-    assert actual[1] == ['b']
-
-
 create_time = datetime.now()
 image_url = 'https://example.com'
 
@@ -26,7 +20,7 @@ class TestUserQuerying:
         3. user does not exist (returned in "errors" field)
 
     The test cases are simulating these situations, test datas are from real responses.
-    There are some cases also test the constructing and default value replacing logic of :class:`user.User`.
+    There are some cases also test the constructing and default value replacing logic of :class:`User`.
 
     get by id: https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users
 
