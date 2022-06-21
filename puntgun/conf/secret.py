@@ -3,6 +3,7 @@ from pathlib import Path
 
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPublicKey
 from loguru import logger
+from pydantic import BaseModel
 from tweepy import OAuth1UserHandler
 
 import util
@@ -16,8 +17,11 @@ twitter_access_token_name = 'AT'
 twitter_access_token_secret_name = 'ATS'
 
 
-class TwitterAPISecrets(object):
-    def __init__(self, key: str, secret: str):
+class TwitterAPISecrets(BaseModel):
+    key: str
+    secret: str
+
+    class Config:
         # Checking the length is a trick:
         #
         # Both loading secrets from environment variables and from setting file
@@ -29,23 +33,17 @@ class TwitterAPISecrets(object):
         #
         # Thankfully these two format have a significant difference - the length.
         # plaintexts length are below 50 characters, but I'll set to 100 for compatibility.
-        if not key or len(key) > 100:
-            raise ValueError
-        if not secret or len(secret) > 100:
-            raise ValueError
-
-        self.key = key
-        self.secret = secret
+        max_anystr_length = 100
 
     @staticmethod
     def from_environment():
-        return TwitterAPISecrets(load_settings_from_environment_variables(twitter_api_key_name),
-                                 load_settings_from_environment_variables(twitter_api_key_secret_name))
+        return TwitterAPISecrets(key=load_settings_from_environment_variables(twitter_api_key_name),
+                                 secret=load_settings_from_environment_variables(twitter_api_key_secret_name))
 
     @staticmethod
     def from_settings(pri_key: RSAPrivateKey):
-        return TwitterAPISecrets(load_and_decrypt_secret_from_settings(pri_key, twitter_api_key_name),
-                                 load_and_decrypt_secret_from_settings(pri_key, twitter_api_key_secret_name))
+        return TwitterAPISecrets(key=load_and_decrypt_secret_from_settings(pri_key, twitter_api_key_name),
+                                 secret=load_and_decrypt_secret_from_settings(pri_key, twitter_api_key_secret_name))
 
     @staticmethod
     def from_input():
@@ -74,30 +72,28 @@ Feel free to terminate this tool if you don't want to register right now.
 (Don't forget to clean the clipboard after copying and pasting secrets to here.)
 """)
 
-        return TwitterAPISecrets(util.get_input_from_terminal('Api key'),
-                                 util.get_input_from_terminal('Api key secret'))
+        return TwitterAPISecrets(key=util.get_input_from_terminal('Api key'),
+                                 secret=util.get_input_from_terminal('Api key secret'))
 
 
-class TwitterAccessTokenSecrets(object):
-    def __init__(self, token: str, secret: str):
-        if not token or len(token) > 100:
-            raise ValueError
-        if not secret or len(secret) > 100:
-            raise ValueError
+class TwitterAccessTokenSecrets(BaseModel):
+    token: str
+    secret: str
 
-        self.token = token
-        self.secret = secret
+    class Config:
+        max_anystr_length = 100
 
     @staticmethod
     def from_environment():
-        return TwitterAccessTokenSecrets(load_settings_from_environment_variables(twitter_access_token_name),
-                                         load_settings_from_environment_variables(twitter_access_token_secret_name))
+        return TwitterAccessTokenSecrets(token=load_settings_from_environment_variables(twitter_access_token_name),
+                                         secret=load_settings_from_environment_variables(
+                                             twitter_access_token_secret_name))
 
     @staticmethod
     def from_settings(pri_key: RSAPrivateKey):
         return TwitterAccessTokenSecrets(
-            load_and_decrypt_secret_from_settings(pri_key, twitter_access_token_name),
-            load_and_decrypt_secret_from_settings(pri_key, twitter_access_token_secret_name))
+            token=load_and_decrypt_secret_from_settings(pri_key, twitter_access_token_name),
+            secret=load_and_decrypt_secret_from_settings(pri_key, twitter_access_token_secret_name))
 
     @staticmethod
     def from_input(api_secrets: TwitterAPISecrets):
@@ -117,7 +113,8 @@ enter them back to here. Again, feel free to terminate this tool if you don't wa
 """)
 
         pin = util.get_input_from_terminal('PIN')
-        return TwitterAccessTokenSecrets(*oauth1_user_handler.get_access_token(pin))
+        token_pair = oauth1_user_handler.get_access_token(pin)
+        return TwitterAccessTokenSecrets(token=token_pair[0], secret=token_pair[1])
 
 
 def load_or_request_all_secrets(pri_key):

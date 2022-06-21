@@ -93,7 +93,7 @@ class ResourceNotFoundError(TwitterApiError):
     title = 'Not Found Error'
 
 
-def record_errors(tweepy_invoking: Callable[[Any], tweepy.Response]):
+def record_twitter_api_errors(tweepy_invoking: Callable[[Any], tweepy.Response]):
     """
     Decorator for recording Twitter API errors returned by tweepy or Twitter server
     while invoking :class:`tweepy.Client`.
@@ -111,7 +111,7 @@ def record_errors(tweepy_invoking: Callable[[Any], tweepy.Response]):
         except tweepy.errors.TweepyException as e:
             # We have no idea how to handle the error tweepy throws out.
             # just wrap it in a custom exception and let it fails the entire process.
-            logger.error('Client throws unrecoverable error while querying Twitter API', e)
+            logger.exception('Client throws unrecoverable error while querying Twitter API')
             raise TwitterClientError from e
 
     return decorator
@@ -168,7 +168,7 @@ class Client(object):
         if len(names) > 100:
             raise ValueError('at most 100 usernames per request')
 
-        @record_errors
+        @record_twitter_api_errors
         def get_users_by_name(**kwargs):
             return self.clt.get_users(**kwargs)
 

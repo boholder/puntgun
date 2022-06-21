@@ -104,6 +104,6 @@ class TestLoadAccessTokenSecretsInteractively:
 
     @staticmethod
     def assert_result():
-        actual = load_or_request_access_token_secrets(TwitterAPISecrets('123', '456'))
+        actual = load_or_request_access_token_secrets(TwitterAPISecrets(key='123', secret='456'))
         assert actual.token == 'key'
         assert actual.secret == 'secret'

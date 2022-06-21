@@ -1,8 +1,22 @@
 from typing import List
 
+import reactivex as rx
+from loguru import logger
 from pydantic import BaseModel
+from reactivex import operators as ops
 
 from client import Client
+
+
+def handle_twitter_client_error(func):
+    def log_and_throw(e, _):
+        logger.error("Client throws TwitterClientError, stop the pipeline.")
+        return rx.throw(e)
+
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs).pipe(ops.catch(log_and_throw))
+
+    return wrapper
 
 
 class UserSourceRule(object):
@@ -22,14 +36,15 @@ class NameUserSourceRule(BaseModel, UserSourceRule):
     """
     names: List[str]
 
-    def __call__(self, clt: Client = Client.singleton()):
-        return clt.get_users_by_usernames(self.names)
+    @handle_twitter_client_error
+    def __call__(self, clt: Client):
+        if not clt:
+            clt = Client.singleton()
 
-
-def split_to_one_hundred(lst: list):
-    """
-    Some Twitter API limits the number of usernames in a single request up to 100,
-    at least we needn't query one by one.
-    """
-    for i in range(0, len(lst), 100):
-        yield lst[i:i + 100]
+        return rx.from_iterable(self.names).pipe(
+            # Some Twitter API limits the number of usernames in a single request up to 100 like this one.
+            # At least we needn't query one by one.
+            ops.buffer_with_count(100),
+            ops.map(clt.get_users_by_usernames),
+            ops.flat_map(lambda x: x),
+        )
