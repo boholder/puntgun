@@ -23,11 +23,11 @@ users:
   # user source rule
   from:
     # '@Alice', '@Bob' and '@Charlie'
-    - name: [ 'Alice', 'Bob', 'Charlie' ]
+    - names: [ 'Alice', 'Bob', 'Charlie' ]
   # user filter rule
   that:
     - follower:
-        less_that: 10
+        less_than: 10
   # user action rule 
   do:
     - block
@@ -40,7 +40,34 @@ users:
 
 Currently, the tool only support processing Twitter accounts (blocking accounts for example), but we left a place for processing tweets in the future (like deleting embarrassing past tweets).
 
+Some rules contain fields that worth a paragraph to explain, but if we put all the details into this single page, it will be too long. So here we just list all the available rules with a brief description, and leave the details in other corresponding pages.
+
 ## User rules
 
-### User Action rules
+### User source rules
 
+#### names
+
+```yaml
+users:
+  from:
+    - names: [ 'Alice', 'Bob', 'Charlie' ]
+```
+
+Specify users in a list of [username](https://help.twitter.com/en/managing-your-account/change-twitter-handle) (also called "handle" by Twitter) as source. Usernames are easy to get, so this rule is pretty good for your first try with a handful usernames. Manually typing down or parsing amount of usernames is awkward and not recommended.
+
+### User filter rules
+
+#### follower
+
+```yaml
+users:
+  that:
+    - follower:
+        less_than: 10
+        more_than: 5
+```
+
+Follower count itself doesn't tell much, but it's good to have a filter rule to set the absolute range.
+
+### User action rules
