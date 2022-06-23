@@ -4,10 +4,9 @@ import pytest
 import tweepy
 from dynaconf import Dynaconf
 
-from conf import secret
-from puntgun.conf.encrypto import generate_private_key
-from puntgun.conf.secret import encrypt_and_save_secrets_into_file, load_and_decrypt_secret_from_settings, \
-    load_or_request_api_secrets, load_or_request_access_token_secrets, TwitterAPISecrets
+from conf.encrypto import generate_private_key
+from conf.secret import encrypt_and_save_secrets_into_file, load_and_decrypt_secret_from_settings, \
+    load_or_request_api_secrets, load_or_request_access_token_secrets, TwitterAPISecrets, secrets_config_file_valid
 
 
 def test_secrets_save_and_load_via_settings_file(tmp_path):
@@ -32,13 +31,13 @@ def test_secrets_config_file_exists_check(monkeypatch, tmp_path):
 
     # blank = invalid
     save_content_to_file('   \n\t')
-    assert secret.secrets_config_file_valid() is False
+    assert secrets_config_file_valid() is False
     # has content = valid
     save_content_to_file('not empty')
-    assert secret.secrets_config_file_valid() is True
+    assert secrets_config_file_valid() is True
     # not exist = invalid
     monkeypatch.setattr('conf.config.secrets_config_file_path', tmp_path.joinpath('b.yml'))
-    assert secret.secrets_config_file_valid() is False
+    assert secrets_config_file_valid() is False
 
 
 @pytest.fixture
@@ -72,7 +71,7 @@ class TestLoadApiSecretsInteractively:
 
     def test_load_from_input(self, monkeypatch, mock_private_key_file):
         # load the private key, then enter two secrets
-        monkeypatch.setattr('builtins.input', Mock(side_effect=['pwd', 'y', 'key', 'y', 'secret', 'y']))
+        monkeypatch.setattr('builtins.input', Mock(side_effect=['key', 'y', 'secret', 'y']))
         self.assert_result()
 
     @staticmethod

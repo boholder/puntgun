@@ -1,6 +1,6 @@
 import pytest
 
-from puntgun.conf.encrypto import generate_private_key, dump_private_key
+from conf.encrypto import generate_private_key, dump_private_key
 
 
 def experimental(func):

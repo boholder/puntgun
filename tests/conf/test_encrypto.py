@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from puntgun.conf.encrypto import load_private_key, encrypt, decrypt, \
+from conf.encrypto import load_private_key, encrypt, decrypt, \
     load_or_generate_private_key
 
 
