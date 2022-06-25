@@ -6,8 +6,15 @@ import reactivex.operators as ops
 from reactivex.internal import SequenceContainsNoElementsError
 
 import client
-from user import User
-from user.source_rules import NameUserSourceRule, IdUserSourceRule
+from rules.user import User
+from rules.user.source_rules import NameUserSourceRule, IdUserSourceRule
+
+
+@pytest.fixture
+def mock_client(monkeypatch):
+    c = MagicMock()
+    monkeypatch.setattr(client.Client, 'singleton', lambda: c)
+    return c
 
 
 def test_name_user_source_rule(mock_client):
@@ -97,10 +104,3 @@ def test_id_user_source_rule(mock_client):
     assert mock_get_users_by_ids.call_count == count == 2
     assert mock_get_users_by_ids.call_args_list[0] == call([1] * 100)
     assert mock_get_users_by_ids.call_args_list[1] == call([2])
-
-
-@pytest.fixture
-def mock_client(monkeypatch):
-    c = MagicMock()
-    monkeypatch.setattr(client.Client, 'singleton', lambda: c)
-    return c

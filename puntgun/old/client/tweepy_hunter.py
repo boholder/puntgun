@@ -10,7 +10,7 @@ from tweepy import Client, OAuth1UserHandler
 import util
 from puntgun.old.client.hunter import Hunter, MixedResultProcessingWrapper
 from model.errors import TwitterApiErrors, TwitterClientError
-from user import User
+from rules.user import User
 
 NO_VALUE_PROVIDED = 'No value provided.'
 

@@ -6,7 +6,7 @@ import tweepy
 from hamcrest import assert_that, is_
 
 from client import Client, ResourceNotFoundError
-from user import User
+from rules.user import User
 
 create_time = datetime.now()
 image_url = 'https://example.com'
@@ -14,10 +14,10 @@ image_url = 'https://example.com'
 
 class TestUserQuerying:
     """
-    For now, I figure out there are three kinds of user datas in response (responded by Twitter(tweepy.Client)):
-        1. user who has pinned tweet, user data in "data" field, pinned tweet in "includes.tweets" field
-        2. user who doesn't have pinned tweet, only user data in "data" field
-        3. user does not exist (returned in "errors" field)
+    For now, I figure out there are three kinds of rules datas in response (responded by Twitter(tweepy.Client)):
+        1. rules who has pinned tweet, rules data in "data" field, pinned tweet in "includes.tweets" field
+        2. rules who doesn't have pinned tweet, only rules data in "data" field
+        3. rules does not exist (returned in "errors" field)
 
     The test cases are simulating these situations, test datas are from real responses.
     There are some cases also test the constructing and default value replacing logic of :class:`User`.
@@ -117,8 +117,8 @@ class TestUserQuerying:
     def not_exist_user_response(self):
         return tweepy.Response(data=None, includes={}, meta={},
                                errors=[{'value': 'ErrorUser',
-                                        'detail': 'Could not find user with username: [ErrorUser].',
-                                        'title': 'Not Found Error', 'resource_type': 'user',
+                                        'detail': 'Could not find rules with username: [ErrorUser].',
+                                        'title': 'Not Found Error', 'resource_type': 'rules',
                                         'parameter': 'username',
                                         'resource_id': 'ErrorUser',
                                         'type': 'https://api.twitter.com/2/problems/resource-not-found'}]
@@ -172,5 +172,5 @@ class TestUserQuerying:
         assert_that(error.title, is_('Not Found Error'))
         assert_that(error.parameter, is_('username'))
         assert_that(error.value, is_('ErrorUser'))
-        assert_that(error.detail, is_('Could not find user with username: [ErrorUser].'))
+        assert_that(error.detail, is_('Could not find rules with username: [ErrorUser].'))
         assert_that(error.ref_url, is_('https://api.twitter.com/2/problems/resource-not-found'))

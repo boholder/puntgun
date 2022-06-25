@@ -1,4 +1,4 @@
-from user import User
+from rules.user import User
 
 
 class Context(object):

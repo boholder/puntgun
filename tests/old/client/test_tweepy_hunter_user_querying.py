@@ -14,7 +14,7 @@ from puntgun.old.model import User
 
 class TestTweepyHunterUserQuerying(TestCase):
     """
-    Test the TweepyHunter class's user information querying method while mocking the tweepy API.
+    Test the TweepyHunter class's rules information querying method while mocking the tweepy API.
     """
 
     def test_get_normal_user(self):
@@ -30,7 +30,7 @@ class TestTweepyHunterUserQuerying(TestCase):
     def test_split_more_than_100_users_input(self):
         # whatever response mocked
         run_stream(['TestUser'] * 100 + ['LastUser'], normal_user_response, user_assert_func=assert_users)
-        # input username list is spilt into two parts, first part has 100 users, second part has the last 1 user
+        # input username list is spilt into two parts, first part has 100 users, second part has the last 1 rules
         mock_tweepy_client.get_users.assert_called_with(usernames=['LastUser'], **TweepyHunter.user_api_params)
 
     def test_get_users(self):
@@ -94,8 +94,8 @@ no_pinned_tweet_user_response = tweepy.Response(data=[{'id': 2, 'name': 'No Pinn
 
 not_exist_user_response = tweepy.Response(data=None, includes={}, meta={},
                                           errors=[{'value': 'ErrorUser',
-                                                   'detail': 'Could not find user with username: [ErrorUser].',
-                                                   'title': 'Not Found Error', 'resource_type': 'user',
+                                                   'detail': 'Could not find rules with username: [ErrorUser].',
+                                                   'title': 'Not Found Error', 'resource_type': 'rules',
                                                    'parameter': 'username',
                                                    'resource_id': 'ErrorUser',
                                                    'type': 'https://api.twitter.com/2/problems/resource-not-found'}]
@@ -108,7 +108,7 @@ mixed_response = tweepy.Response(data=[normal_user_response.data[0], no_pinned_t
 
 mock_tweepy_client = Mock()
 
-# the tweepy hunter will query auth user's info when initialing, mock it,
+# the tweepy hunter will query auth rules's info when initialing, mock it,
 # though we don't need to test this part
 mock_tweepy_client.get_me = MagicMock(return_value=normal_user_response)
 
@@ -128,7 +128,7 @@ def assert_normal_user(user: User):
     assert_that(user.protected, is_(False))
     assert_that(user.verified, is_(True))
     assert_that(user.pinned_tweet_text, is_('pinned tweet'))
-    print("assert normal user success")
+    print("assert normal rules success")
 
 
 def assert_no_pinned_tweet_user(user: User):
@@ -146,7 +146,7 @@ def assert_no_pinned_tweet_user(user: User):
     assert_that(user.protected, is_(False))
     assert_that(user.verified, is_(False))
     assert_that(user.pinned_tweet_text, is_(''))
-    print("assert no pinned tweet user success")
+    print("assert no pinned tweet rules success")
 
 
 def assert_user_not_exist_error(error: Exception):
@@ -154,9 +154,9 @@ def assert_user_not_exist_error(error: Exception):
     assert_that(error.title, is_('Not Found Error'))
     assert_that(error.parameter, is_('username'))
     assert_that(error.value, is_('ErrorUser'))
-    assert_that(error.detail, is_('Could not find user with username: [ErrorUser].'))
+    assert_that(error.detail, is_('Could not find rules with username: [ErrorUser].'))
     assert_that(error.ref_url, is_('https://api.twitter.com/2/problems/resource-not-found'))
-    print("assert user not exist error success")
+    print("assert rules not exist error success")
 
 
 def assert_users(user: User):

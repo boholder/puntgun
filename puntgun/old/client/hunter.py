@@ -5,7 +5,7 @@ from reactivex import operators as op
 
 from model.errors import TwitterApiError
 from puntgun.old.model.tweet import Tweet
-from user import User
+from rules.user import User
 
 
 class MixedResultProcessingWrapper(object):

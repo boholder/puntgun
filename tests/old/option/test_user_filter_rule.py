@@ -94,7 +94,7 @@ class TestUserTextsMatchFilterRule(TestCase):
         rule = UserTextsMatchFilterRule.build(self.get_yaml_parsed(regex))
         texts = [text, '', '']
         for _ in range(3):
-            # rotate valid text to different position to represent different user text
+            # rotate valid text to different position to represent different rules text
             texts = texts[1:] + [texts[0]]
             assert_that(rule.judge(self.user_texts_are(texts)), is_(expected))
 
