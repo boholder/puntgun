@@ -174,6 +174,20 @@ class Client(object):
 
         return self.__user_resp_to_user_instances(get_users_by_name(usernames=names, **self.__user_api_params))
 
+    def get_users_by_ids(self, ids: List[int]):
+        """
+        Calling :meth:`tweepy.Client.get_users`.
+        https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users
+        """
+        if len(ids) > 100:
+            raise ValueError('at most 100 user ids per request')
+
+        @record_twitter_api_errors
+        def get_users_by_id(**kwargs):
+            return self.clt.get_users(**kwargs)
+
+        return self.__user_resp_to_user_instances(get_users_by_id(ids=ids, **self.__user_api_params))
+
     @staticmethod
     def __user_resp_to_user_instances(resp: tweepy.Response):
         """Build a list of :class:`User` instances from one response."""

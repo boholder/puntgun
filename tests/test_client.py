@@ -33,22 +33,40 @@ class TestUserQuerying:
     def test_get_normal_user(self, normal_user_response, mock_tweepy_client):
         self.assert_normal_user(
             Client(mock_tweepy_client(normal_user_response)).get_users_by_usernames(['whatever'])[0])
+        self.assert_normal_user(
+            Client(mock_tweepy_client(normal_user_response)).get_users_by_ids([1])[0])
 
     def test_get_no_pinned_tweet_user(self, no_pinned_tweet_user_response, mock_tweepy_client):
         self.assert_no_pinned_tweet_user(
             Client(mock_tweepy_client(no_pinned_tweet_user_response)).get_users_by_usernames(['whatever'])[0])
+        self.assert_no_pinned_tweet_user(
+            Client(mock_tweepy_client(no_pinned_tweet_user_response)).get_users_by_ids([1])[0])
 
     def test_get_not_exist_user(self, not_exist_user_response, mock_tweepy_client, monkeypatch):
+        # check get by username method
         mock_recorder = MagicMock()
         monkeypatch.setattr('recorder.Recorder.record', mock_recorder)
         Client(mock_tweepy_client(not_exist_user_response)).get_users_by_usernames(['whatever'])
         # recorder received api error
         self.assert_user_not_exist_error(mock_recorder)
 
+        # check get by id method
+        mock_recorder.reset_mock()
+        Client(mock_tweepy_client(not_exist_user_response)).get_users_by_ids([1])
+        self.assert_user_not_exist_error(mock_recorder)
+
     def test_get_all_users(self, mixed_response, mock_tweepy_client, monkeypatch):
+        # check get by username method
         mock_recorder = MagicMock()
         monkeypatch.setattr('recorder.Recorder.record', mock_recorder)
         users = Client(mock_tweepy_client(mixed_response)).get_users_by_usernames(['whatever'])
+        self.assert_normal_user(users[0])
+        self.assert_no_pinned_tweet_user(users[1])
+        self.assert_user_not_exist_error(mock_recorder)
+
+        # check get by id method
+        mock_recorder.reset_mock()
+        users = Client(mock_tweepy_client(mixed_response)).get_users_by_ids([1])
         self.assert_normal_user(users[0])
         self.assert_no_pinned_tweet_user(users[1])
         self.assert_user_not_exist_error(mock_recorder)
