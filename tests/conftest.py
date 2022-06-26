@@ -1,5 +1,8 @@
+from unittest.mock import MagicMock
+
 import pytest
 
+import client
 from conf.encrypto import generate_private_key, dump_private_key
 
 
@@ -25,3 +28,11 @@ def generated_key_file(tmp_path):
 def mock_private_key_file(monkeypatch, generated_key_file):
     monkeypatch.setattr('conf.config.pri_key_file_path', generated_key_file[0])
     return generated_key_file
+
+
+@pytest.fixture
+def mock_client(monkeypatch):
+    c = MagicMock()
+    # set client field for each rule to mock_client
+    monkeypatch.setattr(client.Client, 'singleton', lambda: c)
+    return c

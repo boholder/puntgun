@@ -223,3 +223,26 @@ class Client(object):
         """
 
         return self.clt.block(target_user_id=target_user_id).data['blocking']
+
+
+class NeedsClient(object):
+    """
+    Some rules need a :class:`Client` to call for getting extra information.
+    This class provides a lazy loading client field (call Client.singleton()).
+
+    This class can also be used to label filter rules that take time to run their judgements
+    (because they need to query Twitter API) and can't return immediately.
+    """
+
+    @property
+    def client(self) -> Client:
+        """
+        Lazy load the client field to avoid:
+        run unit test -> initialize this class -> call Client.singleton() -> require terminal input -> test fail
+        https://github.com/samuelcolvin/pydantic/issues/1035#issuecomment-559043877
+        """
+        client = self.__dict__.get('client')
+        if client is None:
+            client = Client.singleton()
+            self.__dict__['client'] = client
+        return client

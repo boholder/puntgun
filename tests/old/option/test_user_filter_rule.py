@@ -24,8 +24,8 @@ class TestUserCreatedFilterRule(TestCase):
 
     def test_before(self):
         rule = UserCreatedFilterRule.build({'before': '2018-01-01'})
-        assert_that(rule.judge(self.user_create_at('2020-01-01')), is_(False))
-        assert_that(rule.judge(self.user_create_at('2015-01-01')), is_(True))
+        assert_that(rule.compare(self.user_create_at('2020-01-01')), is_(False))
+        assert_that(rule.compare(self.user_create_at('2015-01-01')), is_(True))
 
     def test_after(self):
         self.assert_after(UserCreatedFilterRule.build({'after': '2018-01-01'}))
@@ -34,16 +34,16 @@ class TestUserCreatedFilterRule(TestCase):
         self.assert_after(UserCreatedAfterFilterRule.build('2018-01-01'))
 
     def assert_after(self, rule):
-        assert_that(rule.judge(self.user_create_at('2020-01-01')), is_(True))
-        assert_that(rule.judge(self.user_create_at('2015-01-01')), is_(False))
+        assert_that(rule.compare(self.user_create_at('2020-01-01')), is_(True))
+        assert_that(rule.compare(self.user_create_at('2015-01-01')), is_(False))
 
     def test_before_after(self):
         rule = UserCreatedFilterRule.build({'after': '2018-01-01 12:30:40', 'before': '2020-01-01 12:30:50'})
         # edge cases are True
-        assert_that(rule.judge(self.user_create_at('2020-01-01 12:30:40')), is_(True))
-        assert_that(rule.judge(self.user_create_at('2018-01-01 12:30:50')), is_(True))
+        assert_that(rule.compare(self.user_create_at('2020-01-01 12:30:40')), is_(True))
+        assert_that(rule.compare(self.user_create_at('2018-01-01 12:30:50')), is_(True))
         # a normal one
-        assert_that(rule.judge(self.user_create_at('2019-01-01 00:00:00')), is_(True))
+        assert_that(rule.compare(self.user_create_at('2019-01-01 00:00:00')), is_(True))
 
     def test_within_days(self):
         self.assert_within_days(UserCreatedFilterRule.build({'within_days': 10}))
@@ -54,8 +54,8 @@ class TestUserCreatedFilterRule(TestCase):
     @staticmethod
     def assert_within_days(rule):
         now = dt.utcnow()
-        assert_that(rule.judge(Context(User(created_at=now - datetime.timedelta(days=5)))), is_(True))
-        assert_that(rule.judge(Context(User(created_at=now - datetime.timedelta(days=20)))), is_(False))
+        assert_that(rule.compare(Context(User(created_at=now - datetime.timedelta(days=5)))), is_(True))
+        assert_that(rule.compare(Context(User(created_at=now - datetime.timedelta(days=20)))), is_(False))
 
     @staticmethod
     def user_create_at(time: str):
@@ -96,7 +96,7 @@ class TestUserTextsMatchFilterRule(TestCase):
         for _ in range(3):
             # rotate valid text to different position to represent different rules text
             texts = texts[1:] + [texts[0]]
-            assert_that(rule.judge(self.user_texts_are(texts)), is_(expected))
+            assert_that(rule.compare(self.user_texts_are(texts)), is_(expected))
 
     def get_yaml_parsed(self, regex: str):
         return self.yaml.safe_load('regex: ' + regex).get('regex')
@@ -141,7 +141,7 @@ class IntComparingFilterRuleTestCase(TestCase):
 class TestUserFollowerFilterRule(IntComparingFilterRuleTestCase):
     def setUp(self) -> None:
         self.build_func = lambda config: UserFollowerFilterRule.build(config)
-        self.judge_func = lambda rule, num: rule.judge(Context(User(followers_count=num)))
+        self.judge_func = lambda rule, num: rule.compare(Context(User(followers_count=num)))
 
     def test_shorten_less_than(self):
         rule = UserFollowerLessThanFilterRule.build(10)
@@ -152,7 +152,7 @@ class TestUserFollowerFilterRule(IntComparingFilterRuleTestCase):
 class TestUserFollowingFilterRule(IntComparingFilterRuleTestCase):
     def setUp(self) -> None:
         self.build_func = lambda config: UserFollowingFilterRule.build(config)
-        self.judge_func = lambda rule, num: rule.judge(Context(User(following_count=num)))
+        self.judge_func = lambda rule, num: rule.compare(Context(User(following_count=num)))
 
     def test_shorten_more_than(self):
         rule = UserFollowingMoreThanFilterRule.build(10)

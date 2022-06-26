@@ -5,7 +5,7 @@ from loguru import logger
 from pydantic import BaseModel
 from reactivex import operators as ops
 
-from client import Client
+from client import NeedsClient
 
 
 def handle_errors(func):
@@ -29,7 +29,7 @@ class UserSourceRule(object):
     """
 
 
-class NameUserSourceRule(BaseModel, UserSourceRule):
+class NameUserSourceRule(BaseModel, NeedsClient, UserSourceRule):
     """
     Queries Twitter client with provided usernames.
     The "username" is that "@foobar" one, Twitter calls it "handle".
@@ -38,21 +38,18 @@ class NameUserSourceRule(BaseModel, UserSourceRule):
     names: List[str]
 
     @handle_errors
-    def __call__(self, clt: Client):
-        if not clt:
-            clt = Client.singleton()
-
+    def __call__(self):
         return rx.from_iterable(self.names).pipe(
             # Some Twitter API limits the number of usernames
             # in a single request up to 100 like this one.
             # At least we needn't query one by one.
             ops.buffer_with_count(100),
-            ops.map(clt.get_users_by_usernames),
+            ops.map(self.client.get_users_by_usernames),
             ops.flat_map(lambda x: x),
         )
 
 
-class IdUserSourceRule(BaseModel, UserSourceRule):
+class IdUserSourceRule(BaseModel, NeedsClient, UserSourceRule):
     """
     Queries Twitter client with provided user IDs.
     You can find someone's user id when logining to Twitter
@@ -61,13 +58,10 @@ class IdUserSourceRule(BaseModel, UserSourceRule):
     ids: List[int]
 
     @handle_errors
-    def __call__(self, clt: Client):
-        if not clt:
-            clt = Client.singleton()
-
+    def __call__(self):
         return rx.from_iterable(self.ids).pipe(
             # this api also allows to query 100 users at once.
             ops.buffer_with_count(100),
-            ops.map(clt.get_users_by_ids),
+            ops.map(self.client.get_users_by_ids),
             ops.flat_map(lambda x: x),
         )

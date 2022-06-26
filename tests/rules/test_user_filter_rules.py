@@ -2,7 +2,7 @@ import pytest
 from hamcrest import assert_that, is_, contains_string
 from pydantic import ValidationError
 
-from rules.user.filter_rules import NumericFilterRule
+from rules import NumericFilterRule
 
 
 class TestNumericUserFilterRule:
@@ -17,19 +17,19 @@ class TestNumericUserFilterRule:
 
     def test_single_less_than(self, rule):
         r = rule({'less_than': 10})
-        assert_that(r.judge(5), is_(True))
-        assert_that(r.judge(20), is_(False))
+        assert_that(r.compare(5), is_(True))
+        assert_that(r.compare(20), is_(False))
 
     def test_single_more_than(self, rule):
         r = rule({'more_than': 10})
-        assert_that(r.judge(20), is_(True))
-        assert_that(r.judge(5), is_(False))
+        assert_that(r.compare(20), is_(True))
+        assert_that(r.compare(5), is_(False))
 
     def test_both_less_more(self, rule):
         r = rule({'less_than': 20, 'more_than': 10})
-        assert_that(r.judge(15), is_(True))
-        assert_that(r.judge(5), is_(False))
-        assert_that(r.judge(25), is_(False))
+        assert_that(r.compare(15), is_(True))
+        assert_that(r.compare(5), is_(False))
+        assert_that(r.compare(25), is_(False))
         # edge case (equal) result in False.
-        assert_that(r.judge(10), is_(False))
-        assert_that(r.judge(20), is_(False))
+        assert_that(r.compare(10), is_(False))
+        assert_that(r.compare(20), is_(False))

@@ -38,6 +38,7 @@ class User(BaseModel):
 
     @validator('location')
     def set_name(cls, loc):
+        # When 'location' is provided but the value is None, set it to default value.
         return loc or ''
 
     @validator('pinned_tweet_id')
