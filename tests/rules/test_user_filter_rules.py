@@ -2,13 +2,13 @@ import pytest
 from hamcrest import assert_that, is_, contains_string
 from pydantic import ValidationError
 
-from rules.user.filter_rules import NumericUserFilterRule
+from rules.user.filter_rules import NumericFilterRule
 
 
 class TestNumericUserFilterRule:
     @pytest.fixture
     def rule(self):
-        return lambda obj: NumericUserFilterRule.parse_obj(obj)
+        return lambda obj: NumericFilterRule.parse_obj(obj)
 
     def test_check_number_order(self, rule):
         with pytest.raises(ValidationError) as actual_error:

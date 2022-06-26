@@ -1,23 +1,27 @@
 """All the loaded settings and global variables for many modules to use."""
+from pathlib import Path
+
 from dynaconf import Dynaconf
 from from_root import from_root
+
+
+def path_to_str(path: Path):
+    return str(path.absolute())
+
 
 # where to find the config file:
 # .../project-root/conf
 config_dir_path = from_root('conf')
-config_dir_str: str = str(config_dir_path.absolute())
 
 # the dumped private key is stored in the config directory
 pri_key_file_path = config_dir_path.joinpath('.puntgun_rsa4096')
-pri_key_file_str = str(pri_key_file_path.absolute())
 
 # encrypted secrets are stored into this file
 secrets_config_file_path = config_dir_path.joinpath('.secrets.yml')
-secrets_config_file_str = str(secrets_config_file_path.absolute())
 
 # tool settings on the "global" level
-tool_config_files = [str(config_dir_path.joinpath('settings.yml').absolute()),
-                     secrets_config_file_str]
+tool_config_files = [str(config_dir_path.joinpath('settings.yml')),
+                     str(secrets_config_file_path)]
 
 # environment variables' prefix
 environment_variables_prefix = 'BULLET'

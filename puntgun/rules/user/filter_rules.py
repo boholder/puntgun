@@ -8,13 +8,14 @@ from rules.user import User
 class UserFilterRule(object):
     """
     Holds a set of value from plan configuration for constructing a predicative rule.
-    Takes **one** user instance each time and judges if this user's data triggers(fits) its condition.
+    Takes **one** :class:`User` instance each time and judges if this user's data triggers(fits) its condition.
     """
 
 
-class NumericUserFilterRule(BaseModel):
+class NumericFilterRule(BaseModel):
     """
-    A rule that checks if a user's numeric data fits a certain condition.
+    A rule that checks if a numeric value inside a pre-set range (min < v < max).
+    As you see, edge cases (equal) are falsy.
     """
     less_than = float(sys.maxsize)
     more_than = float(-sys.maxsize - 1)
@@ -36,14 +37,14 @@ class NumericUserFilterRule(BaseModel):
         return self.more_than < num < self.less_than
 
 
-class FollowerUserFilterRule(NumericUserFilterRule, UserFilterRule):
+class FollowerUserFilterRule(NumericFilterRule, UserFilterRule):
     """Check user's follower count."""
 
     def __call__(self, user: User):
         return super().judge(user.followers_count)
 
 
-class FollowingUserFilterRule(NumericUserFilterRule, UserFilterRule):
+class FollowingUserFilterRule(NumericFilterRule, UserFilterRule):
     """Check user's following count."""
 
     def __call__(self, user: User):

@@ -40,13 +40,13 @@ def load_or_generate_private_key():
         pri_key = generate_private_key()
         dump_private_key(pri_key, pwd, config.pri_key_file_path)
         print(f'The private key has been saved into the file'
-              f'({config.pri_key_file_str}).')
+              f'({config.pri_key_file_path}).')
         return pri_key
 
     if config.pri_key_file_path.exists():
         print(f"""
 Found the previous saved private key file. 
-({config.pri_key_file_str})
+({config.pri_key_file_path})
 Now please enter the password.
 
 If you've forget the password, just delete the private key file and the secrets file
@@ -66,7 +66,7 @@ And you should remember this password for using this tool in the future.
 
 If you can't remember it, 
 just delete the private key file and the secrets file in this directory and run it again.
-({config.config_dir_str})
+({config.config_dir_path})
 """)
 
         logger.info("Generated a new private key")

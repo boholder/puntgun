@@ -136,7 +136,7 @@ And we'll encrypt them before saving, it's time to load your private key.
                                               twitter_access_token_name: access_token_secrets.token,
                                               twitter_access_token_secret_name: access_token_secrets.secret
                                               })
-        print(f"Secrets saved into file.\n({config.secrets_config_file_str})")
+        print(f"Secrets saved into file.\n({config.secrets_config_file_path})")
     return {'ak': api_secrets.key,
             'aks': api_secrets.secret,
             'at': access_token_secrets.token,

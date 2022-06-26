@@ -3,3 +3,16 @@
 # or in the environment variables.
 
 name: bob
+
+users:
+  # user source rule
+  from:
+    # '@Alice', '@Bob' and '@Charlie'
+    - names: [ 'Alice', 'Bob', 'Charlie' ]
+  # user filter rule
+  that:
+    - follower:
+        less_than: 10
+  # user action rule
+  do:
+    - block
