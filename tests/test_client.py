@@ -1,5 +1,5 @@
 from datetime import datetime
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock
 
 import pytest
 import tweepy
@@ -10,6 +10,17 @@ from rules.user import User
 
 create_time = datetime.now()
 image_url = 'https://example.com'
+
+
+def response_with_data(data=None):
+    return tweepy.Response(data=data, errors=[], includes=[], meta={})
+
+
+@pytest.fixture
+def mock_tweepy_client():
+    mock_tweepy_client = MagicMock()
+    mock_tweepy_client.get_me = MagicMock(return_value=response_with_data())
+    return mock_tweepy_client
 
 
 class TestUserQuerying:
@@ -30,52 +41,50 @@ class TestUserQuerying:
     def test_response_translating(self, normal_user_response):
         self.assert_normal_user(Client._Client__user_resp_to_user_instances(normal_user_response)[0])
 
-    def test_get_normal_user(self, normal_user_response, mock_tweepy_client):
+    def test_get_normal_user(self, normal_user_response, mock_user_getting_tweepy_client):
         self.assert_normal_user(
-            Client(mock_tweepy_client(normal_user_response)).get_users_by_usernames(['whatever'])[0])
+            Client(mock_user_getting_tweepy_client(normal_user_response)).get_users_by_usernames(['whatever'])[0])
         self.assert_normal_user(
-            Client(mock_tweepy_client(normal_user_response)).get_users_by_ids([1])[0])
+            Client(mock_user_getting_tweepy_client(normal_user_response)).get_users_by_ids([1])[0])
 
-    def test_get_no_pinned_tweet_user(self, no_pinned_tweet_user_response, mock_tweepy_client):
+    def test_get_no_pinned_tweet_user(self, no_pinned_tweet_user_response, mock_user_getting_tweepy_client):
         self.assert_no_pinned_tweet_user(
-            Client(mock_tweepy_client(no_pinned_tweet_user_response)).get_users_by_usernames(['whatever'])[0])
+            Client(mock_user_getting_tweepy_client(no_pinned_tweet_user_response)).get_users_by_usernames(['whatever'])[
+                0])
         self.assert_no_pinned_tweet_user(
-            Client(mock_tweepy_client(no_pinned_tweet_user_response)).get_users_by_ids([1])[0])
+            Client(mock_user_getting_tweepy_client(no_pinned_tweet_user_response)).get_users_by_ids([1])[0])
 
-    def test_get_not_exist_user(self, not_exist_user_response, mock_tweepy_client, monkeypatch):
+    def test_get_not_exist_user(self, not_exist_user_response, mock_user_getting_tweepy_client, monkeypatch):
         # check get by username method
         mock_recorder = MagicMock()
         monkeypatch.setattr('recorder.Recorder.record', mock_recorder)
-        Client(mock_tweepy_client(not_exist_user_response)).get_users_by_usernames(['whatever'])
+        Client(mock_user_getting_tweepy_client(not_exist_user_response)).get_users_by_usernames(['whatever'])
         # recorder received api error
         self.assert_user_not_exist_error(mock_recorder)
 
         # check get by id method
         mock_recorder.reset_mock()
-        Client(mock_tweepy_client(not_exist_user_response)).get_users_by_ids([1])
+        Client(mock_user_getting_tweepy_client(not_exist_user_response)).get_users_by_ids([1])
         self.assert_user_not_exist_error(mock_recorder)
 
-    def test_get_all_users(self, mixed_response, mock_tweepy_client, monkeypatch):
+    def test_get_all_users(self, mixed_response, mock_user_getting_tweepy_client, monkeypatch):
         # check get by username method
         mock_recorder = MagicMock()
         monkeypatch.setattr('recorder.Recorder.record', mock_recorder)
-        users = Client(mock_tweepy_client(mixed_response)).get_users_by_usernames(['whatever'])
+        users = Client(mock_user_getting_tweepy_client(mixed_response)).get_users_by_usernames(['whatever'])
         self.assert_normal_user(users[0])
         self.assert_no_pinned_tweet_user(users[1])
         self.assert_user_not_exist_error(mock_recorder)
 
         # check get by id method
         mock_recorder.reset_mock()
-        users = Client(mock_tweepy_client(mixed_response)).get_users_by_ids([1])
+        users = Client(mock_user_getting_tweepy_client(mixed_response)).get_users_by_ids([1])
         self.assert_normal_user(users[0])
         self.assert_no_pinned_tweet_user(users[1])
         self.assert_user_not_exist_error(mock_recorder)
 
     @pytest.fixture
-    def mock_tweepy_client(self):
-        mock_tweepy_client = Mock()
-        mock_tweepy_client.get_me = MagicMock(return_value={'data': None})
-
+    def mock_user_getting_tweepy_client(self, mock_tweepy_client):
         def set_response(test_response_data):
             mock_tweepy_client.get_users = MagicMock(return_value=test_response_data)
             return mock_tweepy_client
@@ -174,3 +183,15 @@ class TestUserQuerying:
         assert_that(error.value, is_('ErrorUser'))
         assert_that(error.detail, is_('Could not find rules with username: [ErrorUser].'))
         assert_that(error.ref_url, is_('https://api.twitter.com/2/problems/resource-not-found'))
+
+
+class TestUserBlocking:
+    def test_success(self, mock_tweepy_client):
+        mock_tweepy_client.block = MagicMock(
+            return_value=response_with_data({'blocking': True}))
+        assert Client(mock_tweepy_client).block_user_by_id(123)
+
+    def test_fail(self, mock_tweepy_client):
+        mock_tweepy_client.block = MagicMock(
+            return_value=response_with_data({'blocking': False}))
+        assert not Client(mock_tweepy_client).block_user_by_id(123)

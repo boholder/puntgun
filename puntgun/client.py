@@ -1,5 +1,5 @@
 import functools
-from typing import List, Callable, Any
+from typing import List
 
 import tweepy
 from loguru import logger
@@ -93,19 +93,19 @@ class ResourceNotFoundError(TwitterApiError):
     title = 'Not Found Error'
 
 
-def record_twitter_api_errors(tweepy_invoking: Callable[[Any], tweepy.Response]):
+def record_twitter_api_errors(client_func):
     """
     Decorator for recording Twitter API errors returned by tweepy or Twitter server
     while invoking :class:`tweepy.Client`.
     """
 
     def record_api_errors(request_params, resp_errors):
-        Recorder.record(TwitterApiErrors(tweepy_invoking.__name__, request_params, resp_errors))
+        Recorder.record(TwitterApiErrors(str(client_func), request_params, resp_errors))
 
     def decorator(*args, **kwargs):
         try:
-            resp = tweepy_invoking(*args, **kwargs)
-            if hasattr(resp, "errors"):
+            resp = client_func(*args, **kwargs)
+            if hasattr(resp, 'errors'):
                 record_api_errors(kwargs, resp.errors)
             return resp
         except tweepy.errors.TweepyException as e:
@@ -144,9 +144,17 @@ class Client(object):
                          'tweet_fields': ['text']}
 
     def __init__(self, tweepy_client: tweepy.Client):
+        # Add a decorator to record Twitter API errors in response on every call to the tweepy client.
+        # can't call '__name__' on mocked functions (MagicMock) even use mock.configure_mock(__name__='...')
+        # so manually set the function names rather than using fn.__name__
+        for name, fn in [('get_users', tweepy_client.get_users), ('block', tweepy_client.block)]:
+            setattr(tweepy_client, name, record_twitter_api_errors(fn))
+
         self.clt = tweepy_client
         # tweepy 4.10.0 changed return structure of tweepy.Client.get_me()
-        self.me = User.from_response(self.clt.get_me()['data'], '')
+        # it's different from tweepy.Client.get_user()'s return structure
+        # it's not the "data: [my_data]", but "data: my_data"
+        self.me = User.from_response(self.clt.get_me().data, '')
         self.id = self.me.id
         self.name = self.me.name
         logger.info(f'The client initialized as Twitter user: {self.name}')
@@ -163,30 +171,24 @@ class Client(object):
     def get_users_by_usernames(self, names: List[str]):
         """
         Calling :meth:`tweepy.Client.get_users`.
+        **rate limit: 900 / 15 min**
         https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-by
         """
         if len(names) > 100:
             raise ValueError('at most 100 usernames per request')
 
-        @record_twitter_api_errors
-        def get_users_by_name(**kwargs):
-            return self.clt.get_users(**kwargs)
-
-        return self.__user_resp_to_user_instances(get_users_by_name(usernames=names, **self.__user_api_params))
+        return self.__user_resp_to_user_instances(self.clt.get_users(usernames=names, **self.__user_api_params))
 
     def get_users_by_ids(self, ids: List[int]):
         """
         Calling :meth:`tweepy.Client.get_users`.
+        **rate limit: 900 / 15 min**
         https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users
         """
         if len(ids) > 100:
             raise ValueError('at most 100 user ids per request')
 
-        @record_twitter_api_errors
-        def get_users_by_id(**kwargs):
-            return self.clt.get_users(**kwargs)
-
-        return self.__user_resp_to_user_instances(get_users_by_id(ids=ids, **self.__user_api_params))
+        return self.__user_resp_to_user_instances(self.clt.get_users(ids=ids, **self.__user_api_params))
 
     @staticmethod
     def __user_resp_to_user_instances(resp: tweepy.Response):
@@ -208,3 +210,16 @@ class Client(object):
             return User.from_response(data, pinned_tweet_text)
 
         return [resp_to_user(d) for d in resp.data]
+
+    def block_user_by_id(self, target_user_id: int | str) -> bool:
+        """
+        Calling :meth:`tweepy.Client.block`.
+        The rate limit is pretty slow, and somehow I think this is the bottleneck of whole pipeline
+        if you don't use complex rules.
+        Sadly, the former block list CSV import method is no longer available.
+        **rate limit: 50 / 15 min**
+        https://help.twitter.com/en/using-twitter/advanced-twitter-block-options
+        https://developer.twitter.com/en/docs/twitter-api/users/blocks/api-reference/post-users-user_id-blocking
+        """
+
+        return self.clt.block(target_user_id=target_user_id).data['blocking']

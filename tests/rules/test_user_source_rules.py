@@ -57,7 +57,7 @@ def test_client_error_catching(mock_client):
 
 def test_what_happen_when_client_returns_empty_list_as_result(mock_client):
     # the client returns an empty list
-    mock_get_users_by_usernames = MagicMock(return_values=[])
+    mock_get_users_by_usernames = MagicMock(return_value=[])
     mock_client.get_users_by_usernames = mock_get_users_by_usernames
     rule = NameUserSourceRule.parse_obj({'names': ['uname']})
 
