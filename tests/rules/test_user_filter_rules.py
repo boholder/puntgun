@@ -6,7 +6,7 @@ from rules.user.filter_rules import NumericUserFilterRule
 
 
 class TestNumericUserFilterRule:
-    @pytest.fixture()
+    @pytest.fixture
     def rule(self):
         return lambda obj: NumericUserFilterRule.parse_obj(obj)
 
@@ -17,19 +17,19 @@ class TestNumericUserFilterRule:
 
     def test_single_less_than(self, rule):
         r = rule({'less_than': 10})
-        assert_that(r(5), is_(True))
-        assert_that(r(20), is_(False))
+        assert_that(r.judge(5), is_(True))
+        assert_that(r.judge(20), is_(False))
 
     def test_single_more_than(self, rule):
         r = rule({'more_than': 10})
-        assert_that(r(20), is_(True))
-        assert_that(r(5), is_(False))
+        assert_that(r.judge(20), is_(True))
+        assert_that(r.judge(5), is_(False))
 
     def test_both_less_more(self, rule):
         r = rule({'less_than': 20, 'more_than': 10})
-        assert_that(r(15), is_(True))
-        assert_that(r(5), is_(False))
-        assert_that(r(25), is_(False))
+        assert_that(r.judge(15), is_(True))
+        assert_that(r.judge(5), is_(False))
+        assert_that(r.judge(25), is_(False))
         # edge case (equal) result in False.
-        assert_that(r(10), is_(False))
-        assert_that(r(20), is_(False))
+        assert_that(r.judge(10), is_(False))
+        assert_that(r.judge(20), is_(False))

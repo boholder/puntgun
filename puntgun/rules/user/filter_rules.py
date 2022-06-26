@@ -8,8 +8,7 @@ from rules.user import User
 class UserFilterRule(object):
     """
     Holds a set of value from plan configuration for constructing a predicative rule.
-
-    Takes **one** user instance each time and judges if this user's data triggers(fits) its rule's condition.
+    Takes **one** user instance each time and judges if this user's data triggers(fits) its condition.
     """
 
 
@@ -33,7 +32,7 @@ class NumericUserFilterRule(BaseModel):
             raise ValueError(f"'less_than'({lt}) should be bigger than 'more_than'({mt})")
         return values
 
-    def __call__(self, num):
+    def judge(self, num):
         return self.more_than < num < self.less_than
 
 
@@ -41,11 +40,11 @@ class FollowerUserFilterRule(NumericUserFilterRule, UserFilterRule):
     """Check user's follower count."""
 
     def __call__(self, user: User):
-        return super().__call__(user.followers_count)
+        return super().judge(user.followers_count)
 
 
 class FollowingUserFilterRule(NumericUserFilterRule, UserFilterRule):
     """Check user's following count."""
 
     def __call__(self, user: User):
-        return super().__call__(user.following_count)
+        return super().judge(user.following_count)
