@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from client import NeedsClient
+from client import NeedClient
 from rules.user import User
 
 
@@ -11,7 +11,7 @@ class UserActionRule(object):
     """
 
 
-class BlockUserActionRule(BaseModel, NeedsClient, UserActionRule):
+class BlockUserActionRule(BaseModel, NeedClient, UserActionRule):
     """
     Block the given user.
     """

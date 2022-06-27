@@ -225,7 +225,7 @@ class Client(object):
         return self.clt.block(target_user_id=target_user_id).data['blocking']
 
 
-class NeedsClient(object):
+class NeedClient(object):
     """
     Some rules need a :class:`Client` to call for getting extra information.
     This class provides a lazy loading client field (call Client.singleton()).

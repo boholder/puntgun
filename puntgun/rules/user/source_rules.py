@@ -5,7 +5,7 @@ from loguru import logger
 from pydantic import BaseModel
 from reactivex import operators as ops
 
-from client import NeedsClient
+from client import NeedClient
 
 
 def handle_errors(func):
@@ -29,7 +29,7 @@ class UserSourceRule(object):
     """
 
 
-class NameUserSourceRule(BaseModel, NeedsClient, UserSourceRule):
+class NameUserSourceRule(BaseModel, NeedClient, UserSourceRule):
     """
     Queries Twitter client with provided usernames.
     The "username" is that "@foobar" one, Twitter calls it "handle".
@@ -49,7 +49,7 @@ class NameUserSourceRule(BaseModel, NeedsClient, UserSourceRule):
         )
 
 
-class IdUserSourceRule(BaseModel, NeedsClient, UserSourceRule):
+class IdUserSourceRule(BaseModel, NeedClient, UserSourceRule):
     """
     Queries Twitter client with provided user IDs.
     You can find someone's user id when logining to Twitter
