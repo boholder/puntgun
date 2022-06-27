@@ -5,7 +5,7 @@ from rules.user import User
 class UserFilterRule(object):
     """
     Holds a set of value from plan configuration for constructing a predicative rule.
-    Takes **one** :class:`User` instance each time and judges if this user's data triggers(fits) its condition.
+    Takes **one** :class:`User` instance each time and judges if this user's data triggers(meets) its condition.
     """
 
 

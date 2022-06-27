@@ -55,7 +55,7 @@ class IdUserSourceRule(BaseModel, NeedClient, UserSourceRule):
     You can find someone's user id when logining to Twitter
     via browser and check the XHRs with browser dev tool.
     """
-    ids: List[int]
+    ids: List[int | str]
 
     @handle_errors
     def __call__(self):

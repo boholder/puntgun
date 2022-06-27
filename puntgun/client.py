@@ -179,7 +179,7 @@ class Client(object):
 
         return self.__user_resp_to_user_instances(self.clt.get_users(usernames=names, **self.__user_api_params))
 
-    def get_users_by_ids(self, ids: List[int]):
+    def get_users_by_ids(self, ids: List[int | str]):
         """
         Calling :meth:`tweepy.Client.get_users`.
         **rate limit: 900 / 15 min**
