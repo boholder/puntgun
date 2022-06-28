@@ -3,6 +3,10 @@ from typing import Optional
 
 from pydantic import BaseModel, validator
 
+from rules.user.action_rules import UserActionRule
+from rules.user.filter_rules import UserFilterRule
+from rules.user.source_rules import UserSourceRule
+
 
 class User(BaseModel):
     """
@@ -67,4 +71,11 @@ class User(BaseModel):
     def __bool__(self):
         return bool(self.id)
 
+
 # TODO 在顶层action用流distinct控制所有 source rule 返回的用户流，过滤成唯一的流。
+
+class UserPlan(BaseModel):
+    name: str <- 如何验证必有 user_plan 字段？
+    sources: [UserSourceRule]
+    filters: Optional[UserFilterRule]
+    actions: [UserActionRule]

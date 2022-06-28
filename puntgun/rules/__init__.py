@@ -3,6 +3,12 @@ import sys
 from pydantic import BaseModel, root_validator
 
 
+class Rule(object):
+    """
+    How
+    """
+
+
 class NumericFilterRule(BaseModel):
     """
     A rule that checks if a numeric value inside a pre-set range (min < v < max).

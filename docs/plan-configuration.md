@@ -13,7 +13,6 @@ The example configuration is written in yaml format
 but you can also use [other supported formats](https://www.dynaconf.com/settings_files/#supported-formats)
 like .toml, .ini, .json. In this page we'll use yaml format.
 
-One plan configuration file can only contain one pipeline.
 A complete plan configuration contains at most three types of rules,
 they construct a processing pipeline:
 
@@ -25,42 +24,59 @@ We tried to make plan configurations look natural, one of the simplest is:
 
 ```yaml
 # this process line is for Twitter accounts (users)
-users:
-  from:
-    # '@Alice', '@Bob' and '@Charlie'
-    - names: [ 'Alice', 'Bob', 'Charlie' ]
-  that:
-    # who has less than 10 (0~9) followers
-    - follower:
-        less_than: 10
-  do:
-    # block them
-    - block
-
-# <process type>:
-#   from: <source rules>
-#   that: <filter rules>
-#   do: <action rules>
+plans:
+  # Name (explain) of this plan
+  - user_plan: Do block on three users depends on their follower number
+    from:
+      # '@Alice', '@Bob' and '@Charlie'
+      - names: [ 'Alice', 'Bob', 'Charlie' ]
+    that:
+      # who has less than 10 (0~9) followers
+      - follower:
+          less_than: 10
+    do:
+      # block them
+      - block
 ```
 
-Currently, the tool only support processing Twitter accounts (blocking accounts for example),
-but we left a place for processing tweets in the future (like deleting embarrassing past tweets).
+The syntax structure is:
+
+```yaml
+plans:
+  [ - <plan> ]
+
+# <plan>
+<plan_type>: <string>
+from: [ <source_rule> ]
+that: [ <filter_rule> ]
+do: [ <action_rule> ]
+```
 
 Some rules contain fields that worth a paragraph to explain,
 but if we put all the details into this single page, it will be too long.
 So here we just list all the available rules with a brief description,
 and leave the details in other corresponding pages.
 
-## User rules
+Currently, the tool only support processing Twitter accounts ("user_plan") (blocking accounts for example),
+but we left a place for processing tweets in the future (like deleting embarrassing past tweets).
 
-### User source rules
+## Plan
 
-#### ids
+integration : from all , that any, do all
+
+which is optional : that
+
+## Rule Sets
+
+any all
+
+## User source rules
+
+### ids
 
 ```yaml
-users:
-  from:
-    - ids: [ 123456789, 987654321 ]
+from:
+  - ids: [ 123456789, 987654321 ]
 ```
 
 Specify users with a list of user id as source.
@@ -70,12 +86,11 @@ If you want to get one user's id manually, maybe you can find it in the [Twitter
 And there are some online websites that allows you to get the id of a user with its name,
 google 'Twitter user id' and you'll find them.
 
-#### names
+### names
 
 ```yaml
-users:
-  from:
-    - names: [ 'Alice', 'Bob', 'Charlie' ]
+from:
+  - names: [ 'Alice', 'Bob', 'Charlie' ]
 ```
 
 Specify users with a list of [username](https://help.twitter.com/en/managing-your-account/change-twitter-handle)
@@ -83,46 +98,43 @@ Specify users with a list of [username](https://help.twitter.com/en/managing-you
 Usernames are easy to get, so this rule is pretty good for your first try with a handful usernames.
 Like the user id, manually typing down or parsing amount of usernames is awkward and not recommended.
 
-### User filter rules
+## User filter rules
 
-#### follower
+### follower
 
 ```yaml
-users:
-  that:
-    - follower:
-        less_than: 10
-        more_than: 5
+that:
+  - follower:
+      less_than: 10
+      more_than: 5
 
-    - follower-less-than: 10
+  - follower-less-than: 10
 ```
 
 Follower count itself doesn't tell much, but it's good to have a rule aiming at it.
 The `follower-less-than` is a shortcut for `follower: { less_than: n }`.
 
-#### following
+### following
 
 ```yaml
-users:
-  that:
-    - following:
-        less_than: 10
-        more_than: 5
+that:
+  - following:
+      less_than: 10
+      more_than: 5
 
-    - following-more-than: 5
+  - following-more-than: 5
 ```
 
 And... the following rule.
 
-### User action rules
+## User action rules
 
-#### block
+### block
 
 ```yaml
-users:
-  do:
-    - block:
-        block_already_followed: true
+do:
+  - block:
+      block_already_followed: true
 ```
 
 Block users that trigger the filter rules.

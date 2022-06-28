@@ -125,7 +125,7 @@ def load_or_request_all_secrets(pri_key):
     # Must save them at once because saving method will override the existing file.
     if not secrets_config_file_valid():
         print(f"""
-Before running the pipeline, we'd save secrets into a secret configuration file,
+Before running plans, we'd save secrets into a secret configuration file,
 so next time you running this tool you needn't enter these annoying unreadable tokens again.
 And we'll encrypt them before saving, it's time to load your private key.   
 """)

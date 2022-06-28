@@ -10,7 +10,7 @@ from client import NeedClient
 
 def handle_errors(func):
     def log_and_throw(e, _):
-        logger.error("An exception is thrown and stops the pipeline.")
+        logger.error("An exception is thrown from source rules and stops the pipeline.")
         return rx.throw(e)
 
     def wrapper(*args, **kwargs):
