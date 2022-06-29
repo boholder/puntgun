@@ -1,9 +1,26 @@
 import sys
+from typing import Type, Optional
 
 from pydantic import BaseModel, root_validator
 
 
-class NumericFilterRule(BaseModel):
+class Rule(BaseModel):
+    """
+    A template class for rule parsing, representing a rule that can be parsed from configuration.
+    """
+    keyword: Optional[str] = ''
+
+    @classmethod
+    def parse_from_config(cls, conf: dict):
+        """
+        Some rules declare fields which names are not the same as the configuration.
+        For example, the plan has a 'from' field which is a reserved keyword in Python.
+        So we need this adapter method to custom the parsing process when necessary.
+        """
+        return cls.parse_obj(conf)
+
+
+class NumericFilterRule(Rule):
     """
     A rule that checks if a numeric value inside a pre-set range (min < v < max).
     As you see, edge cases (equal) are falsy.
@@ -28,12 +45,14 @@ class NumericFilterRule(BaseModel):
         return self.more_than < num < self.less_than
 
 
-class RuleParser(object):
+def parse_one(conf: dict, expected_type: Type[Rule]):
     """
-    Take pieces of configuration from :class:`dynaconf.Dynaconf` in :class:`config`,
-    recognize which rule they are and parse them into rule instances.
+    Take a piece of configuration and the expected type from caller,
+    recognize which rule it is and parse it into corresponding rule instance.
     Only do the parsing work, won't construct them into cascade component instances.
     """
 
-    def parse(self, conf: map, expect_type):
-        没做
+    for subclass in expected_type.__subclasses__():
+        if conf[subclass.keyword]:
+            return subclass.parse_from_config(conf)
+    raise ValueError(f"Can't recognize the configuration: {conf} as a {expected_type}.")

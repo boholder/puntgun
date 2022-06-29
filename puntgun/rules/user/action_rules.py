@@ -1,6 +1,7 @@
-from pydantic import BaseModel
+from typing import Optional
 
 from client import NeedClient
+from rules import Rule
 from rules.user import User
 
 
@@ -11,10 +12,12 @@ class UserActionRule(object):
     """
 
 
-class BlockUserActionRule(BaseModel, NeedClient, UserActionRule):
+class BlockUserActionRule(Rule, NeedClient, UserActionRule):
     """
     Block the given user.
     """
+
+    keyword: Optional[str] = 'block'
 
     # TODO block_already_followed
     block_already_followed: bool = False

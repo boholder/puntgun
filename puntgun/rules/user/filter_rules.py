@@ -1,3 +1,5 @@
+from typing import Optional
+
 from rules import NumericFilterRule
 from rules.user import User
 
@@ -11,6 +13,7 @@ class UserFilterRule(object):
 
 class FollowerUserFilterRule(NumericFilterRule, UserFilterRule):
     """Check user's follower count."""
+    keyword: Optional[str] = 'follower'
 
     def __call__(self, user: User):
         return super().compare(user.followers_count)
@@ -18,6 +21,7 @@ class FollowerUserFilterRule(NumericFilterRule, UserFilterRule):
 
 class FollowingUserFilterRule(NumericFilterRule, UserFilterRule):
     """Check user's following count."""
+    keyword: Optional[str] = 'following'
 
     def __call__(self, user: User):
         return super().compare(user.following_count)

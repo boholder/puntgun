@@ -1,11 +1,11 @@
-from typing import List
+from typing import List, Optional
 
 import reactivex as rx
 from loguru import logger
-from pydantic import BaseModel
 from reactivex import operators as ops
 
 from client import NeedClient
+from rules import Rule
 
 
 def handle_errors(func):
@@ -29,12 +29,13 @@ class UserSourceRule(object):
     """
 
 
-class NameUserSourceRule(BaseModel, NeedClient, UserSourceRule):
+class NameUserSourceRule(Rule, NeedClient, UserSourceRule):
     """
     Queries Twitter client with provided usernames.
     The "username" is that "@foobar" one, Twitter calls it "handle".
     https://help.twitter.com/en/managing-your-account/change-twitter-handle
     """
+    keyword: Optional[str] = 'names'
     names: List[str]
 
     @handle_errors
@@ -49,12 +50,13 @@ class NameUserSourceRule(BaseModel, NeedClient, UserSourceRule):
         )
 
 
-class IdUserSourceRule(BaseModel, NeedClient, UserSourceRule):
+class IdUserSourceRule(Rule, NeedClient, UserSourceRule):
     """
     Queries Twitter client with provided user IDs.
     You can find someone's user id when logining to Twitter
     via browser and check the XHRs with browser dev tool.
     """
+    keyword: Optional[str] = 'ids'
     ids: List[int | str]
 
     @handle_errors
