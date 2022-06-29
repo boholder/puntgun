@@ -5,28 +5,37 @@ nav_order: 2
 
 # Plan Configuration
 
-This page describes configurations for one run of the tool, the core function of this tool -
+This page describes configurations for plan, one run of the tool -
 setting processing rules through the configuration file (also referred to as Plan).
+
+Some rules contain fields that worth a paragraph to explain,
+but if we put all the details into this single page, it will be too long.
+So here we just list all the available rules with a brief description,
+and leave the details in other corresponding pages.
 
 The example configuration is written in yaml format
 (you may want to learn about [yaml's syntax](https://yaml.org/)),
 but you can also use [other supported formats](https://www.dynaconf.com/settings_files/#supported-formats)
 like .toml, .ini, .json. In this page we'll use yaml format.
 
-A complete plan configuration contains at most three types of rules,
-they construct a processing pipeline:
+Currently, the tool only support processing Twitter accounts ("user_plan") (blocking accounts for example),
+but we left a place for processing tweets in the future (like deleting embarrassing past tweets).
+
+## How to write a plan
+
+One plan contains at most three types of rules, together they construct a processing pipeline:
 
 1. **Source rules** - Where to get source candidates (Twitter accounts or tweets)?
 2. **Filter rules** - (optional) What type(s) of candidates should be chosen from the source to take actions?
 3. **Action rules** - What actions to take on candidates that trigger filter rules?
 
-We tried to make plan configurations look natural, one of the simplest is:
+One plan configuration file can contain several plans (under field `plans`).
+We tried to make plan configuration look natural, one of the simplest is:
 
 ```yaml
-# this process line is for Twitter accounts (users)
 plans:
   # Name (explain) of this plan
-  - user_plan: Do block on three users depends on their follower number
+  - user_plan: Do block on three users depend on their follower number
     from:
       # '@Alice', '@Bob' and '@Charlie'
       - names: [ 'Alice', 'Bob', 'Charlie' ]
@@ -52,19 +61,35 @@ that: [ <filter_rule> ]
 do: [ <action_rule> ]
 ```
 
-Some rules contain fields that worth a paragraph to explain,
-but if we put all the details into this single page, it will be too long.
-So here we just list all the available rules with a brief description,
-and leave the details in other corresponding pages.
+As the filter rule is optional, we can directly take action on every user in the source:
 
-Currently, the tool only support processing Twitter accounts ("user_plan") (blocking accounts for example),
-but we left a place for processing tweets in the future (like deleting embarrassing past tweets).
+```yaml
+plans:
+  - user_plan: Again
+    from:
+      - names: [ 'Alice', 'Bob', 'Charlie' ]
+    do:
+      - block
+```
 
-## Plan
+## How plans are executed
 
-integration : from all , that any, do all
+Plans are executed in the order they are defined in the configuration file,
+one by one i.e. in parallel (so plans won't compete for limited API invocation resources).
 
-which is optional : that
+For a single plan:
+
+1. The source rules are executed first, results are default union together as one final set.
+2. Users in the source set are judged by a chain of filter rules,
+   results are default ORed together, so if any filter rule is matched,
+   that user will be considered as the target.
+3. The action rules are executed on the target set of users,
+   in the order they are defined in the configuration file.
+
+In natural language, the summary is:
+Run **all** `action_rule`s on targets from **any** `source_rule`  that trigger **any** `filter_rule`.
+
+You can arrange more complex but flexible executing orders by nesting rule sets below.
 
 ## Rule Sets
 

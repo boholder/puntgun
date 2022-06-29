@@ -3,12 +3,6 @@ import sys
 from pydantic import BaseModel, root_validator
 
 
-class Rule(object):
-    """
-    How
-    """
-
-
 class NumericFilterRule(BaseModel):
     """
     A rule that checks if a numeric value inside a pre-set range (min < v < max).
@@ -32,3 +26,14 @@ class NumericFilterRule(BaseModel):
 
     def compare(self, num):
         return self.more_than < num < self.less_than
+
+
+class RuleParser(object):
+    """
+    Take pieces of configuration from :class:`dynaconf.Dynaconf` in :class:`config`,
+    recognize which rule they are and parse them into rule instances.
+    Only do the parsing work, won't construct them into cascade component instances.
+    """
+
+    def parse(self, conf: map, expect_type):
+        没做
