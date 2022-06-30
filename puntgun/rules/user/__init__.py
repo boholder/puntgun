@@ -3,11 +3,6 @@ from typing import Optional
 
 from pydantic import BaseModel, validator
 
-from rules import Rule, parse_one
-from rules.user.action_rules import UserActionRule
-from rules.user.filter_rules import UserFilterRule
-from rules.user.source_rules import UserSourceRule
-
 
 class User(BaseModel):
     """
@@ -71,21 +66,3 @@ class User(BaseModel):
 
     def __bool__(self):
         return bool(self.id)
-
-
-# TODO 在顶层action用流distinct控制所有 source rule 返回的用户流，过滤成唯一的流。
-
-class UserPlan(Rule):
-    keyword: Optional[str] = 'user_plan'
-    name: str
-    sources: [UserSourceRule]
-    filters: Optional[UserFilterRule]
-    actions: [UserActionRule]
-
-    @classmethod
-    def parse_from_config(cls, conf: dict):
-        这里应该把所有异常收集成列表再打印，而且不该这里做。
-        return cls(name=conf['user_plan'],
-                   sources=[parse_one(c, UserSourceRule) for c in conf['from']],
-                   filters=[parse_one(c, UserFilterRule) for c in conf['that']],
-                   actions=[parse_one(c, UserActionRule) for c in conf['do']])

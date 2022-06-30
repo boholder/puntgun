@@ -1,5 +1,5 @@
 import sys
-from typing import Type, Optional
+from typing import Type, Optional, List
 
 from pydantic import BaseModel, root_validator
 
@@ -13,11 +13,47 @@ class Rule(BaseModel):
     @classmethod
     def parse_from_config(cls, conf: dict):
         """
-        Some rules declare fields which names are not the same as the configuration.
-        For example, the plan has a 'from' field which is a reserved keyword in Python.
-        So we need this adapter method to custom the parsing process when necessary.
+        There are some special cases when parsing a rule from configuration.
+        For example, some rules declare fields which names are not the same as the configuration:
+        the plan type has a 'from' field which is a reserved keyword in Python.
+
+        Anyway, we need this polymorphic method to let rules to custom their parsing processes.
         """
         return cls.parse_obj(conf)
+
+
+class ConfigParser(object):
+    __errors: List[Exception] = []
+
+    @staticmethod
+    def parse(conf: dict, expected_type: Type[Rule]):
+        """
+        Take a piece of configuration and the expected type from caller,
+        recognize which rule it is and parse it into corresponding rule instance.
+        Only do the find & parse work, won't construct them into cascade component instances.
+
+        Collect errors occurred during parsing,
+        by this way we won't break the whole parsing process with error raising.
+        So that we can report all errors at once after finished all parsing
+        and user can fix them at once without running over again for configuration validation.
+        """
+
+        for subclass in expected_type.__subclasses__():
+            if subclass.keyword in conf:
+                try:
+                    # let the subclass itself decide how to parse
+                    return subclass.parse_from_config(conf)
+                except Exception as e:
+                    # catch validation exceptions raised by pydantic and store them
+                    ConfigParser.__errors.append(e)
+                    return None
+
+        ConfigParser.__errors.append(
+            ValueError(f"Can't parse this to the [{expected_type}] type: {conf}"))
+
+    @staticmethod
+    def get_errors():
+        return ConfigParser.__errors
 
 
 class NumericFilterRule(Rule):
@@ -43,16 +79,3 @@ class NumericFilterRule(Rule):
 
     def compare(self, num):
         return self.more_than < num < self.less_than
-
-
-def parse_one(conf: dict, expected_type: Type[Rule]):
-    """
-    Take a piece of configuration and the expected type from caller,
-    recognize which rule it is and parse it into corresponding rule instance.
-    Only do the parsing work, won't construct them into cascade component instances.
-    """
-
-    for subclass in expected_type.__subclasses__():
-        if conf[subclass.keyword]:
-            return subclass.parse_from_config(conf)
-    raise ValueError(f"Can't recognize the configuration: {conf} as a {expected_type}.")
