@@ -17,13 +17,17 @@ class Rule(BaseModel, abc.ABC):
     @classmethod
     def parse_from_config(cls, conf: dict):
         """
+        Most rules have a dictionary structure of fields, their configuration is something like:
+        { 'rule_name': {'field_1':1, 'field_2':2,...} }
+        Take this format as the default logic so most rules needn't override this function.
+
         There are some special cases when parsing a rule from configuration.
         For example, some rules declare fields which names are not the same as the configuration:
         the plan type has a 'from' field which is a reserved keyword in Python.
 
         Anyway, we need this polymorphic method to let rules to custom their parsing processes.
         """
-        return cls.parse_obj(conf)
+        return cls.parse_obj(conf[cls._keyword])
 
     @classmethod
     def keyword(cls):

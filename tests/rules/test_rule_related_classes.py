@@ -1,5 +1,5 @@
 import pytest
-from hamcrest import assert_that, contains_string, all_of, is_
+from hamcrest import assert_that, contains_string, all_of
 from pydantic import ValidationError
 
 from rules import Rule, ConfigParser, NumericFilterRule
@@ -11,7 +11,7 @@ class TestRuleType:
 
 class TestConfigParserWithRuleBaseClass:
     class TestRule(Rule, TestRuleType):
-        _keyword = 'f'
+        _keyword = 'key'
         f: int
 
     @pytest.fixture(autouse=True)
@@ -19,7 +19,7 @@ class TestConfigParserWithRuleBaseClass:
         ConfigParser.clear_errors()
 
     def test_config_parsing_success(self):
-        obj = ConfigParser.parse({'f': 123}, TestRuleType)
+        obj = ConfigParser.parse({'key': {'f': 123}}, TestRuleType)
         assert obj.f == 123
 
     def test_config_parsing_failure(self):
@@ -31,7 +31,7 @@ class TestConfigParserWithRuleBaseClass:
 
     def test_handle_validation_exception(self):
         place_holder_instance = ConfigParser.parse(
-            {'f': 'wrong_type_value_triggers_pydantic_validation_exception'}, TestRuleType)
+            {'key': {'f': 'wrong_type_value_triggers_pydantic_validation_exception'}}, TestRuleType)
         assert issubclass(type(place_holder_instance), TestRuleType)
         assert_that(str(ConfigParser.errors()[0]), contains_string('validation'))
 
@@ -48,19 +48,19 @@ class TestNumericUserFilterRule:
 
     def test_single_less_than(self, rule):
         r = rule({'less_than': 10})
-        assert_that(r.compare(5), is_(True))
-        assert_that(r.compare(20), is_(False))
+        assert r.compare(5)
+        assert not r.compare(20)
 
     def test_single_more_than(self, rule):
         r = rule({'more_than': 10})
-        assert_that(r.compare(20), is_(True))
-        assert_that(r.compare(5), is_(False))
+        assert r.compare(20)
+        assert not r.compare(5)
 
     def test_both_less_more(self, rule):
         r = rule({'less_than': 20, 'more_than': 10})
-        assert_that(r.compare(15), is_(True))
-        assert_that(r.compare(5), is_(False))
-        assert_that(r.compare(25), is_(False))
+        assert r.compare(15)
+        assert not r.compare(5)
+        assert not r.compare(25)
         # edge case (equal) result in False.
-        assert_that(r.compare(10), is_(False))
-        assert_that(r.compare(20), is_(False))
+        assert not r.compare(10)
+        assert not r.compare(20)

@@ -50,6 +50,11 @@ class NameUserSourceRule(Rule, NeedClient, UserSourceRule):
             ops.flat_map(lambda x: x),
         )
 
+    @classmethod
+    def parse_from_config(cls, conf: dict):
+        """the config is { 'names': [...] } """
+        return cls.parse_obj(conf)
+
 
 class IdUserSourceRule(Rule, NeedClient, UserSourceRule):
     """
@@ -68,3 +73,7 @@ class IdUserSourceRule(Rule, NeedClient, UserSourceRule):
             ops.map(self.client.get_users_by_ids),
             ops.flat_map(lambda x: x),
         )
+
+    @classmethod
+    def parse_from_config(cls, conf: dict):
+        return cls.parse_obj(conf)
