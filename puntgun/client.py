@@ -240,9 +240,7 @@ class NeedClient(object):
         Lazy load the client field to avoid:
         run unit test -> initialize this class -> call Client.singleton() -> require terminal input -> test fail
         https://github.com/samuelcolvin/pydantic/issues/1035#issuecomment-559043877
+
+        Directly return the invocation for now, may complicate it for load balancing in the future.
         """
-        client = self.__dict__.get('client')
-        if client is None:
-            client = Client.singleton()
-            self.__dict__['client'] = client
-        return client
+        return Client.singleton()

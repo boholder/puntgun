@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, ClassVar
 
 from rules import Rule, ConfigParser
 from rules.user.action_rules import UserActionRule
@@ -7,7 +7,7 @@ from rules.user.source_rules import UserSourceRule
 
 
 class UserPlan(Rule):
-    keyword: Optional[str] = 'user_plan'
+    _keyword: ClassVar[str] = 'user_plan'
     name: str
     sources: [UserSourceRule]
     filters: Optional[UserFilterRule]

@@ -1,4 +1,5 @@
-from typing import List, Optional
+import abc
+from typing import List, ClassVar
 
 import reactivex as rx
 from loguru import logger
@@ -19,7 +20,7 @@ def handle_errors(func):
     return wrapper
 
 
-class UserSourceRule(object):
+class UserSourceRule(abc.ABC):
     """
     Knows methods the :class:`Client` provides and how to get users information via these methods.
     Handling client's blocking behavior with :class:`reactivex` library.
@@ -35,7 +36,7 @@ class NameUserSourceRule(Rule, NeedClient, UserSourceRule):
     The "username" is that "@foobar" one, Twitter calls it "handle".
     https://help.twitter.com/en/managing-your-account/change-twitter-handle
     """
-    keyword: Optional[str] = 'names'
+    _keyword: ClassVar[str] = 'names'
     names: List[str]
 
     @handle_errors
@@ -56,7 +57,7 @@ class IdUserSourceRule(Rule, NeedClient, UserSourceRule):
     You can find someone's user id when logining to Twitter
     via browser and check the XHRs with browser dev tool.
     """
-    keyword: Optional[str] = 'ids'
+    _keyword: ClassVar[str] = 'ids'
     ids: List[int | str]
 
     @handle_errors

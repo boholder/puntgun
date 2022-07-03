@@ -1,11 +1,12 @@
-from typing import Optional
+import abc
+from typing import ClassVar
 
 from client import NeedClient
 from rules import Rule
 from rules.user import User
 
 
-class UserActionRule(object):
+class UserActionRule(abc.ABC):
     """
     Takes **one** :class:`User` instance each time
     and perform an action (block, mute...) on this user via :class:`Client`.
@@ -17,7 +18,7 @@ class BlockUserActionRule(Rule, NeedClient, UserActionRule):
     Block the given user.
     """
 
-    keyword: Optional[str] = 'block'
+    _keyword: ClassVar[str] = 'block'
 
     # TODO block_already_followed
     block_already_followed: bool = False

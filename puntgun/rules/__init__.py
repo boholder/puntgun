@@ -1,14 +1,18 @@
+import abc
 import sys
-from typing import Type, Optional, List
+from typing import List, ClassVar, TypeVar
 
 from pydantic import BaseModel, root_validator
 
 
-class Rule(BaseModel):
+class Rule(BaseModel, abc.ABC):
     """
     A template class for rule parsing, representing a rule that can be parsed from configuration.
     """
-    keyword: Optional[str] = ''
+
+    # Works like index of rule classes,
+    # help the :class:`ConfigParser` to recognize which class it should pick according to the configuration.
+    _keyword: ClassVar[str] = 'corresponding_rule_name_in_config_of_this_rule'
 
     @classmethod
     def parse_from_config(cls, conf: dict):
@@ -21,12 +25,25 @@ class Rule(BaseModel):
         """
         return cls.parse_obj(conf)
 
+    @classmethod
+    def keyword(cls):
+        return cls._keyword
+
+    class Config:
+        """https://pydantic-docs.helpmanual.io/usage/models/#private-model-attributes"""
+        underscore_attrs_are_private = True
+
 
 class ConfigParser(object):
-    __errors: List[Exception] = []
+    # There are only once parsing process for each run,
+    # so I guess it's ok to use a class variable to store the errors.
+    # Sort of inconvenient when unit testing.
+    _errors: List[Exception] = []
+
+    _T = TypeVar('_T', bound=Rule)
 
     @staticmethod
-    def parse(conf: dict, expected_type: Type[Rule]):
+    def parse(conf: dict, expected_type: _T):
         """
         Take a piece of configuration and the expected type from caller,
         recognize which rule it is and parse it into corresponding rule instance.
@@ -34,26 +51,39 @@ class ConfigParser(object):
 
         Collect errors occurred during parsing,
         by this way we won't break the whole parsing process with error raising.
-        So that we can report all errors at once after finished all parsing
-        and user can fix them at once without running over again for configuration validation.
+        So that we can report all errors at once after finished all parsing work
+        and the user can fix them at once without running over again for configuration validation.
         """
 
+        def generate_placeholder_instance():
+            """
+            Return a placeholder instance which inherits from the given expected class.
+            For letting caller continue parsing.
+            """
+            return type('FakeSubclassOf' + expected_type.__name__, (expected_type,), {})()
+
         for subclass in expected_type.__subclasses__():
-            if subclass.keyword in conf:
+            if subclass.keyword() in conf:
                 try:
                     # let the subclass itself decide how to parse
                     return subclass.parse_from_config(conf)
                 except Exception as e:
                     # catch validation exceptions raised by pydantic and store them
-                    ConfigParser.__errors.append(e)
-                    return None
+                    ConfigParser._errors.append(e)
+                    return generate_placeholder_instance()
 
-        ConfigParser.__errors.append(
-            ValueError(f"Can't parse this to the [{expected_type}] type: {conf}"))
+        ConfigParser._errors.append(
+            ValueError(f"Can't find the rule of the [{expected_type.__name__}] type from configuration: {conf}"))
+
+        return generate_placeholder_instance()
 
     @staticmethod
-    def get_errors():
-        return ConfigParser.__errors
+    def errors():
+        return ConfigParser._errors
+
+    @staticmethod
+    def clear_errors():
+        ConfigParser._errors = []
 
 
 class NumericFilterRule(Rule):
