@@ -2,7 +2,7 @@ import abc
 import sys
 from typing import List, ClassVar, TypeVar
 
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel, root_validator, ValidationError
 
 
 class Rule(BaseModel, abc.ABC):
@@ -67,7 +67,7 @@ class ConfigParser(object):
                 try:
                     # let the subclass itself decide how to parse
                     return subclass.parse_from_config(conf)
-                except Exception as e:
+                except ValidationError as e:
                     # catch validation exceptions raised by pydantic and store them
                     ConfigParser._errors.append(e)
                     return generate_placeholder_instance()
