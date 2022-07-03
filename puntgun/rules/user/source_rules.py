@@ -1,4 +1,3 @@
-import abc
 from typing import List, ClassVar
 
 import reactivex as rx
@@ -6,7 +5,7 @@ from loguru import logger
 from reactivex import operators as ops
 
 from client import NeedClient
-from rules import Rule
+from rules import Rule, SourceRule
 
 
 def handle_errors(func):
@@ -20,7 +19,7 @@ def handle_errors(func):
     return wrapper
 
 
-class UserSourceRule(abc.ABC):
+class UserSourceRule(SourceRule):
     """
     Knows methods the :class:`Client` provides and how to get users information via these methods.
     Handling client's blocking behavior with :class:`reactivex` library.

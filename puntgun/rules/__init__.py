@@ -7,7 +7,7 @@ from pydantic import BaseModel, root_validator, ValidationError
 
 class Rule(BaseModel, abc.ABC):
     """
-    A template class for rule parsing, representing a rule that can be parsed from configuration.
+    A base class for rule parsing, representing a rule that can be parsed from configuration.
     """
 
     # Works like index of rule classes,
@@ -113,3 +113,18 @@ class NumericFilterRule(Rule):
 
     def compare(self, num):
         return self.more_than < num < self.less_than
+
+
+class SourceRule(abc.ABC):
+    """
+    Base class as a label or tag of a rule class for rule parsing,
+    let the upper class can tell which type of rule set it needs for constructing plan instance.
+    """
+
+
+class FilterRule(abc.ABC):
+    """Same as above."""
+
+
+class ActionRule(abc.ABC):
+    """Same as above."""

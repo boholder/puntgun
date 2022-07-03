@@ -7,6 +7,10 @@ from rules.user.source_rules import UserSourceRule
 
 
 class UserPlan(Rule):
+    """
+    Represent a user_plan, user processing pipeline.
+    """
+
     _keyword: ClassVar[str] = 'user_plan'
     name: str
     sources: [UserSourceRule]
