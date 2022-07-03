@@ -1,12 +1,12 @@
 from typing import Optional, ClassVar
 
-from rules import Rule, ConfigParser
+from rules import FromConfig, ConfigParser
 from rules.user.action_rules import UserActionRule
 from rules.user.filter_rules import UserFilterRule
 from rules.user.source_rules import UserSourceRule
 
 
-class UserPlan(Rule):
+class UserPlan(FromConfig):
     """
     Represent a user_plan, user processing pipeline.
     """

@@ -2,7 +2,7 @@ import pytest
 from hamcrest import assert_that, contains_string, all_of
 from pydantic import ValidationError
 
-from rules import Rule, ConfigParser, NumericFilterRule
+from rules import FromConfig, ConfigParser, NumericFilterRule
 
 
 class TestRuleType:
@@ -10,7 +10,7 @@ class TestRuleType:
 
 
 class TestConfigParserWithRuleBaseClass:
-    class TestRule(Rule, TestRuleType):
+    class TestRule(FromConfig, TestRuleType):
         _keyword = 'key'
         f: int
 

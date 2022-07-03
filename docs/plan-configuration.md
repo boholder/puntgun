@@ -89,7 +89,7 @@ For a single plan:
 In natural language, the summary is:
 Run **all** `action_rule`s on targets from **any** `source_rule`  that trigger **any** `filter_rule`.
 
-You can arrange more complex but flexible executing orders by nesting rule sets below.
+You can arrange more complex but flexible execution orders by nesting rule sets below.
 
 ## Rule Sets
 

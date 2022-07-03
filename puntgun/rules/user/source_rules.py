@@ -5,7 +5,7 @@ from loguru import logger
 from reactivex import operators as ops
 
 from client import NeedClient
-from rules import Rule, SourceRule
+from rules import FromConfig, SourceRule
 
 
 def handle_errors(func):
@@ -29,7 +29,7 @@ class UserSourceRule(SourceRule):
     """
 
 
-class NameUserSourceRule(Rule, NeedClient, UserSourceRule):
+class NameUserSourceRule(FromConfig, NeedClient, UserSourceRule):
     """
     Queries Twitter client with provided usernames.
     The "username" is that "@foobar" one, Twitter calls it "handle".
@@ -55,7 +55,7 @@ class NameUserSourceRule(Rule, NeedClient, UserSourceRule):
         return cls.parse_obj(conf)
 
 
-class IdUserSourceRule(Rule, NeedClient, UserSourceRule):
+class IdUserSourceRule(FromConfig, NeedClient, UserSourceRule):
     """
     Queries Twitter client with provided user IDs.
     You can find someone's user id when logining to Twitter

@@ -1,7 +1,7 @@
 from typing import ClassVar
 
 from client import NeedClient
-from rules import Rule, ActionRule
+from rules import FromConfig, ActionRule
 from rules.user import User
 
 
@@ -12,7 +12,7 @@ class UserActionRule(ActionRule):
     """
 
 
-class BlockUserActionRule(Rule, NeedClient, UserActionRule):
+class BlockUserActionRule(FromConfig, NeedClient, UserActionRule):
     """
     Block the given user.
     """

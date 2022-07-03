@@ -5,7 +5,7 @@ from typing import List, ClassVar, TypeVar
 from pydantic import BaseModel, root_validator, ValidationError
 
 
-class Rule(BaseModel, abc.ABC):
+class FromConfig(BaseModel, abc.ABC):
     """
     A base class for rule parsing, representing a rule that can be parsed from configuration.
     """
@@ -44,7 +44,7 @@ class ConfigParser(object):
     # Sort of inconvenient when unit testing.
     _errors: List[Exception] = []
 
-    _T = TypeVar('_T', bound=Rule)
+    _T = TypeVar('_T', bound=FromConfig)
 
     @staticmethod
     def parse(conf: dict, expected_type: _T):
@@ -90,7 +90,7 @@ class ConfigParser(object):
         ConfigParser._errors = []
 
 
-class NumericFilterRule(Rule):
+class NumericFilterRule(FromConfig):
     """
     A rule that checks if a numeric value inside a pre-set range (min < v < max).
     As you see, edge cases (equal) are falsy.
@@ -118,7 +118,7 @@ class NumericFilterRule(Rule):
 class SourceRule(abc.ABC):
     """
     Base class as a label or tag of a rule class for rule parsing,
-    let the upper class can tell which type of rule set it needs for constructing plan instance.
+    let the upper class can tell which type of rule set it needs for constructing plan instance's components.
     """
 
 
