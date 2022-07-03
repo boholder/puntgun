@@ -2,10 +2,11 @@ from typing import List, ClassVar
 
 import reactivex as rx
 from loguru import logger
-from reactivex import operators as ops
+from reactivex import operators as ops, Observable
 
 from client import NeedClient
 from rules import FromConfig, SourceRule
+from rules.user import User
 
 
 def handle_errors(func):
@@ -39,7 +40,7 @@ class NameUserSourceRule(FromConfig, NeedClient, UserSourceRule):
     names: List[str]
 
     @handle_errors
-    def __call__(self):
+    def __call__(self) -> Observable[User]:
         return rx.from_iterable(self.names).pipe(
             # Some Twitter API limits the number of usernames
             # in a single request up to 100 like this one.
@@ -65,7 +66,7 @@ class IdUserSourceRule(FromConfig, NeedClient, UserSourceRule):
     ids: List[int | str]
 
     @handle_errors
-    def __call__(self):
+    def __call__(self) -> Observable[User]:
         return rx.from_iterable(self.ids).pipe(
             # this api also allows to query 100 users at once.
             ops.buffer_with_count(100),
