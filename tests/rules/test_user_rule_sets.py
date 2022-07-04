@@ -1,12 +1,13 @@
-from rules import FromConfig, ConfigParser
+import reactivex as rx
+
+from rules import ConfigParser
 from rules.user import User
 from rules.user.source_rules import UserSourceRule
-import reactivex as rx
-from reactivex import operators as op, Observable
+from rules.user.rule_sets import UserSourceRuleAnyOfSet
 
 
 class TestUserSourceRuleAnyOfSet:
-    class TestUserSourceRule(FromConfig, UserSourceRule):
+    class TestUserSourceRule(UserSourceRule):
         _keyword = 'sr'
         num: int
 

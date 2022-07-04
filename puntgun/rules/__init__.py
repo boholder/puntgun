@@ -1,8 +1,13 @@
 import abc
+import importlib
+import inspect
+import pkgutil
 import sys
 from typing import List, ClassVar, TypeVar
 
 from pydantic import BaseModel, root_validator, ValidationError
+
+import rules
 
 
 class FromConfig(BaseModel, abc.ABC):
@@ -38,9 +43,42 @@ class FromConfig(BaseModel, abc.ABC):
         underscore_attrs_are_private = True
 
 
+class NumericFilterRule(FromConfig):
+    """
+    A rule that checks if a numeric value inside a pre-set range (min < v < max).
+    As you see, edge cases (equal) are falsy.
+    """
+    less_than = float(sys.maxsize)
+    more_than = float(-sys.maxsize - 1)
+
+    @root_validator(pre=True)
+    def there_should_be_fields(cls, values):
+        if not values.get('less_than') and not values.get('more_than'):
+            raise ValueError('At least one of "less_than" or "more_than" should be specified.')
+        return values
+
+    @root_validator
+    def validate_two_edges(cls, values):
+        lt, mt = values.get('less_than'), values.get('more_than')
+        if lt <= mt:
+            raise ValueError(f"'less_than'({lt}) should be bigger than 'more_than'({mt})")
+        return values
+
+    def compare(self, num):
+        return self.more_than < num < self.less_than
+
+
+def import_rule_classes():
+    """This logic worth an independent function"""
+    ?怎么实现
+
+import_rule_classes()
+
+
 class ConfigParser(object):
     # There are only once parsing process for each run,
-    # so I guess it's ok to use a class variable to store the errors.
+    # so I guess it's ok to use a class variable to store the errors,
+    # and use this class as singleton pattern.
     # Sort of inconvenient when unit testing.
     _errors: List[Exception] = []
 
@@ -77,7 +115,7 @@ class ConfigParser(object):
                     return generate_placeholder_instance()
 
         ConfigParser._errors.append(
-            ValueError(f"Can't find the rule of the [{expected_type.__name__}] type from configuration: {conf}"))
+            ValueError(f"Can't find the rule of the [{expected_type}] type from configuration: {conf}"))
 
         return generate_placeholder_instance()
 
@@ -88,28 +126,3 @@ class ConfigParser(object):
     @staticmethod
     def clear_errors():
         ConfigParser._errors = []
-
-
-class NumericFilterRule(FromConfig):
-    """
-    A rule that checks if a numeric value inside a pre-set range (min < v < max).
-    As you see, edge cases (equal) are falsy.
-    """
-    less_than = float(sys.maxsize)
-    more_than = float(-sys.maxsize - 1)
-
-    @root_validator(pre=True)
-    def there_should_be_fields(cls, values):
-        if not values.get('less_than') and not values.get('more_than'):
-            raise ValueError('At least one of "less_than" or "more_than" should be specified.')
-        return values
-
-    @root_validator
-    def validate_two_edges(cls, values):
-        lt, mt = values.get('less_than'), values.get('more_than')
-        if lt <= mt:
-            raise ValueError(f"'less_than'({lt}) should be bigger than 'more_than'({mt})")
-        return values
-
-    def compare(self, num):
-        return self.more_than < num < self.less_than

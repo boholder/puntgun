@@ -20,19 +20,21 @@ so they get different implements:
 Action rule type doesn't have any rule set because
 it's the latest execution step and there's no need for aggregating action results.
 """
+from typing import List
+
 import reactivex as rx
 from reactivex import operators as op, Observable
 
 from client import NeedClient
-from rules import FromConfig, ConfigParser
+from rules import ConfigParser
 from rules.user import User
 from rules.user.filter_rules import UserFilterRule
 from rules.user.source_rules import UserSourceRule
 
 
-class UserSourceRuleAnyOfSet(FromConfig, UserSourceRule):
+class UserSourceRuleAnyOfSet(UserSourceRule):
     _keyword = 'any_of'
-    rules: [UserSourceRule]
+    rules: List[UserSourceRule]
 
     @classmethod
     def parse_from_config(cls, conf: dict):
@@ -40,10 +42,10 @@ class UserSourceRuleAnyOfSet(FromConfig, UserSourceRule):
 
     def __call__(self) -> Observable[User]:
         # simply merge results together, and remove repeating elements
-        return rx.merge(self.rules).pipe(op.distinct())
+        return rx.merge(*[r() for r in self.rules]).pipe(op.distinct())
 
 
-class UserFilterRuleAllOfSet(FromConfig, UserFilterRule, NeedClient):
+class UserFilterRuleAllOfSet(UserFilterRule, NeedClient):
     """
     Run immediate rules first, then slow rules.
     If getting any False result while running, short-circuiting return False
@@ -54,8 +56,8 @@ class UserFilterRuleAllOfSet(FromConfig, UserFilterRule, NeedClient):
     """
 
     _keyword = 'all_of'
-    immediate_rules: [UserFilterRule]
-    slow_rules: [UserFilterRule]
+    immediate_rules: List[UserFilterRule]
+    slow_rules: List[UserFilterRule]
 
     @classmethod
     def parse_from_config(cls, conf: dict):
@@ -83,14 +85,14 @@ class UserFilterRuleAllOfSet(FromConfig, UserFilterRule, NeedClient):
         )
 
 
-class UserFilterRuleAnyOfSet(FromConfig, UserFilterRule, NeedClient):
+class UserFilterRuleAnyOfSet(UserFilterRule, NeedClient):
     """
     Similar like :class:`UserFilterRuleAllOfSet`,
     but looking for the first True result for short-circuiting.
     """
     _keyword = 'any_of'
-    immediate_rules: [UserFilterRule]
-    slow_rules: [UserFilterRule]
+    immediate_rules: List[UserFilterRule]
+    slow_rules: List[UserFilterRule]
 
     @classmethod
     def parse_from_config(cls, conf: dict):
