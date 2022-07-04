@@ -1,4 +1,3 @@
-import abc
 from typing import List, ClassVar
 
 import reactivex as rx
@@ -21,7 +20,7 @@ def handle_errors(func):
     return wrapper
 
 
-class UserSourceRule(abc.ABC):
+class UserSourceRule(FromConfig):
     """
     Knows methods the :class:`Client` provides and how to get users information via these methods.
     Handling client's blocking behavior with :class:`reactivex` library.
@@ -30,8 +29,11 @@ class UserSourceRule(abc.ABC):
     and returns an :class:`reactivex.Observable` of :class:`user.User`.
     """
 
+    def __call__(self) -> Observable[User]:
+        """"""
 
-class NameUserSourceRule(FromConfig, NeedClient, UserSourceRule):
+
+class NameUserSourceRule(UserSourceRule, NeedClient):
     """
     Queries Twitter client with provided usernames.
     The "username" is that "@foobar" one, Twitter calls it "handle".
@@ -41,7 +43,7 @@ class NameUserSourceRule(FromConfig, NeedClient, UserSourceRule):
     names: List[str]
 
     @handle_errors
-    def __call__(self) -> Observable[User]:
+    def __call__(self):
         return rx.from_iterable(self.names).pipe(
             # Some Twitter API limits the number of usernames
             # in a single request up to 100 like this one.
@@ -57,7 +59,7 @@ class NameUserSourceRule(FromConfig, NeedClient, UserSourceRule):
         return cls.parse_obj(conf)
 
 
-class IdUserSourceRule(FromConfig, NeedClient, UserSourceRule):
+class IdUserSourceRule(UserSourceRule, NeedClient):
     """
     Queries Twitter client with provided user IDs.
     You can find someone's user id when logining to Twitter
@@ -67,7 +69,7 @@ class IdUserSourceRule(FromConfig, NeedClient, UserSourceRule):
     ids: List[int | str]
 
     @handle_errors
-    def __call__(self) -> Observable[User]:
+    def __call__(self):
         return rx.from_iterable(self.ids).pipe(
             # this api also allows to query 100 users at once.
             ops.buffer_with_count(100),

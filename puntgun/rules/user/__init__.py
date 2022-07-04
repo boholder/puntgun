@@ -64,5 +64,10 @@ class User(BaseModel):
                     tweet_count=public_metrics.get('tweet_count', 0),
                     pinned_tweet_text=pinned_tweet_text)
 
+    def __eq__(self, other):
+        if isinstance(other, type(self)):
+            return self.id == other.id
+        return False
+
     def __bool__(self):
         return bool(self.id)
