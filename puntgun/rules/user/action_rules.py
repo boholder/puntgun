@@ -1,11 +1,12 @@
+import abc
 from typing import ClassVar
 
 from client import NeedClient
-from rules import FromConfig, ActionRule
+from rules import FromConfig
 from rules.user import User
 
 
-class UserActionRule(ActionRule):
+class UserActionRule(abc.ABC):
     """
     Takes **one** :class:`User` instance each time
     and perform an action (block, mute...) on this user via :class:`Client`.

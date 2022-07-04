@@ -113,18 +113,3 @@ class NumericFilterRule(FromConfig):
 
     def compare(self, num):
         return self.more_than < num < self.less_than
-
-
-class SourceRule(abc.ABC):
-    """
-    Base class as a label or tag of a rule class for rule parsing,
-    let the upper class can tell which type of rule set it needs for constructing plan instance's components.
-    """
-
-
-class FilterRule(abc.ABC):
-    """Same as above."""
-
-
-class ActionRule(abc.ABC):
-    """Same as above."""

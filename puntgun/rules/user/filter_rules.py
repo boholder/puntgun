@@ -1,10 +1,11 @@
+import abc
 from typing import ClassVar
 
-from rules import NumericFilterRule, FilterRule
+from rules import NumericFilterRule
 from rules.user import User
 
 
-class UserFilterRule(FilterRule):
+class UserFilterRule(abc.ABC):
     """
     Holds a set of value from plan configuration for constructing a predicative rule.
     Takes **one** :class:`User` instance each time and judges if this user's data triggers(meets) its condition.
