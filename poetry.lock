@@ -2,7 +2,7 @@
 name = "atomicwrites"
 version = "1.4.0"
 description = "Atomic file writes."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -10,7 +10,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 name = "attrs"
 version = "21.4.0"
 description = "Classes Without Boilerplate"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -138,7 +138,7 @@ python-versions = ">=3.5"
 name = "iniconfig"
 version = "1.1.1"
 description = "iniconfig: brain-dead simple config-ini parsing"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -174,7 +174,7 @@ signedtoken = ["cryptography (>=3.0.0)", "pyjwt (>=2.0.0,<3)"]
 name = "packaging"
 version = "21.3"
 description = "Core utilities for Python packages"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -185,7 +185,7 @@ pyparsing = ">=2.0.2,<3.0.5 || >3.0.5"
 name = "pluggy"
 version = "1.0.0"
 description = "plugin and hook calling mechanisms for python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -197,7 +197,7 @@ testing = ["pytest", "pytest-benchmark"]
 name = "py"
 version = "1.11.0"
 description = "library with cross-python path, ini-parsing, io, code, log facilities"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -242,7 +242,7 @@ tests-numpy = ["pytest (>=5.0)", "pytest-sugar", "pytest-xdist", "coverage", "ty
 name = "pyparsing"
 version = "3.0.9"
 description = "pyparsing module - Classes and methods to define and execute parsing grammars"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6.8"
 
@@ -253,7 +253,7 @@ diagrams = ["railroad-diagrams", "jinja2"]
 name = "pytest"
 version = "7.1.2"
 description = "pytest: simple powerful testing with Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7"
 
@@ -272,7 +272,7 @@ testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.
 
 [[package]]
 name = "reactivex"
-version = "4.0.2"
+version = "4.0.3"
 description = "ReactiveX (Rx) for Python"
 category = "main"
 optional = false
@@ -334,7 +334,7 @@ python-versions = "*"
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7"
 
@@ -392,7 +392,7 @@ dev = ["pytest (>=4.6.2)", "black (>=19.3b0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "6c6ac3c1252c16db5a6afb73eef6b9a85ebbdd02532b76917234f8fb76ae78ea"
+content-hash = "fdbb3d5343da0d93af1c632b61dfc49f1a36faaf27952819bb15b37aa8379490"
 
 [metadata.files]
 atomicwrites = [
@@ -627,8 +627,8 @@ pytest = [
     {file = "pytest-7.1.2.tar.gz", hash = "sha256:a06a0425453864a270bc45e71f783330a7428defb4230fb5e6a731fde06ecd45"},
 ]
 reactivex = [
-    {file = "reactivex-4.0.2-py3-none-any.whl", hash = "sha256:04d17b55652caf8b6c911f7588b4fe8fa69b6fc48e312e0e3462597fb93bb588"},
-    {file = "reactivex-4.0.2.tar.gz", hash = "sha256:e4db0f7b1646c2198fb7cceade05be7d2e1bd8c0284ae5dffdae449055400310"},
+    {file = "reactivex-4.0.3-py3-none-any.whl", hash = "sha256:0edadf09d6cda8d242a55a3ba1bc2f3b753a3cfd77c5c53d19da750a7bda816e"},
+    {file = "reactivex-4.0.3.tar.gz", hash = "sha256:32eda4b0915e19e56a59b71745f5e173bf46686d81d05d31d62156b591064cf2"},
 ]
 requests = [
     {file = "requests-2.28.0-py3-none-any.whl", hash = "sha256:bc7861137fbce630f17b03d3ad02ad0bf978c844f3536d0edda6499dafce2b6f"},
