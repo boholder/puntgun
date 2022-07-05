@@ -1,4 +1,4 @@
-from typing import Optional, ClassVar
+from typing import Optional, ClassVar, List
 
 from rules import FromConfig, ConfigParser
 from rules.user.action_rules import UserActionRule
@@ -13,9 +13,9 @@ class UserPlan(FromConfig):
 
     _keyword: ClassVar[str] = 'user_plan'
     name: str
-    sources: [UserSourceRule]
-    filters: Optional[UserFilterRule]
-    actions: [UserActionRule]
+    sources: List[UserSourceRule]
+    filters: Optional[List[UserFilterRule]]
+    actions: List[UserActionRule]
 
     @classmethod
     def parse_from_config(cls, conf: dict):

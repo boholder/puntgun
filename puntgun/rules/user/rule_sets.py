@@ -73,11 +73,12 @@ class UserFilterRuleAllOfSet(UserFilterRule, NeedClient):
 
     def __call__(self, user: User):
         # In ideal case, we can find the result without consuming any API resource.
+        # TODO 如果流能提前丢弃工作的话，让这种即时返回的也返 Observable[bool]，统一
         for r in self.immediate_rules:
             if not r(user):
                 return rx.just(False)
 
-        return rx.of(self.slow_rules(user)).pipe(
+        return rx.merge(*[r(user) for r in self.slow_rules]).pipe(
             # each slow rule returns an observable contains only one boolean value.
             op.flat_map(lambda x: x),
             # expect first False result or return True finally.
@@ -105,7 +106,7 @@ class UserFilterRuleAnyOfSet(UserFilterRule, NeedClient):
             if r(user):
                 return rx.just(True)
 
-        return rx.of(self.slow_rules(user)).pipe(
+        return rx.merge(*[r(user) for r in self.slow_rules]).pipe(
             op.flat_map(lambda x: x),
             op.first_or_default(lambda e: e is True, False)
         )

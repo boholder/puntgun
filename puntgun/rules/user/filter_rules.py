@@ -10,6 +10,9 @@ class UserFilterRule(FromConfig):
     Takes **one** :class:`User` instance each time and judges if this user's data triggers(meets) its condition.
     """
 
+    def __call__(self, user: User):
+        """"""
+
 
 class FollowerUserFilterRule(NumericFilterRule, UserFilterRule):
     """Check user's follower count."""
