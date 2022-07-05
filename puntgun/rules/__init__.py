@@ -4,6 +4,8 @@ from typing import List, ClassVar, TypeVar
 
 from pydantic import BaseModel, root_validator, ValidationError
 
+from rules import loader
+
 
 class FromConfig(BaseModel, abc.ABC):
     """

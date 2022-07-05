@@ -1,24 +1,25 @@
 import importlib
 import pkgutil
 
-import rules
-
 
 def import_rule_classes():
     """
-    This logic worth an independent module.
-    It's my fault that I let specific rules depend on rules.__init__.py,
-    thus I can't call this loading method in the rules.__init__.py.
+    :class:`ConfigParser` in `rules.__init__.py` will
+    dynamically construct rule class base on configuration passed to it,
+    ( using object.__subclasses__ )
+    but it requires that all the rule classes need to be preloaded
+    or the config parser can't get all valid candidates.
+    This function will do this job.
+
+    This logic needs an independent module.
+    It's my fault that I let specific rules depend on `rules.__init__.py`
+    (and I think it's ok and needn't refactoring),
+    thus I can't put and call this loading method in the `rules.__init__.py`
+    which will compose a circular import.
+
+    Must manually call this method before doing any configuration parsing work.
     """
-
-    # first get modules under "rules"
-    for _, submodule_name, _ in list(pkgutil.iter_modules(rules.__path__)):
-        # skip this loader module
-        if submodule_name == 'loader':
-            continue
-
-        # then get each rule type module under that module
-        submodule = importlib.import_module(f"{rules.__name__}.{submodule_name}").__path__
-        for _, rule_type_module_name, _ in list(pkgutil.iter_modules(submodule)):
-            rule_type_module = importlib.import_module(f"{__name__}.{submodule_name}.{rule_type_module_name}")
-            print(rule_type_module)
+    user_rules = 'rules.user'
+    submodule = importlib.import_module(user_rules)
+    for _, name, _ in list(pkgutil.iter_modules(submodule.__path__)):
+        importlib.import_module(f'{user_rules}.{name}', 'puntgun')
