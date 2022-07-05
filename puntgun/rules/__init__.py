@@ -1,13 +1,8 @@
 import abc
-import importlib
-import inspect
-import pkgutil
 import sys
 from typing import List, ClassVar, TypeVar
 
 from pydantic import BaseModel, root_validator, ValidationError
-
-import rules
 
 
 class FromConfig(BaseModel, abc.ABC):
@@ -66,13 +61,6 @@ class NumericFilterRule(FromConfig):
 
     def compare(self, num):
         return self.more_than < num < self.less_than
-
-
-def import_rule_classes():
-    """This logic worth an independent function"""
-    ?怎么实现
-
-import_rule_classes()
 
 
 class ConfigParser(object):

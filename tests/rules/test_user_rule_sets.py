@@ -1,9 +1,10 @@
 import reactivex as rx
 
-from rules import ConfigParser
+from rules import ConfigParser, loader
 from rules.user import User
 from rules.user.source_rules import UserSourceRule
-from rules.user.rule_sets import UserSourceRuleAnyOfSet
+
+loader.import_rule_classes()
 
 
 class TestUserSourceRuleAnyOfSet:
@@ -17,4 +18,5 @@ class TestUserSourceRuleAnyOfSet:
     def test_source_merge_and_distinct(self):
         rule_set = ConfigParser.parse({'any_of': [{'sr': {'num': 1}}, {'sr': {'num': 3}}]},
                                       UserSourceRule)
-        print(rule_set)
+        for r in rule_set.rules:
+            assert isinstance(r, self.TestUserSourceRule)
