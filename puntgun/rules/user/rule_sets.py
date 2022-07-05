@@ -23,6 +23,7 @@ it's the latest execution step and there's no need for aggregating action result
 from typing import List
 
 import reactivex as rx
+from pydantic import BaseModel
 from reactivex import operators as op, Observable
 
 from client import NeedClient
@@ -42,10 +43,29 @@ class UserSourceRuleAnyOfSet(UserSourceRule):
 
     def __call__(self) -> Observable[User]:
         # simply merge results together, and remove repeating elements
+        # TODO 这里也要变成lazy返回，不能直接r()
         return rx.merge(*[r() for r in self.rules]).pipe(op.distinct())
 
 
-class UserFilterRuleAllOfSet(UserFilterRule, NeedClient):
+class UserFilterRuleSet(BaseModel):
+    immediate_rules: List[UserFilterRule]
+    slow_rules: List[UserFilterRule]
+
+    @classmethod
+    def parse_from_config(cls, conf: dict):
+        rules = [ConfigParser.parse(c, UserFilterRule) for c in conf['all_of']]
+
+        # Filter rules that need to communicate with Twitter Server via API
+        # will take some time to run judgement and can't return immediately.
+        #
+        # In some case we can come up a result without knowing all the results,
+        # similar to short-circuiting evaluation in logical expressions.
+        # So it's good to divide these two types and process them independently.
+        return cls(slow_rules=[r for r in rules if isinstance(r, NeedClient)],
+                   immediate_rules=[r for r in rules if not isinstance(r, NeedClient)])
+
+
+class UserFilterRuleAllOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
     """
     Run immediate rules first, then slow rules.
     If getting any False result while running, short-circuiting return False
@@ -56,20 +76,6 @@ class UserFilterRuleAllOfSet(UserFilterRule, NeedClient):
     """
 
     _keyword = 'all_of'
-    immediate_rules: List[UserFilterRule]
-    slow_rules: List[UserFilterRule]
-
-    @classmethod
-    def parse_from_config(cls, conf: dict):
-        rules = [ConfigParser.parse(c, UserFilterRule) for c in conf['all_of']]
-        # Filter rules that need to communicate with Twitter Server via API
-        # will take some time to run judgement and can't return immediately.
-        #
-        # In some case we can come up a result without knowing all the results,
-        # similar to short-circuiting evaluation in logical expressions.
-        # So it's good to divide these two types and process them independently.
-        return cls(slow_rules=[r for r in rules if isinstance(r, NeedClient)],
-                   immediate_rules=[r for r in rules if not isinstance(r, NeedClient)])
 
     def __call__(self, user: User):
         # In ideal case, we can find the result without consuming any API resource.
@@ -78,7 +84,7 @@ class UserFilterRuleAllOfSet(UserFilterRule, NeedClient):
             if not r(user):
                 return rx.just(False)
 
-        return rx.merge(*[r(user) for r in self.slow_rules]).pipe(
+        return rx.merge(*[rx.start(r) for r in self.slow_rules]).pipe(
             # each slow rule returns an observable contains only one boolean value.
             op.flat_map(lambda x: x),
             # expect first False result or return True finally.
@@ -86,27 +92,20 @@ class UserFilterRuleAllOfSet(UserFilterRule, NeedClient):
         )
 
 
-class UserFilterRuleAnyOfSet(UserFilterRule, NeedClient):
+class UserFilterRuleAnyOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
     """
     Similar like :class:`UserFilterRuleAllOfSet`,
     but looking for the first True result for short-circuiting.
     """
     _keyword = 'any_of'
-    immediate_rules: List[UserFilterRule]
-    slow_rules: List[UserFilterRule]
-
-    @classmethod
-    def parse_from_config(cls, conf: dict):
-        rules = [ConfigParser.parse(c, UserFilterRule) for c in conf['any_of']]
-        return cls(slow_rules=[r for r in rules if isinstance(r, NeedClient)],
-                   immediate_rules=[r for r in rules if not isinstance(r, NeedClient)])
 
     def __call__(self, user: User):
+        """I can endure repeating twice"""
         for r in self.immediate_rules:
             if r(user):
                 return rx.just(True)
 
-        return rx.merge(*[r(user) for r in self.slow_rules]).pipe(
+        return rx.merge(*[rx.start(r) for r in self.slow_rules]).pipe(
             op.flat_map(lambda x: x),
             op.first_or_default(lambda e: e is True, False)
         )
