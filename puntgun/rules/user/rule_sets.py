@@ -42,27 +42,35 @@ class UserSourceRuleAnyOfSet(UserSourceRule):
         return cls(rules=[ConfigParser.parse(c, UserSourceRule) for c in conf['any_of']])
 
     def __call__(self) -> Observable[User]:
-        # simply merge results together, and remove repeating elements
-        # TODO 这里也要变成lazy返回，不能直接r()
-        return rx.merge(*[r() for r in self.rules]).pipe(op.distinct())
+        # simply merge results together
+        return rx.merge(*[rx.start(r) for r in self.rules]).pipe(
+            # extract user source rules' results
+            op.flat_map(lambda x: x),
+            # remove repeating elements
+            op.distinct()
+        )
 
 
 class UserFilterRuleSet(BaseModel):
     immediate_rules: List[UserFilterRule]
     slow_rules: List[UserFilterRule]
 
-    @classmethod
-    def parse_from_config(cls, conf: dict):
-        rules = [ConfigParser.parse(c, UserFilterRule) for c in conf['all_of']]
-
-        # Filter rules that need to communicate with Twitter Server via API
-        # will take some time to run judgement and can't return immediately.
-        #
-        # In some case we can come up a result without knowing all the results,
-        # similar to short-circuiting evaluation in logical expressions.
-        # So it's good to divide these two types and process them independently.
+    @staticmethod
+    def construct(cls, rules: [UserFilterRule]):
         return cls(slow_rules=[r for r in rules if isinstance(r, NeedClient)],
                    immediate_rules=[r for r in rules if not isinstance(r, NeedClient)])
+
+    @staticmethod
+    def execution_wrapper(u: User, rule: UserFilterRule):
+        """
+        Because the rx.start() only accept no-param functions as its parameter,
+        but user filter rule need a user instance param for judgement.
+        """
+
+        def run_the_rule():
+            return rule(u)
+
+        return run_the_rule
 
 
 class UserFilterRuleAllOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
@@ -72,20 +80,23 @@ class UserFilterRuleAllOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
     and discard have-not-finish or have-not-run rules' results.
 
     It also makes rule set itself becomes time-consuming
-    and needed to be treated in async way (marked with :class:`NeedClient`).
+    and needed to be treated as a slow filter rule (marked with :class:`NeedClient`).
     """
 
     _keyword = 'all_of'
 
+    @classmethod
+    def parse_from_config(cls, conf: dict):
+        return UserFilterRuleSet.construct(cls, [ConfigParser.parse(c, UserFilterRule) for c in conf['all_of']])
+
     def __call__(self, user: User):
         # In ideal case, we can find the result without consuming any API resource.
-        # TODO 如果流能提前丢弃工作的话，让这种即时返回的也返 Observable[bool]，统一
         for r in self.immediate_rules:
             if not r(user):
                 return rx.just(False)
 
-        return rx.merge(*[rx.start(r) for r in self.slow_rules]).pipe(
-            # each slow rule returns an observable contains only one boolean value.
+        return rx.merge(*[rx.start(self.execution_wrapper(user, r)) for r in self.slow_rules]).pipe(
+            # each slow rule returns an observable that contains only one boolean value.
             op.flat_map(lambda x: x),
             # expect first False result or return True finally.
             op.first_or_default(lambda e: e is False, True)
@@ -99,13 +110,16 @@ class UserFilterRuleAnyOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
     """
     _keyword = 'any_of'
 
+    @classmethod
+    def parse_from_config(cls, conf: dict):
+        return UserFilterRuleSet.construct(cls, [ConfigParser.parse(c, UserFilterRule) for c in conf['any_of']])
+
     def __call__(self, user: User):
         """I can endure repeating twice"""
         for r in self.immediate_rules:
             if r(user):
                 return rx.just(True)
 
-        return rx.merge(*[rx.start(r) for r in self.slow_rules]).pipe(
-            op.flat_map(lambda x: x),
-            op.first_or_default(lambda e: e is True, False)
+        return rx.merge(*[rx.start(self.execution_wrapper(user, r)) for r in self.slow_rules]).pipe(
+            op.flat_map(lambda x: x), op.first_or_default(lambda e: e is True, False)
         )

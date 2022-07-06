@@ -1,5 +1,7 @@
 from typing import ClassVar
 
+from reactivex import Observable
+
 from rules import NumericFilterRule, FromConfig
 from rules.user import User
 
@@ -10,8 +12,12 @@ class UserFilterRule(FromConfig):
     Takes **one** :class:`User` instance each time and judges if this user's data triggers(meets) its condition.
     """
 
-    def __call__(self, user: User):
-        """"""
+    def __call__(self, user: User) -> bool | Observable[bool]:
+        """
+        Immediate filter rules will directly return a raw boolean value,
+        while slow filter rules (marked with :class:`NeedClient`) and filter rule sets
+        will return a reactivex :class:`Observable` which wraps a boolean value.
+        """
 
 
 class FollowerUserFilterRule(NumericFilterRule, UserFilterRule):
