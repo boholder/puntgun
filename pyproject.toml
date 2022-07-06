@@ -12,7 +12,7 @@ tweepy = "^4.10.0"
 reactivex = "^4.0.3"
 fire = "^0.4.0"
 from-root = "^1.0.2"
-cryptography = "^37.0.3"
+cryptography = "^37.0.4"
 loguru = "^0.6.0"
 pydantic = "^1.9.1"
 
