@@ -99,7 +99,7 @@ class ConfigParser(object):
                 try:
                     # let the subclass itself decide how to parse
                     return subclass.parse_from_config(conf)
-                except ValidationError as e:
+                except (ValidationError, ValueError) as e:
                     # catch validation exceptions raised by pydantic and store them
                     ConfigParser._errors.append(e)
                     return generate_placeholder_instance()
@@ -116,3 +116,13 @@ class ConfigParser(object):
     @staticmethod
     def clear_errors():
         ConfigParser._errors = []
+
+
+def validate_required_fields_exist(rule_keyword, conf: dict, required_field_names: [str]):
+    """
+    Custom configuration parsing process - :class:`ConfigParser` sort of bypass the pydantic library's
+    validation, so we need to put custom validation inside the custom parsing process when necessary.
+    """
+    for k in required_field_names:
+        if k not in conf:
+            raise ValueError(f"Missing required field [{k}] in {rule_keyword}: {conf}")

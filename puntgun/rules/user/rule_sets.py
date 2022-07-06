@@ -56,7 +56,7 @@ class UserFilterRuleSet(BaseModel):
     slow_rules: List[UserFilterRule]
 
     @staticmethod
-    def construct(cls, rules: [UserFilterRule]):
+    def divide_and_construct(cls, rules: [UserFilterRule]):
         return cls(slow_rules=[r for r in rules if isinstance(r, NeedClient)],
                    immediate_rules=[r for r in rules if not isinstance(r, NeedClient)])
 
@@ -87,7 +87,8 @@ class UserFilterRuleAllOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
 
     @classmethod
     def parse_from_config(cls, conf: dict):
-        return UserFilterRuleSet.construct(cls, [ConfigParser.parse(c, UserFilterRule) for c in conf['all_of']])
+        return UserFilterRuleSet.divide_and_construct(
+            cls, [ConfigParser.parse(c, UserFilterRule) for c in conf['all_of']])
 
     def __call__(self, user: User):
         # In ideal case, we can find the result without consuming any API resource.
@@ -112,7 +113,8 @@ class UserFilterRuleAnyOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
 
     @classmethod
     def parse_from_config(cls, conf: dict):
-        return UserFilterRuleSet.construct(cls, [ConfigParser.parse(c, UserFilterRule) for c in conf['any_of']])
+        return UserFilterRuleSet.divide_and_construct(
+            cls, [ConfigParser.parse(c, UserFilterRule) for c in conf['any_of']])
 
     def __call__(self, user: User):
         """I can endure repeating twice"""
