@@ -15,22 +15,18 @@ class TestConfigParserWithRuleBaseClass:
         _keyword = 'key'
         f: int
 
-    @pytest.fixture(autouse=True)
-    def clean_config_parser(self):
-        ConfigParser.clear_errors()
-
     def test_config_parsing_success(self):
         obj = ConfigParser.parse({'key': {'f': 123}}, TestRuleType)
         assert obj.f == 123
 
-    def test_config_parsing_failure(self):
+    def test_config_parsing_failure(self, clean_config_parser):
         # can't find the TestRule base on an empty dict
         # will return a placeholder instance which inherits from the given expected class.
         place_holder_instance = ConfigParser.parse({}, TestRuleType)
         assert issubclass(type(place_holder_instance), TestRuleType)
         assert_that(str(ConfigParser.errors()[0]), all_of(contains_string('{}'), contains_string('TestRuleType')))
 
-    def test_handle_validation_exception(self):
+    def test_handle_validation_exception(self, clean_config_parser):
         place_holder_instance = ConfigParser.parse(
             {'key': {'f': 'wrong_type_value_triggers_pydantic_validation_exception'}}, TestRuleType)
         assert issubclass(type(place_holder_instance), TestRuleType)

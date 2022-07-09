@@ -1,3 +1,6 @@
+"""
+I'm using this file as util module for rule stuff.
+"""
 import abc
 import sys
 from typing import ClassVar
@@ -40,7 +43,7 @@ class FromConfig(BaseModel, abc.ABC):
 
 class NumericFilterRule(FromConfig):
     """
-    A rule that checks if a numeric value inside a pre-set range (min < v < max).
+    A filter rule that checks if a numeric value inside a pre-set range (min < v < max).
     As you see, edge cases (equal) are falsy.
     """
     less_than = float(sys.maxsize)
@@ -68,6 +71,15 @@ def validate_required_fields_exist(rule_keyword, conf: dict, required_field_name
     Custom configuration parsing process - :class:`ConfigParser` sort of bypass the pydantic library's
     validation, so we need to put custom validation inside the custom parsing process when necessary.
     """
+    missing = []
     for k in required_field_names:
         if k not in conf:
-            raise ValueError(f"Missing required field [{k}] in {rule_keyword}: {conf}")
+            missing.append(k)
+
+    # point out all errors at once
+    if missing:
+        raise ValueError(f"Missing required field(s) {missing} in configuration [{rule_keyword}]: {conf}")
+
+
+class Plan(FromConfig):
+    """This class exists only for :class:`ConfigParser` to recognize plan classes."""

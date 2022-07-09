@@ -15,10 +15,11 @@ def import_rule_classes():
     or the config parser can't get all valid candidates.
     This function will do this job.
     """
-    user_rules = 'rules.user'
-    submodule = importlib.import_module(user_rules)
-    for _, name, _ in list(pkgutil.iter_modules(submodule.__path__)):
-        importlib.import_module(f'{user_rules}.{name}', 'puntgun')
+
+    for rule_module_name in ['rules.user']:
+        rule_module = importlib.import_module(rule_module_name)
+        for _, name, _ in list(pkgutil.iter_modules(rule_module.__path__)):
+            importlib.import_module(f'{rule_module_name}.{name}', 'puntgun')
 
 
 class ConfigParser(object):
