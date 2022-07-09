@@ -1,22 +1,16 @@
 import time
 from typing import Optional
 
-import pytest
 import reactivex as rx
 from reactivex import operators as op
 
 from client import NeedClient
-from rules import ConfigParser, loader
+from rules.config_parser import ConfigParser
 from rules.user import User
 from rules.user.filter_rules import UserFilterRule
 from rules.user.rule_sets import UserSourceRuleAnyOfSet, UserFilterRuleAllOfSet, UserFilterRuleSet, \
     UserFilterRuleAnyOfSet
 from rules.user.source_rules import UserSourceRule
-
-
-@pytest.fixture(autouse=True)
-def load_rule_classes():
-    loader.import_rule_classes()
 
 
 class TestUserSourceRuleAnyOfSet:

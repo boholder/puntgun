@@ -6,7 +6,7 @@ import reactivex.operators as ops
 from reactivex.internal import SequenceContainsNoElementsError
 
 import client
-from rules import ConfigParser
+from rules.config_parser import ConfigParser
 from rules.user import User
 from rules.user.source_rules import NameUserSourceRule, UserSourceRule
 

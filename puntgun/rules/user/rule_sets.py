@@ -27,7 +27,7 @@ from pydantic import BaseModel
 from reactivex import operators as op, Observable
 
 from client import NeedClient
-from rules import ConfigParser
+from rules.config_parser import ConfigParser
 from rules.user import User
 from rules.user.filter_rules import UserFilterRule
 from rules.user.source_rules import UserSourceRule

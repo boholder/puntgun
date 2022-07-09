@@ -2,7 +2,8 @@ from typing import Optional, ClassVar, List
 
 from reactivex import operators as op
 
-from rules import FromConfig, ConfigParser, validate_required_fields_exist
+from rules import FromConfig, validate_required_fields_exist
+from rules.config_parser import ConfigParser
 from rules.user.action_rules import UserActionRule
 from rules.user.filter_rules import UserFilterRule
 from rules.user.rule_sets import UserSourceRuleAnyOfSet, UserFilterRuleAnyOfSet
