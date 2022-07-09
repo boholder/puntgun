@@ -4,6 +4,7 @@ import pytest
 
 import client
 from conf.encrypto import generate_private_key, dump_private_key
+from rules.config_parser import ConfigParser
 
 
 def experimental(func):
@@ -70,16 +71,5 @@ def user_id_sequence_checker():
 
 
 @pytest.fixture
-def filter_rule_result_checker():
-    """For user filter rule sets testing."""
-
-    def factory(expect: bool):
-        factory.call_count = 0
-
-        def real(actual: bool):
-            factory.call_count += 1
-            assert actual is expect
-
-        return real
-
-    return factory
+def clean_config_parser():
+    ConfigParser.clear_errors()

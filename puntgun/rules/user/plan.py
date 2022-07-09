@@ -1,16 +1,18 @@
-from typing import Optional, ClassVar, List
+from typing import ClassVar, List
 
+import reactivex as rx
 from reactivex import operators as op
 
-from rules import FromConfig, validate_required_fields_exist
+from rules import validate_required_fields_exist, Plan
 from rules.config_parser import ConfigParser
+from rules.user import User
 from rules.user.action_rules import UserActionRule
 from rules.user.filter_rules import UserFilterRule
 from rules.user.rule_sets import UserSourceRuleAnyOfSet, UserFilterRuleAnyOfSet
 from rules.user.source_rules import UserSourceRule
 
 
-class UserPlan(FromConfig):
+class UserPlan(Plan):
     """
     Represent a user_plan, user processing pipeline.
     """
@@ -18,9 +20,12 @@ class UserPlan(FromConfig):
     _keyword: ClassVar[str] = 'user_plan'
     name: str
     sources: UserSourceRuleAnyOfSet
-    # TODO filter还没写完，要做到有默认的lambda。
-    filters: Optional[UserFilterRuleAnyOfSet]
+    filters: UserFilterRuleAnyOfSet
     actions: List[UserActionRule]
+
+    class DefaultAllTriggerUserFilterRule(UserFilterRule):
+        def __call__(self, user: User):
+            return True
 
     @classmethod
     def parse_from_config(cls, conf: dict):
@@ -28,14 +33,25 @@ class UserPlan(FromConfig):
         # so custom validation is needed.
         validate_required_fields_exist(cls._keyword, conf, ['from', 'do'])
 
-        return cls(name=conf['user_plan'],
-                   # wrap source rules with any_of rule set
+        # need at least one default filter rule to keep plan execution functionally
+        if 'that' not in conf:
+            conf['that'] = [cls.DefaultAllTriggerUserFilterRule()]
+
+        return cls(name=conf['user_plan'],  # using the keyword field for naming this plan
+                   # wrap source rules and filter rules with their rule set
+                   # for giving them a default running order
                    sources=ConfigParser.parse({'any_of': conf['from']}, UserSourceRule),
-                   # wrap with any_of
                    filters=ConfigParser.parse({'any_of': conf['that']}, UserFilterRule),
                    actions=[ConfigParser.parse(c, UserActionRule) for c in conf['do']])
 
     def __call__(self):
-        # TODO 还没实现运行呢
+        # TODO action 想要的是每个action各衍生一个消费流去消费user
+        self.filtering()
 
-        self.sources().pipe(op.filter(self.filters))
+    def filtering(self):
+        """
+        Pass source users to filter chain and combine filter result with origin user instance.
+        """
+        users = self.sources()
+        filter_results = users.pipe(op.filter(self.filters), op.flat_map(lambda x: x))
+        return rx.zip(self.sources(), filter_results)

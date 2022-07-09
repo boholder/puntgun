@@ -1,6 +1,7 @@
 import time
 from typing import Optional
 
+import pytest
 import reactivex as rx
 from reactivex import operators as op
 
@@ -181,3 +182,19 @@ class TestUserFilterRuleAnyOfSet:
         # can function normally
         rule_set(User()).pipe(op.do(rx.Observer(on_next=filter_rule_result_checker(True)))).run()
         assert filter_rule_result_checker.call_count == 1
+
+
+@pytest.fixture
+def filter_rule_result_checker():
+    """For user filter rule sets testing."""
+
+    def factory(expect: bool):
+        factory.call_count = 0
+
+        def real(actual: bool):
+            factory.call_count += 1
+            assert actual is expect
+
+        return real
+
+    return factory
