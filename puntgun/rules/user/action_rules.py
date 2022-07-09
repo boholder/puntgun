@@ -1,5 +1,8 @@
 from typing import ClassVar
 
+import reactivex as rx
+from reactivex import Observable
+
 from client import NeedClient
 from rules import FromConfig
 from rules.user import User
@@ -10,6 +13,13 @@ class UserActionRule(FromConfig):
     Takes **one** :class:`User` instance each time
     and perform an action (block, mute...) on this user via :class:`Client`.
     """
+
+    def __call__(self, user: User) -> Observable[bool]:
+        """
+        Do operation on given user instance, and return the result (success or fail).
+        Due to the operation takes time to perform (needs to call Twitter API),
+        the result returned in reactivex :class:`Observable` type that contains only one boolean value.
+        """
 
 
 class BlockUserActionRule(UserActionRule, NeedClient):
@@ -23,4 +33,4 @@ class BlockUserActionRule(UserActionRule, NeedClient):
     block_already_followed: bool = False
 
     def __call__(self, user: User):
-        self.client.block_user_by_id(user.id)
+        return rx.just(self.client.block_user_by_id(user.id))

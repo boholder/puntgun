@@ -35,7 +35,7 @@ class UserPlan(Plan):
 
         # need at least one default filter rule to keep plan execution functionally
         if 'that' not in conf:
-            conf['that'] = [cls.DefaultAllTriggerUserFilterRule()]
+            conf['that'] = [{'placeholder_user_filter_rule': {}}]
 
         return cls(name=conf['user_plan'],  # using the keyword field for naming this plan
                    # wrap source rules and filter rules with their rule set
@@ -46,12 +46,13 @@ class UserPlan(Plan):
 
     def __call__(self):
         # TODO action 想要的是每个action各衍生一个消费流去消费user
-        self.filtering()
+        self.__filtering()
 
-    def filtering(self):
+    def __filtering(self):
         """
-        Pass source users to filter chain and combine filter result with origin user instance.
+        Pass source users to filter chain and combine filtering result with origin user instance.
+        the result is in (<user instance>, <filtering result>) tuple format.
         """
         users = self.sources()
-        filter_results = users.pipe(op.filter(self.filters), op.flat_map(lambda x: x))
+        filter_results = users.pipe(op.map(self.filters), op.flat_map(lambda x: x))
         return rx.zip(self.sources(), filter_results)
