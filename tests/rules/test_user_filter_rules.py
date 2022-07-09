@@ -1,4 +1,4 @@
-from rules import ConfigParser
+from rules.config_parser import ConfigParser
 from rules.user import User
 from rules.user.filter_rules import UserFilterRule
 

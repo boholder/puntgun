@@ -2,7 +2,8 @@ import pytest
 from hamcrest import assert_that, contains_string, all_of
 from pydantic import ValidationError
 
-from rules import FromConfig, ConfigParser, NumericFilterRule
+from rules import FromConfig, NumericFilterRule
+from rules.config_parser import ConfigParser
 
 
 class TestRuleType:

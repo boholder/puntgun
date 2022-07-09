@@ -1,10 +1,8 @@
 import abc
 import sys
-from typing import List, ClassVar, TypeVar
+from typing import ClassVar
 
-from pydantic import BaseModel, root_validator, ValidationError
-
-from rules import loader
+from pydantic import BaseModel, root_validator
 
 
 class FromConfig(BaseModel, abc.ABC):
@@ -63,59 +61,6 @@ class NumericFilterRule(FromConfig):
 
     def compare(self, num):
         return self.more_than < num < self.less_than
-
-
-class ConfigParser(object):
-    # There are only once parsing process for each run,
-    # so I guess it's ok to use a class variable to store the errors,
-    # and use this class as singleton pattern.
-    # Sort of inconvenient when unit testing.
-    _errors: List[Exception] = []
-
-    _T = TypeVar('_T', bound=FromConfig)
-
-    @staticmethod
-    def parse(conf: dict, expected_type: _T):
-        """
-        Take a piece of configuration and the expected type from caller,
-        recognize which rule it is and parse it into corresponding rule instance.
-        Only do the find & parse work, won't construct them into cascade component instances.
-
-        Collect errors occurred during parsing,
-        by this way we won't break the whole parsing process with error raising.
-        So that we can report all errors at once after finished all parsing work
-        and the user can fix them at once without running over again for configuration validation.
-        """
-
-        def generate_placeholder_instance():
-            """
-            Return a placeholder instance which inherits from the given expected class.
-            For letting caller continue parsing.
-            """
-            return type('FakeSubclassOf' + expected_type.__name__, (expected_type,), {})()
-
-        for subclass in expected_type.__subclasses__():
-            if subclass.keyword() in conf:
-                try:
-                    # let the subclass itself decide how to parse
-                    return subclass.parse_from_config(conf)
-                except (ValidationError, ValueError) as e:
-                    # catch validation exceptions raised by pydantic and store them
-                    ConfigParser._errors.append(e)
-                    return generate_placeholder_instance()
-
-        ConfigParser._errors.append(
-            ValueError(f"Can't find the rule of the [{expected_type}] type from configuration: {conf}"))
-
-        return generate_placeholder_instance()
-
-    @staticmethod
-    def errors():
-        return ConfigParser._errors
-
-    @staticmethod
-    def clear_errors():
-        ConfigParser._errors = []
 
 
 def validate_required_fields_exist(rule_keyword, conf: dict, required_field_names: [str]):
