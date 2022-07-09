@@ -152,6 +152,15 @@ def load_or_request_api_secrets(pri_key: RSAPrivateKey = None):
     if secrets_config_file_valid():
         logger.info("Found previous secrets config file")
         try:
+            # you may wander why not use default value on function parameter.
+            # That's for unit test conveniences,
+            # because python initializes methods' signatures pretty early on running,
+            # and if you want to mock default parameters to another values,
+            # you need to do mock on each method, even all origin default values are
+            # from same one function. (e.g. this "load_or_generate_private_key" )
+            #
+            # By changing default values assignments to this none checking form,
+            # you only need to mock that exactly function.
             if not pri_key:
                 pri_key = load_or_generate_private_key()
             return TwitterAPISecrets.from_settings(pri_key)
