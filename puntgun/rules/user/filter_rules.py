@@ -20,6 +20,19 @@ class UserFilterRule(FromConfig):
         """
 
 
+class PlaceHolderUserFilterRule(UserFilterRule):
+    """
+    In user plan, the filter rule is optional,
+    but we need a default dummy placeholder for an executable user plan.
+    Here is the default one which will let all users from source trigger it
+    so actions can apply on all users.
+    """
+    _keyword = 'placeholder_user_filter_rule'
+
+    def __call__(self, user: User):
+        return True
+
+
 class FollowerUserFilterRule(NumericFilterRule, UserFilterRule):
     """Check user's follower count."""
     _keyword: ClassVar[str] = 'follower'
