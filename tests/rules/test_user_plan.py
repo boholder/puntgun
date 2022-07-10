@@ -57,7 +57,8 @@ def always_true_zipped_result_checker():
         # [0] is a user instance
         assert zipped_user_bool[0].id == call_count
         # [1] is filter result of this user
-        assert zipped_user_bool[1] is True
+        # It's RuleResult type, so we need bool() function to convert
+        assert bool(zipped_user_bool[1]) is True
         call_count += 1
         check_result.call_count = call_count
 

@@ -2,7 +2,7 @@ from typing import ClassVar
 
 from reactivex import Observable
 
-from rules import NumericFilterRule, FromConfig
+from rules import NumericFilterRule, FromConfig, RuleResult
 from rules.user import User
 
 
@@ -12,11 +12,11 @@ class UserFilterRule(FromConfig):
     Takes **one** :class:`User` instance each time and judges if this user's data triggers(meets) its condition.
     """
 
-    def __call__(self, user: User) -> bool | Observable[bool]:
+    def __call__(self, user: User) -> RuleResult | Observable[RuleResult]:
         """
         Immediate filter rules will directly return a raw boolean value,
         while slow filter rules (marked with :class:`NeedClient`) and filter rule sets
-        will return a reactivex :class:`Observable` which wraps a boolean value.
+        will return a reactivex :class:`Observable` which wraps a :class:`RuleResult` value.
         """
 
 
@@ -30,7 +30,7 @@ class PlaceHolderUserFilterRule(UserFilterRule):
     _keyword = 'placeholder_user_filter_rule'
 
     def __call__(self, user: User):
-        return True
+        return RuleResult.true(self)
 
 
 class FollowerUserFilterRule(NumericFilterRule, UserFilterRule):
@@ -38,7 +38,7 @@ class FollowerUserFilterRule(NumericFilterRule, UserFilterRule):
     _keyword: ClassVar[str] = 'follower'
 
     def __call__(self, user: User):
-        return super().compare(user.followers_count)
+        return RuleResult(self, super().compare(user.followers_count))
 
 
 class FollowingUserFilterRule(NumericFilterRule, UserFilterRule):
@@ -46,4 +46,4 @@ class FollowingUserFilterRule(NumericFilterRule, UserFilterRule):
     _keyword: ClassVar[str] = 'following'
 
     def __call__(self, user: User):
-        return super().compare(user.following_count)
+        return RuleResult(self, super().compare(user.following_count))
