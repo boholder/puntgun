@@ -71,7 +71,7 @@ class TestLoadApiSecretsInteractively:
 
     def test_load_from_input(self, monkeypatch, mock_private_key_file):
         # load the private key, then enter two secrets
-        monkeypatch.setattr('builtins.input', Mock(side_effect=['key', 'y', 'secret', 'y']))
+        monkeypatch.setattr('builtins.input', Mock(side_effect=['pwd', 'y', 'key', 'y', 'secret', 'y']))
         self.assert_result()
 
     @staticmethod
