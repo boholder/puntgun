@@ -4,7 +4,7 @@ import reactivex as rx
 from reactivex import Observable
 
 from client import NeedClient
-from rules import FromConfig
+from rules import FromConfig, RuleResult
 from rules.user import User
 
 
@@ -14,7 +14,7 @@ class UserActionRule(FromConfig):
     and perform an action (block, mute...) on this user via :class:`Client`.
     """
 
-    def __call__(self, user: User) -> Observable[bool]:
+    def __call__(self, user: User) -> Observable[RuleResult]:
         """
         Do operation on given user instance, and return the result (success or fail).
         Due to the operation takes time to perform (needs to call Twitter API),
@@ -33,4 +33,4 @@ class BlockUserActionRule(UserActionRule, NeedClient):
     block_already_followed: bool = False
 
     def __call__(self, user: User):
-        return rx.just(self.client.block_user_by_id(user.id))
+        return rx.just(RuleResult(self, self.client.block_user_by_id(user.id)))

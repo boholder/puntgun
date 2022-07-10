@@ -2,7 +2,7 @@ import pytest
 from hamcrest import assert_that, contains_string, all_of
 from pydantic import ValidationError
 
-from rules import FromConfig, NumericFilterRule
+from rules import FromConfig, NumericFilterRule, RuleResult
 from rules.config_parser import ConfigParser
 
 
@@ -61,3 +61,11 @@ class TestNumericUserFilterRule:
         # edge case (equal) result in False.
         assert not r.compare(10)
         assert not r.compare(20)
+
+
+class TestRuleResult:
+    def test_getting_both_result_and_rule_instance_inside(self):
+        fake_rule_instance = object()
+        r = RuleResult(fake_rule_instance, True)
+        assert r.rule is fake_rule_instance
+        assert bool(r) is True

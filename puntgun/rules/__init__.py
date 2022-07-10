@@ -83,3 +83,34 @@ def validate_required_fields_exist(rule_keyword, conf: dict, required_field_name
 
 class Plan(FromConfig):
     """This class exists only for :class:`ConfigParser` to recognize plan classes."""
+
+
+class RuleResult(object):
+    """
+    It's a special wrapper as filter/action rules' execution result.
+    After a rule's execution, it returns an instance of this class instead of directly return the boolean value,
+    zipping the rule instance itself with its boolean type filtering/operation result into one.
+
+    It's for constructing execution report that need to tell
+    WHICH filter rule is triggered or WHICH action rule is successfully executed.
+
+    Rather than using tuple structure,
+    we can simplify the logic by using bool(<result>) to get the boolean result
+    (python will automatically do that for us)
+    without extract/map the tuple before processing, so we can change lesser present code.
+    """
+
+    def __init__(self, rule, result: bool):
+        self.rule = rule
+        self.result = result
+
+    def __bool__(self):
+        return self.result
+
+    @staticmethod
+    def true(rule):
+        return RuleResult(rule, True)
+
+    @staticmethod
+    def false(rule):
+        return RuleResult(rule, False)

@@ -93,8 +93,9 @@ class UserFilterRuleAllOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
     def __call__(self, user: User):
         # In ideal case, we can find the result without consuming any API resource.
         for r in self.immediate_rules:
-            if not r(user):
-                return rx.just(False)
+            result = r(user)
+            if not result:
+                return rx.just(result)
 
         return rx.merge(*[rx.start(self.execution_wrapper(user, r)) for r in self.slow_rules]).pipe(
             # each slow rule returns an observable that contains only one boolean value.
@@ -119,8 +120,9 @@ class UserFilterRuleAnyOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
     def __call__(self, user: User):
         """I can endure repeating twice"""
         for r in self.immediate_rules:
-            if r(user):
-                return rx.just(True)
+            result = r(user)
+            if result:
+                return rx.just(result)
 
         return rx.merge(*[rx.start(self.execution_wrapper(user, r)) for r in self.slow_rules]).pipe(
             op.flat_map(lambda x: x), op.first_or_default(lambda e: e is True, False)
