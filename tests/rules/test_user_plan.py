@@ -7,7 +7,7 @@ from rules import Plan
 from rules.config_parser import ConfigParser
 from rules.user import User
 from rules.user.filter_rules import UserFilterRule
-from rules.user.rule_sets import UserSourceRuleAnyOfSet, UserFilterRuleAnyOfSet
+from rules.user.rule_sets import UserSourceRuleResultMergingSet, UserFilterRuleAnyOfSet
 from rules.user.source_rules import UserSourceRule
 
 
@@ -82,7 +82,7 @@ def test_filtering_with_filter_rule(even_true_zipped_result_checker):
 
     # type check
     assert plan.name == 'plan name'
-    assert isinstance(plan.sources, UserSourceRuleAnyOfSet)
+    assert isinstance(plan.sources, UserSourceRuleResultMergingSet)
     assert isinstance(plan.sources.rules[0], TUserSourceRule)
     assert isinstance(plan.filters, UserFilterRuleAnyOfSet)
     assert isinstance(plan.filters.immediate_rules[0], TEvenTrueUserFilterRule)

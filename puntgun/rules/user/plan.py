@@ -8,7 +8,7 @@ from rules.config_parser import ConfigParser
 from rules.user import User
 from rules.user.action_rules import UserActionRule
 from rules.user.filter_rules import UserFilterRule
-from rules.user.rule_sets import UserSourceRuleAnyOfSet, UserFilterRuleAnyOfSet
+from rules.user.rule_sets import UserSourceRuleResultMergingSet, UserFilterRuleAnyOfSet
 from rules.user.source_rules import UserSourceRule
 
 
@@ -19,7 +19,7 @@ class UserPlan(Plan):
 
     _keyword: ClassVar[str] = 'user_plan'
     name: str
-    sources: UserSourceRuleAnyOfSet
+    sources: UserSourceRuleResultMergingSet
     filters: UserFilterRuleAnyOfSet
     actions: List[UserActionRule]
 
@@ -46,12 +46,21 @@ class UserPlan(Plan):
 
     def __call__(self):
         # TODO action 想要的是每个action各衍生一个消费流去消费user
-        self.__filtering()
+        users_need_to_be_perform = self.__filtering().pipe(
+            # take users that triggered filter rules
+            op.filter(lambda z: z[1] is True),
+            # extract user instance from tuple
+            op.map(lambda z: z[0])
+        )
+
+        for action_rule in self.actions:
+            users_need_to_be_perform.subscribe(on_next=action_rule)
 
     def __filtering(self):
         """
         Pass source users to filter chain and combine filtering result with origin user instance.
         the result is in (<user instance>, <filtering result>) tuple format.
+        :return: rx.Observable(Tuple[User, bool])
         """
         users = self.sources()
         filter_results = users.pipe(op.map(self.filters), op.flat_map(lambda x: x))
