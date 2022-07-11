@@ -1,24 +1,10 @@
 """
-A rule set is an auxiliary type of rule used to organize the execution order
-by aggregating the results of a group of rules into a single result.
+A rule set is an auxiliary type of rule used to organize the execution order,
+aggregate the results of a group of rules into a single result.
+
 The rule set itself can be contained inside another rule set,
 so you can make complex cascading execution order tree with them.
 It's the composite pattern I guess.
-
-Currently, there are two logical rule sets:
-all_of(AND), any_of(OR)
-
-Different rule type has different type of result to aggregating,
-so they get different implements:
-
-1. source rule: any_of
-(And it's its default (and only) execution order - combine results together into one set.)
-
-2. filter rule: all_of, any_of
-(There will be more rule set for filter rule type.)
-
-Action rule type doesn't have any rule set because
-it's the latest execution step and there's no need for aggregating action results.
 """
 from typing import List
 
@@ -29,11 +15,15 @@ from reactivex import operators as op, Observable
 from client import NeedClient
 from rules.config_parser import ConfigParser
 from rules.user import User
+from rules.user.action_rules import UserActionRule
 from rules.user.filter_rules import UserFilterRule
 from rules.user.source_rules import UserSourceRule
 
 
-class UserSourceRuleAnyOfSet(UserSourceRule):
+class UserSourceRuleResultMergingSet(UserSourceRule):
+    """
+    Simply merge user source rule results together into one :class:`Observable`.
+    """
     _keyword = 'any_of'
     rules: List[UserSourceRule]
 
@@ -42,7 +32,6 @@ class UserSourceRuleAnyOfSet(UserSourceRule):
         return cls(rules=[ConfigParser.parse(c, UserSourceRule) for c in conf['any_of']])
 
     def __call__(self) -> Observable[User]:
-        # simply merge results together
         return rx.merge(*[rx.start(r) for r in self.rules]).pipe(
             # extract user source rules' results
             op.flat_map(lambda x: x),
@@ -127,3 +116,7 @@ class UserFilterRuleAnyOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
         return rx.merge(*[rx.start(self.execution_wrapper(user, r)) for r in self.slow_rules]).pipe(
             op.flat_map(lambda x: x), op.first_or_default(lambda e: e is True, False)
         )
+
+
+class UserActionRuleRunAndCollectSet(UserActionRule, NeedClient):
+    """"""

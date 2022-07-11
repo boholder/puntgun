@@ -9,7 +9,7 @@ from client import NeedClient
 from rules.config_parser import ConfigParser
 from rules.user import User
 from rules.user.filter_rules import UserFilterRule
-from rules.user.rule_sets import UserSourceRuleAnyOfSet, UserFilterRuleAllOfSet, UserFilterRuleSet, \
+from rules.user.rule_sets import UserSourceRuleResultMergingSet, UserFilterRuleAllOfSet, UserFilterRuleSet, \
     UserFilterRuleAnyOfSet
 from rules.user.source_rules import UserSourceRule
 
@@ -34,7 +34,7 @@ class TestUserSourceRuleAnyOfSet:
                                       UserSourceRule)
 
         # check type
-        assert isinstance(rule_set, UserSourceRuleAnyOfSet)
+        assert isinstance(rule_set, UserSourceRuleResultMergingSet)
         for r in rule_set.rules:
             assert isinstance(r, self.TUserSourceRule)
 
