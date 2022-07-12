@@ -19,7 +19,7 @@ pydantic = "^1.9.1"
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
 PyHamcrest = "^2.0.3"
-coverage = "^6.4.1"
+coverage = "^6.4.2"
 
 [tool.pytest.ini_options]
 pythonpath = ["puntgun", "tests"]
