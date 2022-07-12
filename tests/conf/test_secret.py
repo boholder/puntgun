@@ -69,9 +69,11 @@ class TestLoadApiSecretsInteractively:
         mock_secrets_config_file(ak='key', aks='secret')
         self.assert_result()
 
-    def test_load_from_input(self, monkeypatch, mock_private_key_file):
-        # load the private key, then enter two secrets
-        monkeypatch.setattr('builtins.input', Mock(side_effect=['pwd', 'y', 'key', 'y', 'secret', 'y']))
+    def test_load_from_input(self, monkeypatch, mock_secrets_config_file):
+        # mock_secrets_config_file for letting program believes there is no valid secrets config file,
+        # so it won't try to load private key for decrypting secrets config file --
+        # which leads to requiring password input and fail the test.
+        monkeypatch.setattr('builtins.input', Mock(side_effect=['key', 'y', 'secret', 'y']))
         self.assert_result()
 
     @staticmethod
