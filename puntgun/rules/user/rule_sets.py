@@ -92,7 +92,7 @@ class UserFilterRuleAllOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
             # each slow rule returns an observable that contains only one boolean value.
             op.flat_map(lambda x: x),
             # expect first False result or return True finally.
-            op.first_or_default(lambda e: e is False, True)
+            op.first_or_default(lambda e: bool(e) is False, rx.just(RuleResult.true(self)))
         )
 
 
@@ -116,7 +116,7 @@ class UserFilterRuleAnyOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
                 return rx.just(result)
 
         return rx.merge(*[rx.start(self.execution_wrapper(user, r)) for r in self.slow_rules]).pipe(
-            op.flat_map(lambda x: x), op.first_or_default(lambda e: e is True, False)
+            op.flat_map(lambda x: x), op.first_or_default(lambda e: bool(e) is True, rx.just(RuleResult.false(self)))
         )
 
 
@@ -133,4 +133,5 @@ class UserActionRuleResultCollectingSet(UserActionRule):
     def parse_from_config(cls, conf: dict):
         return cls(rules=[ConfigParser.parse(c, UserSourceRule) for c in conf['all_of']])
 
-    def __call__(self, user: User) -> Observable[RuleResult]:
+    def __call__(self, user: User) -> Observable[List[RuleResult]]:
+        pass
