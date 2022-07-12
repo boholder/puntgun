@@ -11,7 +11,7 @@ class TestRuleType:
 
 
 class TestConfigParserWithRuleBaseClass:
-    class TestRule(FromConfig, TestRuleType):
+    class TRule(FromConfig, TestRuleType):
         _keyword = 'key'
         f: int
 
