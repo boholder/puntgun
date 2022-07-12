@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from reactivex import operators as op, Observable
 
 from client import NeedClient
+from rules import RuleResult
 from rules.config_parser import ConfigParser
 from rules.user import User
 from rules.user.action_rules import UserActionRule
@@ -22,6 +23,7 @@ from rules.user.source_rules import UserSourceRule
 
 class UserSourceRuleResultMergingSet(UserSourceRule):
     """
+    * Only be used inside user plan.
     Simply merge user source rule results together into one :class:`Observable`.
     """
     _keyword = 'any_of'
@@ -79,7 +81,7 @@ class UserFilterRuleAllOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
         return UserFilterRuleSet.divide_and_construct(
             cls, [ConfigParser.parse(c, UserFilterRule) for c in conf['all_of']])
 
-    def __call__(self, user: User):
+    def __call__(self, user: User) -> Observable[RuleResult]:
         # In ideal case, we can find the result without consuming any API resource.
         for r in self.immediate_rules:
             result = r(user)
@@ -106,7 +108,7 @@ class UserFilterRuleAnyOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
         return UserFilterRuleSet.divide_and_construct(
             cls, [ConfigParser.parse(c, UserFilterRule) for c in conf['any_of']])
 
-    def __call__(self, user: User):
+    def __call__(self, user: User) -> Observable[RuleResult]:
         """I can endure repeating twice"""
         for r in self.immediate_rules:
             result = r(user)
@@ -118,5 +120,17 @@ class UserFilterRuleAnyOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
         )
 
 
-class UserActionRuleRunAndCollectSet(UserActionRule, NeedClient):
-    """"""
+class UserActionRuleResultCollectingSet(UserActionRule):
+    """
+    * Only be used inside user plan.
+    Run action rules and collect their results (whether succeeded)
+    into one set for latter result aggregating and recording.
+    """
+    _keyword = 'all_of'
+    rules: List[UserActionRule]
+
+    @classmethod
+    def parse_from_config(cls, conf: dict):
+        return cls(rules=[ConfigParser.parse(c, UserSourceRule) for c in conf['all_of']])
+
+    def __call__(self, user: User) -> Observable[RuleResult]:
