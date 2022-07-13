@@ -1,13 +1,7 @@
 """All the loaded settings and global variables for many modules to use."""
-from pathlib import Path
 
 from dynaconf import Dynaconf
 from from_root import from_root
-
-
-def path_to_str(path: Path):
-    return str(path.absolute())
-
 
 # where to find the config file:
 # .../project-root/conf
@@ -35,8 +29,3 @@ settings = Dynaconf(
 # settings.configure(settings_files=static_config_files + ['conf/a.yml'])
 # https://www.dynaconf.com/settings_files/#yaml-caveats
 # https://loguru.readthedocs.io/en/stable/api/logger.html#loguru._logger.Logger.configure
-
-# try:
-#     print(settings.get('name'))
-# except Exception as e:
-#     print(e)

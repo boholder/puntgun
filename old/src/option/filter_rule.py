@@ -7,8 +7,8 @@ from typing import Any, Tuple, Dict
 
 import reactivex as rx
 
-from puntgun.old.base.options import MapOption, Field, Option
-from puntgun.old.model.context import Context
+from old.test.base.options import MapOption, Field, Option
+from old.test.model.context import Context
 from model.errors import TwitterApiError
 
 

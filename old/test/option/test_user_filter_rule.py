@@ -5,9 +5,9 @@ from unittest import TestCase
 
 from hamcrest import assert_that, calling, raises, is_
 
-from puntgun.old.model import Context
-from puntgun.old.model import User
-from puntgun.old.option.filter_rule import UserCreatedFilterRule, UserTextsMatchFilterRule, UserCreatedAfterFilterRule, \
+from old.test import Context
+from old.test import User
+from old.test import UserCreatedFilterRule, UserTextsMatchFilterRule, UserCreatedAfterFilterRule, \
     UserCreatedWithinDaysFilterRule, IntComparingFilterRule, UserFollowerFilterRule, UserFollowerLessThanFilterRule, \
     UserFollowingMoreThanFilterRule, UserFollowingFilterRule, FloatComparingFilterRule
 

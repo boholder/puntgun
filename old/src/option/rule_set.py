@@ -3,12 +3,12 @@ from typing import Any, List, Dict, Tuple
 import reactivex as rx
 
 import util
-from puntgun.old.base.options import ListOption, Field, MapOption
-from puntgun.old.model.context import Context
-from puntgun.old.model.decision import Decision
+from old.test.base.options import ListOption, Field, MapOption
+from old.test.model.context import Context
+from old.test.model.decision import Decision
 from model.errors import TwitterApiError
 from rules.user import User
-from puntgun.old.option.filter_rule import FilterRule
+from old.test.option.filter_rule import FilterRule
 
 
 class RuleSet(ListOption):

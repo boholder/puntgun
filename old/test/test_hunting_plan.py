@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from puntgun.old.hunting_plan import HuntingPlan
+from old.test import HuntingPlan
 
 
 class TestHuntingPlan(TestCase):

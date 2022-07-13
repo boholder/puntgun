@@ -7,16 +7,6 @@ from conf.encrypto import generate_private_key, dump_private_key
 from rules.config_parser import ConfigParser
 
 
-def experimental(func):
-    """Decorator. Skip this test because it's for testing behaviors of libraries etc. for developing."""
-
-    @pytest.mark.skip(reason="experimental")
-    def decorator(*args, **kwargs):
-        return func(*args, **kwargs)
-
-    return decorator
-
-
 @pytest.fixture
 def generated_key_file(tmp_path):
     file = tmp_path.joinpath('pri_key_file')

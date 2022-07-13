@@ -7,9 +7,9 @@ import reactivex as rx
 import tweepy
 from hamcrest import assert_that, is_
 
-from puntgun.old.client import TweepyHunter
-from puntgun.old.model import ResourceNotFoundError
-from puntgun.old.model import User
+from old.test import TweepyHunter
+from old.test import ResourceNotFoundError
+from old.test import User
 
 
 class TestTweepyHunterUserQuerying(TestCase):

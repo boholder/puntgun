@@ -8,7 +8,7 @@ from reactivex import operators as op
 from tweepy import Client, OAuth1UserHandler
 
 import util
-from puntgun.old.client.hunter import Hunter, MixedResultProcessingWrapper
+from old.test.client.hunter import Hunter, MixedResultProcessingWrapper
 from model.errors import TwitterApiErrors, TwitterClientError
 from rules.user import User
 

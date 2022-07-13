@@ -4,8 +4,8 @@ from unittest import TestCase
 
 from hamcrest import assert_that, instance_of
 
-from puntgun.old.client import Hunter
-from puntgun.old.option import WhoField, UserSelectingRule
+from old.test import Hunter
+from old.test import WhoField, UserSelectingRule
 
 
 class TestWhoField(WhoField):

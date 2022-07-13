@@ -4,7 +4,7 @@ import reactivex as rx
 from reactivex import operators as op
 
 from model.errors import TwitterApiError
-from puntgun.old.model.tweet import Tweet
+from old.test.model.tweet import Tweet
 from rules.user import User
 
 

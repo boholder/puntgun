@@ -3,13 +3,13 @@ from typing import List, Dict, Any, Tuple
 import reactivex as rx
 
 import util
-from puntgun.old.base.options import Field, MapOption
-from puntgun.old.client.hunter import Hunter
-from puntgun.old.model.decision import Decision
+from old.test.base.options import Field, MapOption
+from old.test.client.hunter import Hunter
+from old.test.model.decision import Decision
 from model.errors import TwitterApiError
 from rules.user import User
-from puntgun.old.option.let_me_check_rule import LetMeCheckRule
-from puntgun.old.option.rule_set import RuleSet
+from old.test.option.let_me_check_rule import LetMeCheckRule
+from old.test.option.rule_set import RuleSet
 
 
 class WhoField(Field):
