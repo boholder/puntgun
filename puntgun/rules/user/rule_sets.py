@@ -51,17 +51,17 @@ class UserFilterRuleSet(BaseModel):
         return cls(slow_rules=[r for r in rules if isinstance(r, NeedClient)],
                    immediate_rules=[r for r in rules if not isinstance(r, NeedClient)])
 
-    @staticmethod
-    def execution_wrapper(u: User, rule: UserFilterRule):
-        """
-        Because the rx.start() only accept no-param functions as its parameter,
-        but user filter rule need a user instance param for judgement.
-        """
 
-        def run_the_rule():
-            return rule(u)
+def execution_wrapper(u: User, rule: UserFilterRule | UserActionRule):
+    """
+    Because the rx.start() only accept no-param functions as its parameter,
+    but user filter rule need a user instance param for judgement.
+    """
 
-        return run_the_rule
+    def run_the_rule():
+        return rule(u)
+
+    return run_the_rule
 
 
 class UserFilterRuleAllOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
@@ -88,11 +88,11 @@ class UserFilterRuleAllOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
             if not result:
                 return rx.just(result)
 
-        return rx.merge(*[rx.start(self.execution_wrapper(user, r)) for r in self.slow_rules]).pipe(
+        return rx.merge(*[rx.start(execution_wrapper(user, r)) for r in self.slow_rules]).pipe(
             # each slow rule returns an observable that contains only one boolean value.
             op.flat_map(lambda x: x),
             # expect first False result or return True finally.
-            op.first_or_default(lambda e: bool(e) is False, rx.just(RuleResult.true(self)))
+            op.first_or_default(lambda e: bool(e) is False, RuleResult.true(self))
         )
 
 
@@ -115,8 +115,9 @@ class UserFilterRuleAnyOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
             if result:
                 return rx.just(result)
 
-        return rx.merge(*[rx.start(self.execution_wrapper(user, r)) for r in self.slow_rules]).pipe(
-            op.flat_map(lambda x: x), op.first_or_default(lambda e: bool(e) is True, rx.just(RuleResult.false(self)))
+        return rx.merge(*[rx.start(execution_wrapper(user, r)) for r in self.slow_rules]).pipe(
+            op.flat_map(lambda x: x),
+            op.first_or_default(lambda e: bool(e) is True, RuleResult.false(self))
         )
 
 
@@ -134,4 +135,9 @@ class UserActionRuleResultCollectingSet(UserActionRule):
         return cls(rules=[ConfigParser.parse(c, UserSourceRule) for c in conf['all_of']])
 
     def __call__(self, user: User) -> Observable[List[RuleResult]]:
-        pass
+        # TODO untested
+        return rx.merge(*[rx.start(execution_wrapper(user, r)) for r in self.rules]).pipe(
+            op.flat_map(lambda x: x),
+            # collect them into one list
+            op.buffer_with_count(len(self.rules))
+        )
