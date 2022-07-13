@@ -6,15 +6,17 @@ import reactivex as rx
 from reactivex import operators as op
 
 from client import NeedClient
+from rules import RuleResult
 from rules.config_parser import ConfigParser
 from rules.user import User
+from rules.user.action_rules import UserActionRule
 from rules.user.filter_rules import UserFilterRule
 from rules.user.rule_sets import UserSourceRuleResultMergingSet, UserFilterRuleAllOfSet, UserFilterRuleAnyOfSet, \
     execution_wrapper
 from rules.user.source_rules import UserSourceRule
 
 
-class TestUserSourceRuleAnyOfSet:
+class TestUserSourceRuleResultMergingSet:
     class TUserSourceRule(UserSourceRule):
         _keyword = 'sr'
         num: int
@@ -65,6 +67,22 @@ class TSlowFilterRuleTrue(UserFilterRule, NeedClient):
             # proof that the slow rule is still running
             self.work_count += 1
         return rx.just(self.will_return)
+
+
+@pytest.fixture
+def filter_rule_result_checker():
+    """For user filter rule sets testing."""
+
+    def factory(expect: bool):
+        factory.call_count = 0
+
+        def real(actual):
+            factory.call_count += 1
+            assert bool(actual) is expect
+
+        return real
+
+    return factory
 
 
 class TestUserFilterRuleAllOfSet:
@@ -184,17 +202,14 @@ class TestUserFilterRuleAnyOfSet:
         assert filter_rule_result_checker.call_count == 1
 
 
-@pytest.fixture
-def filter_rule_result_checker():
-    """For user filter rule sets testing."""
+class TUserActionRule(UserActionRule):
+    _keyword = 'tuar'
 
-    def factory(expect: bool):
-        factory.call_count = 0
+    will_return: bool
 
-        def real(actual):
-            factory.call_count += 1
-            assert bool(actual) is expect
+    def __call__(self, user: User):
+        return rx.just(RuleResult(self, self.will_return))
 
-        return real
 
-    return factory
+class TestUserActionRuleResultCollectingSet:
+    pass
