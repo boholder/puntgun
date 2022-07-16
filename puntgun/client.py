@@ -13,6 +13,9 @@ from rules.user import User
 class TwitterClientError(Exception):
     """Class for wrapping all Twitter client library custom errors."""
 
+    def __init__(self):
+        super().__init__(f'Twitter client raises unrecoverable error while querying Twitter API')
+
 
 class TwitterApiErrors(Exception, Recordable):
     """
@@ -111,7 +114,7 @@ def record_twitter_api_errors(client_func):
         except tweepy.errors.TweepyException as e:
             # We have no idea how to handle the error tweepy throws out.
             # just wrap it in a custom exception and let it fails the entire process.
-            logger.exception('Client throws unrecoverable error while querying Twitter API')
+            logger.exception('Client raises unrecoverable error while querying Twitter API')
             raise TwitterClientError from e
 
     return decorator
@@ -177,7 +180,7 @@ class Client(object):
         if len(names) > 100:
             raise ValueError('at most 100 usernames per request')
 
-        return self.__user_resp_to_user_instances(self.clt.get_users(usernames=names, **self.__user_api_params))
+        return self._user_resp_to_user_instances(self.clt.get_users(usernames=names, **self.__user_api_params))
 
     def get_users_by_ids(self, ids: List[int | str]):
         """
@@ -188,10 +191,10 @@ class Client(object):
         if len(ids) > 100:
             raise ValueError('at most 100 user ids per request')
 
-        return self.__user_resp_to_user_instances(self.clt.get_users(ids=ids, **self.__user_api_params))
+        return self._user_resp_to_user_instances(self.clt.get_users(ids=ids, **self.__user_api_params))
 
     @staticmethod
-    def __user_resp_to_user_instances(resp: tweepy.Response):
+    def _user_resp_to_user_instances(resp: tweepy.Response):
         """Build a list of :class:`User` instances from one response."""
         if not resp.data:
             return []

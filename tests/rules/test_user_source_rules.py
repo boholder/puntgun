@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, call
 import pytest
 import reactivex as rx
 import reactivex.operators as ops
+from hamcrest import contains_string, assert_that
 from reactivex.internal import SequenceContainsNoElementsError
 
 import client
@@ -16,11 +17,11 @@ class TestCommonBehavior:
     def test_client_error_catching(self, mock_client):
         def raise_error(_):
             raise_error.called = True
-            raise client.TwitterClientError('error')
+            raise client.TwitterClientError()
 
         def assertion_consumer(e):
             assertion_consumer.called = True
-            assert str(e) == 'error'
+            assert_that(str(e), contains_string('client'))
 
         mock_client.get_users_by_usernames = raise_error
         rule = NameUserSourceRule.parse_obj({'names': ['uname']})
@@ -29,7 +30,7 @@ class TestCommonBehavior:
         with pytest.raises(client.TwitterClientError) as actual_error:
             rule().pipe(ops.do(rx.Observer(on_error=assertion_consumer))).run()
 
-        assert str(actual_error.value) == 'error'
+        assert_that(str(actual_error.value), contains_string('client'))
         assert raise_error.called
         assert assertion_consumer.called
 

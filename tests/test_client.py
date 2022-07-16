@@ -3,10 +3,30 @@ from unittest.mock import MagicMock
 
 import pytest
 import tweepy
-from hamcrest import assert_that, is_
+from hamcrest import assert_that, is_, contains_string
 
+import client
 from client import Client, ResourceNotFoundError
 from rules.user import User
+
+
+class TestTwitterApiErrors:
+    def test_its_magic_methods(self):
+        # one instance in type of 'TwitterApiErrors'
+        errors = client.TwitterApiErrors(query_func_name='func',
+                                         query_params=(1, 2, 3),
+                                         resp_errors=[{'value': 'v',
+                                                       'detail': 'd',
+                                                       # the TwitterApiError take this 'title' field as error type.
+                                                       'title': 'test api error', 'resource_type': 'rt',
+                                                       'parameter': 'p',
+                                                       'resource_id': 'r',
+                                                       'type': 't'}])
+
+        assert bool(errors) is True
+        assert len(errors) == 1
+        assert list([e for e in errors])[0] == errors[0]
+
 
 create_time = datetime.now()
 image_url = 'https://example.com'
@@ -23,6 +43,15 @@ def mock_tweepy_client():
     return mock_tweepy_client
 
 
+@pytest.fixture
+def mock_user_getting_tweepy_client(mock_tweepy_client):
+    def set_response(test_response_data):
+        mock_tweepy_client.get_users = MagicMock(return_value=test_response_data)
+        return mock_tweepy_client
+
+    return set_response
+
+
 class TestUserQuerying:
     """
     For now, I figure out there are three kinds of rules datas in response (responded by Twitter(tweepy.Client)):
@@ -33,13 +62,22 @@ class TestUserQuerying:
     The test cases are simulating these situations, test datas are from real responses.
     There are some cases also test the constructing and default value replacing logic of :class:`User`.
 
+    We'll test both `get_by_username` and `get_by_id` methods, they are too similar.
+
     get by id: https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users
 
     get by username: https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-by
     """
 
     def test_response_translating(self, normal_user_response):
-        self.assert_normal_user(Client._Client__user_resp_to_user_instances(normal_user_response)[0])
+        self.assert_normal_user(Client._user_resp_to_user_instances(normal_user_response)[0])
+
+    def test_tweepy_exception_handling(self, mock_tweepy_client):
+        mock_tweepy_client.get_users = MagicMock(side_effect=tweepy.errors.TweepyException('inner'))
+        with pytest.raises(client.TwitterClientError) as e:
+            Client(mock_tweepy_client).get_users_by_usernames(['whatever'])
+        assert_that(str(e.value), contains_string('client'))
+        assert_that(str(e.value.__cause__), contains_string('inner'))
 
     def test_get_normal_user(self, normal_user_response, mock_user_getting_tweepy_client):
         self.assert_normal_user(
@@ -83,13 +121,14 @@ class TestUserQuerying:
         self.assert_no_pinned_tweet_user(users[1])
         self.assert_user_not_exist_error(mock_recorder)
 
-    @pytest.fixture
-    def mock_user_getting_tweepy_client(self, mock_tweepy_client):
-        def set_response(test_response_data):
-            mock_tweepy_client.get_users = MagicMock(return_value=test_response_data)
-            return mock_tweepy_client
+    def test_pass_more_than_100_users_will_raise_error(self, normal_user_response, mock_user_getting_tweepy_client):
+        with pytest.raises(ValueError) as e:
+            Client(mock_user_getting_tweepy_client(normal_user_response)).get_users_by_ids(['1'] * 101)
+        assert_that(str(e.value), contains_string('100'))
 
-        return set_response
+        with pytest.raises(ValueError) as e:
+            Client(mock_user_getting_tweepy_client(normal_user_response)).get_users_by_ids([1] * 101)
+        assert_that(str(e.value), contains_string('100'))
 
     @pytest.fixture
     def normal_user_response(self):
