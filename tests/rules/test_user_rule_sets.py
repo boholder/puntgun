@@ -1,5 +1,5 @@
 import time
-from typing import Optional
+from typing import Optional, List
 
 import pytest
 import reactivex as rx
@@ -208,8 +208,28 @@ class TUserActionRule(UserActionRule):
     will_return: bool
 
     def __call__(self, user: User):
-        return rx.just(RuleResult(self, self.will_return))
+        return RuleResult(self, self.will_return)
 
 
 class TestUserActionRuleResultCollectingSet:
-    pass
+    def test_result_aggregating(self):
+        def action_ruleset_result_checker(results: List[RuleResult]):
+            """For user filter rule sets testing."""
+            action_ruleset_result_checker.call_count = 0
+
+            for r in results:
+                assert isinstance(r.rule, TUserActionRule)
+                action_ruleset_result_checker.call_count += 1
+
+            assert bool(results[0]) is True
+            assert bool(results[1]) is False
+
+        rule_set = ConfigParser.parse({'all_of': [{'tuar': {'will_return': True}},
+                                                  {'tuar': {'will_return': False}}]},
+                                      UserActionRule)
+
+        for rule in rule_set.rules:
+            assert isinstance(rule, TUserActionRule)
+
+        rule_set(User()).pipe(op.do(rx.Observer(on_next=action_ruleset_result_checker))).run()
+        assert action_ruleset_result_checker.call_count == 2

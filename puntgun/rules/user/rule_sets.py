@@ -132,12 +132,10 @@ class UserActionRuleResultCollectingSet(UserActionRule):
 
     @classmethod
     def parse_from_config(cls, conf: dict):
-        return cls(rules=[ConfigParser.parse(c, UserSourceRule) for c in conf['all_of']])
+        return cls(rules=[ConfigParser.parse(c, UserActionRule) for c in conf['all_of']])
 
     def __call__(self, user: User) -> Observable[List[RuleResult]]:
-        # TODO untested
         return rx.merge(*[rx.start(execution_wrapper(user, r)) for r in self.rules]).pipe(
-            op.flat_map(lambda x: x),
             # collect them into one list
             op.buffer_with_count(len(self.rules))
         )
