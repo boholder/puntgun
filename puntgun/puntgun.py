@@ -30,7 +30,6 @@ class PreCheckCommand(object):
     def config(config_file='config_parsing.yml'):
         """Check the syntactic correctness of the given configuration file,
         run test cases if the file contains."""
-        # TODO 配置文件里可配套写测试用例和预期结果
         print(f"check rule file:{config_file}")
 
     @staticmethod
