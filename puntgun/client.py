@@ -6,7 +6,7 @@ from loguru import logger
 
 from conf.encrypto import load_or_generate_private_key
 from conf.secret import load_or_request_all_secrets
-from recorder import Recorder, Recordable
+from recorder import Recorder, Recordable, Record
 from rules.user import User
 
 
@@ -15,6 +15,47 @@ class TwitterClientError(Exception):
 
     def __init__(self):
         super().__init__(f'Twitter client raises unrecoverable error while querying Twitter API')
+
+
+class TwitterApiError(Exception):
+    """Corresponding to one https://developer.twitter.com/en/support/twitter-api/error-troubleshooting#partial-errors"""
+    title = 'generic twitter api error'
+
+    def __init__(self, title, ref_url, detail, parameter, value):
+        super().__init__(f'{detail} Refer: {ref_url}')
+        self.title = title
+        self.ref_url = ref_url
+        self.detail = detail
+        self.parameter = parameter
+        self.value = value
+
+    @staticmethod
+    def from_response(resp_error: dict):
+        # build an accurate error type according to the response content
+        for subclass in TwitterApiError.__subclasses__():
+            if subclass.title == resp_error['title']:
+                return subclass(
+                    title=resp_error['title'],
+                    ref_url=resp_error['type'],
+                    detail=resp_error['detail'],
+                    parameter=resp_error['parameter'],
+                    value=resp_error['value'])
+
+        # if we haven't written a subclass for given error, return generic error
+        return TwitterApiError(
+            title=resp_error['title'],
+            ref_url=resp_error['type'],
+            detail=resp_error['detail'],
+            parameter=resp_error['parameter'],
+            value=resp_error['value'])
+
+
+class ResourceNotFoundError(TwitterApiError):
+    """
+    For example, if you try to query information about a not-exist user id,
+    this error will be returned by Twitter server and raised by the tool.
+    """
+    title = 'Not Found Error'
 
 
 class TwitterApiErrors(Exception, Recordable):
@@ -60,46 +101,10 @@ class TwitterApiErrors(Exception, Recordable):
         """TODO"""
         pass
 
-
-class TwitterApiError(Exception):
-    """Corresponding to one https://developer.twitter.com/en/support/twitter-api/error-troubleshooting#partial-errors"""
-    title = 'generic twitter api error'
-
-    def __init__(self, title, ref_url, detail, parameter, value):
-        super().__init__(f'{detail} Refer: {ref_url}.')
-        self.title = title
-        self.ref_url = ref_url
-        self.detail = detail
-        self.parameter = parameter
-        self.value = value
-
     @staticmethod
-    def from_response(resp_error: dict):
-        # build an accurate error type according to the response content
-        for subclass in TwitterApiError.__subclasses__():
-            if subclass.title == resp_error['title']:
-                return subclass(
-                    title=resp_error['title'],
-                    ref_url=resp_error['type'],
-                    detail=resp_error['detail'],
-                    parameter=resp_error['parameter'],
-                    value=resp_error['value'])
-
-        # if we haven't written a subclass for given error, return generic error
-        return TwitterApiError(
-            title=resp_error['title'],
-            ref_url=resp_error['type'],
-            detail=resp_error['detail'],
-            parameter=resp_error['parameter'],
-            value=resp_error['value'])
-
-
-class ResourceNotFoundError(TwitterApiError):
-    """
-    For example, if you try to query information about a not-exist user id,
-    this error will be returned by Twitter server and raised by the tool.
-    """
-    title = 'Not Found Error'
+    def parse_from_record(record: Record):
+        """TODO"""
+        pass
 
 
 def record_twitter_api_errors(client_func):
@@ -166,7 +171,6 @@ class Client(object):
         self.me = User.from_response(self.clt.get_me().data, '')
         self.id = self.me.id
         self.name = self.me.name
-        logger.info(f'The client initialized as Twitter user: {self.name}')
 
     @staticmethod
     @functools.lru_cache(maxsize=1)
