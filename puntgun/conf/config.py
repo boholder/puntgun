@@ -4,7 +4,7 @@ from dynaconf import Dynaconf
 from from_root import from_root
 
 # where to find the config file:
-# .../project-root/conf
+# .../<project-root>/conf
 config_dir_path = from_root('conf')
 
 # the dumped private key is stored in the config directory

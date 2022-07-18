@@ -35,8 +35,14 @@ class TwitterApiErrors(Exception, Recordable):
         self.query_func_name = query_func_name
         self.query_params = query_params
         self.errors = [TwitterApiError.from_response(e) for e in resp_errors]
-        super().__init__(f"Twitter Server returned partial errors when querying API:"
-                         f" function called: {query_func_name}, params: {query_params}, errors: {self.errors}")
+
+        msg = f"Twitter Server returned partial errors when querying API: " \
+              f"function called: [{query_func_name}], " \
+              f"params: [{query_params}], " \
+              f"errors: [{self.errors}]"
+
+        logger.info(msg)
+        super().__init__(msg)
 
     def __bool__(self):
         return bool(self.errors)
@@ -203,6 +209,7 @@ class Client(object):
 
         def resp_to_user(data: dict) -> User:
             """Build one user instance"""
+
             # find this user's pinned tweet
             # Twitter's response doesn't guarantee the order of pinned tweets,
             # because there are users who don't have pinned tweets:
