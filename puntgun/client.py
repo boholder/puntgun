@@ -97,9 +97,9 @@ class TwitterApiErrors(Exception, Recordable):
     def __getitem__(self, index):
         return self.errors[index]
 
-    def record(self) -> str:
+    def record(self):
         """TODO"""
-        pass
+        return Record(type='twitter_api_errors', data=dict(self))
 
     @staticmethod
     def parse_from_record(record: Record):
