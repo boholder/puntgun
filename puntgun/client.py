@@ -33,21 +33,23 @@ class TwitterApiError(Exception):
     def from_response(resp_error: dict):
         # build an accurate error type according to the response content
         for subclass in TwitterApiError.__subclasses__():
-            if subclass.title == resp_error['title']:
+            if subclass.title == resp_error.get('title'):
                 return subclass(
-                    title=resp_error['title'],
-                    ref_url=resp_error['type'],
-                    detail=resp_error['detail'],
-                    parameter=resp_error['parameter'],
-                    value=resp_error['value'])
+                    title=resp_error.get('title', ''),
+                    # when parsing from Twitter API response, key is 'type'
+                    # when parsing from :class:`Record` instance, key is 'ref_url'
+                    ref_url=resp_error.get('type', resp_error.get('ref_url', '')),
+                    detail=resp_error.get('detail', ''),
+                    parameter=resp_error.get('parameter', ''),
+                    value=resp_error.get('value', ''))
 
         # if we haven't written a subclass for given error, return generic error
         return TwitterApiError(
-            title=resp_error['title'],
-            ref_url=resp_error['type'],
-            detail=resp_error['detail'],
-            parameter=resp_error['parameter'],
-            value=resp_error['value'])
+            title=resp_error.get('title', ''),
+            ref_url=resp_error.get('type', resp_error.get('ref_url', '')),
+            detail=resp_error.get('detail', ''),
+            parameter=resp_error.get('parameter', ''),
+            value=resp_error.get('value', ''))
 
 
 class ResourceNotFoundError(TwitterApiError):
@@ -97,14 +99,18 @@ class TwitterApiErrors(Exception, Recordable):
     def __getitem__(self, index):
         return self.errors[index]
 
-    def record(self):
-        """TODO"""
-        return Record(type='twitter_api_errors', data=dict(self))
+    def to_record(self):
+        return Record(type='twitter_api_errors',
+                      data={'query_func_name': self.query_func_name,
+                            'query_params': self.query_params,
+                            'errors': [e.__dict__ for e in self.errors]})
 
     @staticmethod
     def parse_from_record(record: Record):
-        """TODO"""
-        pass
+        data = record.data
+        return TwitterApiErrors(data.get('query_func_name', ''),
+                                data.get('query_params', ()),
+                                data.get('errors', []))
 
 
 def record_twitter_api_errors(client_func):
@@ -209,7 +215,7 @@ class Client(object):
         if not resp.data:
             return []
 
-        pinned_tweets = resp.includes['tweets'] if 'tweets' in resp.includes else []
+        pinned_tweets = resp.includes.get('tweets', [])
 
         def resp_to_user(data: dict) -> User:
             """Build one user instance"""

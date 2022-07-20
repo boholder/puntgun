@@ -39,13 +39,13 @@ class Record(BaseModel):
         I don't want to add pyyaml package for parsing yaml, let the dynaconf do it.
         So assume that the parameter is a python dictionary parsed from yaml file by dynaconf.
         """
-        return Record(type=config['type'], data=config['data'])
+        return Record(type=config.get('type', ''), data=config.get('data', {}))
 
 
 class Recordable(object):
     """Interface for objects that can be recorded into report file."""
 
-    def record(self) -> Record:
+    def to_record(self) -> Record:
         """Record the object."""
         raise NotImplementedError
 

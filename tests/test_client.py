@@ -5,27 +5,48 @@ import pytest
 import tweepy
 from hamcrest import assert_that, is_, contains_string
 
-import client
-from client import Client, ResourceNotFoundError
+from client import Client, ResourceNotFoundError, TwitterApiErrors, TwitterClientError
+from recorder import Record
 from rules.user import User
 
 
 class TestTwitterApiErrors:
-    def test_its_magic_methods(self):
-        # one instance in type of 'TwitterApiErrors'
-        errors = client.TwitterApiErrors(query_func_name='func',
-                                         query_params=(1, 2, 3),
-                                         resp_errors=[{'value': 'v',
-                                                       'detail': 'd',
-                                                       # the TwitterApiError take this 'title' field as error type.
-                                                       'title': 'test api error', 'resource_type': 'rt',
-                                                       'parameter': 'p',
-                                                       'resource_id': 'r',
-                                                       'type': 't'}])
+    @pytest.fixture
+    def errors(self):
+        return TwitterApiErrors(query_func_name='func',
+                                query_params=(1, 2, 3),
+                                resp_errors=[{'value': 'v',
+                                              'detail': 'd',
+                                              # the TwitterApiError take this 'title' field as error type.
+                                              'title': 'test api error',
+                                              'parameter': 'p',
+                                              'type': 't'}])
 
+    def test_its_magic_methods(self, errors):
         assert bool(errors) is True
         assert len(errors) == 1
         assert list([e for e in errors])[0] == errors[0]
+
+    def test_transform_with_record(self, errors):
+        record: Record = errors.to_record()
+        parsed_errors = TwitterApiErrors.parse_from_record(record)
+
+        # check direct fields
+        assert record.type == 'twitter_api_errors'
+        assert record.data.get('query_func_name') == parsed_errors.query_func_name == 'func'
+        assert record.data.get('query_params') == parsed_errors.query_params == (1, 2, 3)
+        assert len(record.data.get('errors')) == len(parsed_errors) == 1
+
+        # check inner single api error
+        error = record.data.get('errors')[0]
+        p_error = parsed_errors[0]
+        assert error.get('value') == p_error.value == 'v'
+        assert error.get('detail') == p_error.detail == 'd'
+        assert error.get('title') == p_error.title == 'test api error'
+        assert error.get('parameter') == p_error.parameter == 'p'
+        assert error.get('ref_url') == p_error.ref_url == 't'
+
+        print(record.to_yaml())
 
 
 create_time = datetime.now()
@@ -74,7 +95,7 @@ class TestUserQuerying:
 
     def test_tweepy_exception_handling(self, mock_tweepy_client):
         mock_tweepy_client.get_users = MagicMock(side_effect=tweepy.errors.TweepyException('inner'))
-        with pytest.raises(client.TwitterClientError) as e:
+        with pytest.raises(TwitterClientError) as e:
             Client(mock_tweepy_client).get_users_by_usernames(['whatever'])
         assert_that(str(e.value), contains_string('client'))
         assert_that(str(e.value.__cause__), contains_string('inner'))
@@ -166,7 +187,8 @@ class TestUserQuerying:
         return tweepy.Response(data=None, includes={}, meta={},
                                errors=[{'value': 'ErrorUser',
                                         'detail': 'Could not find rules with username: [ErrorUser].',
-                                        'title': 'Not Found Error', 'resource_type': 'rules',
+                                        'title': 'Not Found Error',
+                                        'resource_type': 'rules',
                                         'parameter': 'username',
                                         'resource_id': 'ErrorUser',
                                         'type': 'https://api.twitter.com/2/problems/resource-not-found'}]
