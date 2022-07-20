@@ -19,7 +19,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install poetry
+          python -m pip install poetry pytest coverage
+          poetry config virtualenvs.create false
           poetry install
 
       - name: Run coverage
