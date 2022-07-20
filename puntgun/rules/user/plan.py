@@ -1,9 +1,11 @@
-from typing import ClassVar
+from typing import ClassVar, List
 
 import reactivex as rx
+from pydantic import BaseModel
 from reactivex import operators as op
 
-from rules import validate_required_fields_exist, Plan
+from recorder import Recordable, Record
+from rules import validate_required_fields_exist, Plan, RuleResult
 from rules.config_parser import ConfigParser
 from rules.user import User
 from rules.user.action_rules import UserActionRule
@@ -11,6 +13,20 @@ from rules.user.filter_rules import UserFilterRule
 from rules.user.rule_sets import UserSourceRuleResultMergingSet, UserFilterRuleAnyOfSet, \
     UserActionRuleResultCollectingSet
 from rules.user.source_rules import UserSourceRule
+
+
+class UserPlanResult(BaseModel, Recordable):
+    """TODO"""
+    user: User
+    filtering_result: RuleResult
+    action_results: List[RuleResult]
+
+    def to_record(self) -> Record:
+        pass
+
+    @staticmethod
+    def parse_from_record(record: Record):
+        pass
 
 
 class UserPlan(Plan):

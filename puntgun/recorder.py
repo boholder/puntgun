@@ -19,14 +19,14 @@ class Record(BaseModel):
         # first line is only '\n'
         data_list = '\n'.join([f'      - {k}: {v}' for k, v in self.data.items()])
 
-        # <an empty line for spacing>
+        # < an empty line for spacing >
         #  - type: <type>
         #    time: <time>
         #    data:
         #      - a: ...
         #      - b: ...
         #      ...
-        # <no empty line at bottom>
+        # < no empty line at bottom >
         return f"""
   - type: {self.type}
     time: {datetime.now()}
