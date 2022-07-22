@@ -1,45 +1,33 @@
-from datetime import datetime
+import datetime
 
-from pydantic import BaseModel
+import yaml
 
 
-class Record(BaseModel):
+class Record(object):
     """
     Record wrapper for a recordable object for format uniformity.
     """
-    type: str
+    name: str
     data: dict
+
+    def __init__(self, name: str, data: dict):
+        self.name = name
+        self.data = data
 
     def to_yaml(self) -> str:
         """
         Translate this record into a yaml-list-item format string.
         "time" field for labeling record happening time.
+        Remove first line of placeholder (3 chars - "a:\n") for creating a "list-item".
         """
-
-        # first line is only '\n'
-        data_list = '\n'.join([f'      - {k}: {v}' for k, v in self.data.items()])
-
-        # < an empty line for spacing >
-        #  - type: <type>
-        #    time: <time>
-        #    data:
-        #      - a: ...
-        #      - b: ...
-        #      ...
-        # < no empty line at bottom >
-        return f"""
-  - type: {self.type}
-    time: {datetime.now()}
-    data:
-{data_list}"""
+        return yaml.safe_dump({'a': [{'type': self.name, 'time': datetime.datetime.now(), 'data': self.data}]})[3::]
 
     @staticmethod
     def from_parsed_yaml(config: dict):
         """
-        I don't want to add pyyaml package for parsing yaml, let the dynaconf do it.
-        So assume that the parameter is a python dictionary parsed from yaml file by dynaconf.
+        Assume that the parameter is a python dictionary type parsed from yaml file by dynaconf or pyyaml.
         """
-        return Record(type=config.get('type', ''), data=config.get('data', {}))
+        return Record(config.get('type', ''), config.get('data', {}))
 
 
 class Recordable(object):

@@ -1,7 +1,6 @@
 from typing import ClassVar, List
 
 import reactivex as rx
-from pydantic import BaseModel
 from reactivex import operators as op
 
 from recorder import Recordable, Record
@@ -15,8 +14,8 @@ from rules.user.rule_sets import UserSourceRuleResultMergingSet, UserFilterRuleA
 from rules.user.source_rules import UserSourceRule
 
 
-class UserPlanResult(BaseModel, Recordable):
-    """TODO"""
+class UserPlanResult(Recordable):
+    """TODO 这是个危险信号，我需要展示更细节的user和rule字段，换成pyyaml让专业的来"""
     user: User
     filtering_result: RuleResult
     action_results: List[RuleResult]

@@ -100,7 +100,7 @@ class TwitterApiErrors(Exception, Recordable):
         return self.errors[index]
 
     def to_record(self):
-        return Record(type='twitter_api_errors',
+        return Record(name='twitter_api_errors',
                       data={'query_func_name': self.query_func_name,
                             'query_params': self.query_params,
                             'errors': [e.__dict__ for e in self.errors]})
