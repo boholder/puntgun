@@ -1,7 +1,9 @@
 # puntgun - a configurable automation command line tool for Twitter
 
+[![ci workflow status badge](https://github.com/boholder/puntgun/actions/workflows/ci.yml/badge.svg)](https://github.com/boholder/puntgun/actions/workflows/ci.yml)
 [![unit test coverage badge](./coverage/coverage.svg)](./coverage)
-[![visitor badge](https://boholder-visitor-badge.glitch.me/badge?page_id=puntgun-readme)](https://github.com/jwenjian/visitor-badge)
+[![releases total download badge](https://img.shields.io/github/downloads/boholder/puntgun/total)](https://github.com/boholder/puntgun/releases)
+[![pypi python version badge](https://img.shields.io/pypi/pyversions/puntgun)](https://pypi.org/project/puntgun/)
 
 This tool was originally conceived as a configurable automatic Twitter account blocker. What could be a better name for it than [the punt gun](https://en.wikipedia.org/wiki/Punt_gun), a special hunting weapon used to kill a large number of waterfowl in one shot. But that type of gun is a huge threat to the natural environment, and fortunately this tool only inherits the meaning of its origin, even to the benefit of the social platform environment (or at least to the mental health of its users).
 
