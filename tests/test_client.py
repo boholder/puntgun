@@ -6,7 +6,7 @@ import tweepy
 from hamcrest import assert_that, is_, contains_string
 
 from client import Client, ResourceNotFoundError, TwitterApiErrors, TwitterClientError
-from recorder import Record
+from record import Record
 from rules.user import User
 
 
@@ -77,8 +77,8 @@ class TestUserQuerying:
     """
     For now, I figure out there are three kinds of rules datas in response (responded by Twitter(tweepy.Client)):
         1. rules who has pinned tweet, rules data in "data" field, pinned tweet in "includes.tweets" field
-        2. rules who doesn't have pinned tweet, only rules data in "data" field
-        3. rules does not exist (returned in "errors" field)
+        2. rules who don't have pinned tweet, only rules data in "data" field
+        3. rules do not exist (returned in "errors" field)
 
     The test cases are simulating these situations, test datas are from real responses.
     There are some cases also test the constructing and default value replacing logic of :class:`User`.
@@ -116,7 +116,7 @@ class TestUserQuerying:
     def test_get_not_exist_user(self, not_exist_user_response, mock_user_getting_tweepy_client, monkeypatch):
         # check get by username method
         mock_recorder = MagicMock()
-        monkeypatch.setattr('recorder.Recorder.record', mock_recorder)
+        monkeypatch.setattr('record.Recorder.record', mock_recorder)
         Client(mock_user_getting_tweepy_client(not_exist_user_response)).get_users_by_usernames(['whatever'])
         # recorder received api error
         self.assert_user_not_exist_error(mock_recorder)
@@ -129,7 +129,7 @@ class TestUserQuerying:
     def test_get_all_users(self, mixed_response, mock_user_getting_tweepy_client, monkeypatch):
         # check get by username method
         mock_recorder = MagicMock()
-        monkeypatch.setattr('recorder.Recorder.record', mock_recorder)
+        monkeypatch.setattr('record.Recorder.record', mock_recorder)
         users = Client(mock_user_getting_tweepy_client(mixed_response)).get_users_by_usernames(['whatever'])
         self.assert_normal_user(users[0])
         self.assert_no_pinned_tweet_user(users[1])

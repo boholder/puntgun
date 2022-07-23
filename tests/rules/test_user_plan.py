@@ -3,7 +3,7 @@ import reactivex as rx
 from hamcrest import assert_that, contains_string, all_of
 from reactivex import operators as op
 
-from recorder import Record
+from record import Record
 from rules import Plan, RuleResult
 from rules.config_parser import ConfigParser
 from rules.user import User

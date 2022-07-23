@@ -1,7 +1,14 @@
 """All the loaded settings and global variables for many modules to use."""
+from importlib.metadata import version
 
 from dynaconf import Dynaconf
 from from_root import from_root
+
+# For version based branch logic in report-based "undo" operation.
+# (you have different available actions at different version,
+# which may require different "undo" process.)
+# Works sort of like java's serial version uid.
+puntgun_version = version('puntgun')
 
 # where to find the config file:
 # .../<project-root>/conf
@@ -13,16 +20,12 @@ pri_key_file_path = config_dir_path.joinpath('.puntgun_rsa4096')
 # encrypted secrets are stored into this file
 secrets_config_file_path = config_dir_path.joinpath('.secrets.yml')
 
-# tool settings on the "global" level
-tool_config_files = [str(config_dir_path.joinpath('settings.yml')),
-                     str(secrets_config_file_path)]
-
-# environment variables' prefix
-environment_variables_prefix = 'BULLET'
-
 settings = Dynaconf(
-    envvar_prefix=environment_variables_prefix,
-    settings_files=tool_config_files,
+    # environment variables' prefix
+    envvar_prefix='BULLET',
+    # tool settings on the "global" level
+    settings_files=[str(config_dir_path.joinpath('settings.yml')),
+                    str(secrets_config_file_path)],
     apply_default_on_none=True
 )
 
