@@ -100,7 +100,10 @@ class RuleResult(object):
     without extract/map the tuple before processing, so we can change lesser present code.
     """
 
-    def __init__(self, rule, result: bool):
+    rule: FromConfig
+    result: bool
+
+    def __init__(self, rule: FromConfig, result: bool):
         self.rule = rule
         self.result = result
 

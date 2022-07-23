@@ -18,9 +18,12 @@ class Record(object):
         """
         Translate this record into a yaml-list-item format string.
         "time" field for labeling record happening time.
-        Remove first line of placeholder (3 chars - "a:\n") for creating a "list-item".
         """
-        return yaml.safe_dump({'a': [{'type': self.name, 'time': datetime.datetime.now(), 'data': self.data}]})[3::]
+        # Remove first line of placeholder (3 chars - "a:\n") for creating a "list-item".
+        # sort_keys=False for not letting pyyaml auto-sort keys to alphabetical order,
+        # so we get a better "understandable" order in report file.
+        return yaml.safe_dump({'a': [{'type': self.name, 'time': datetime.datetime.now(), 'data': self.data}]},
+                              sort_keys=False)[3::]
 
     @staticmethod
     def from_parsed_yaml(config: dict):

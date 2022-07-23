@@ -1,7 +1,7 @@
 from typing import ClassVar, List
 
 import reactivex as rx
-from reactivex import operators as op
+from reactivex import operators as op, Observable
 
 from recorder import Recordable, Record
 from rules import validate_required_fields_exist, Plan, RuleResult
@@ -15,17 +15,44 @@ from rules.user.source_rules import UserSourceRule
 
 
 class UserPlanResult(Recordable):
-    """TODO 这是个危险信号，我需要展示更细节的user和rule字段，换成pyyaml让专业的来"""
     user: User
     filtering_result: RuleResult
     action_results: List[RuleResult]
 
+    def __init__(self, user: User, filtering_result: RuleResult, action_results: List[RuleResult]):
+        self.user = user
+        self.filtering_result = filtering_result
+        self.action_results = action_results
+
     def to_record(self) -> Record:
-        pass
+        # Only the user id, action rules keywords and results ("done" field) are critical for "undo" operations,
+        # other information for letting user know what happened.
+        #
+        # Thanks to the pydantic library, the "str(r.rule)" will output every field's value of the rule,
+        # along with rule's keyword, user can figure out what this rule's meaning is.
+        return Record(name='user_plan_result',
+                      data={'user': {'id': self.user.id, 'username': self.user.username},
+                            'decisive_filter_rule': {
+                                'keyword': self.filtering_result.rule.keyword(),
+                                'value': str(self.filtering_result.rule)
+                            },
+                            'action_rule_results': [
+                                {'keyword': r.rule.keyword(), 'value': str(r.rule), 'done': r.result}
+                                for r in self.action_results
+                            ]})
 
     @staticmethod
     def parse_from_record(record: Record):
-        pass
+        user: dict = record.data.get('user', {})
+        action_rule_results: list = record.data.get('action_rule_results', [])
+        return UserPlanResult(user=User(id=user.get('id'), username=user.get('username')),
+                              # we don't need this (while parsing from record for "undo" operations)
+                              filtering_result=RuleResult.true(None),
+                              action_results=[
+                                  RuleResult(rule=ConfigParser.parse({r.get('keyword'): {}}, UserActionRule),
+                                             result=r.get('done'))
+                                  for r in action_rule_results
+                              ])
 
 
 class UserPlan(Plan):
@@ -60,7 +87,7 @@ class UserPlan(Plan):
                    filters=ConfigParser.parse({'any_of': conf['that']}, UserFilterRule),
                    actions=ConfigParser.parse({'all_of': conf['do']}, UserActionRule))
 
-    def __call__(self):
+    def __call__(self) -> Observable[UserPlanResult]:
         """
         Run this plan, return users that triggered filter rules and action rules execution results.
         result explanation: (<user instance>, <filtering result>, <action results>)
@@ -82,7 +109,9 @@ class UserPlan(Plan):
 
         return rx.zip(users_need_to_be_performed_with_filtering_result, action_results).pipe(
             # put three values under one tuple, no nested
-            op.map(lambda zipped: (zipped[0][0], zipped[0][1], zipped[1]))
+            op.map(lambda zipped: UserPlanResult(user=zipped[0][0],
+                                                 filtering_result=zipped[0][1],
+                                                 action_results=zipped[1]))
         )
 
     def _filtering(self):
