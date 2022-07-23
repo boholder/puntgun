@@ -1,6 +1,7 @@
 import datetime
 
-import yaml
+import orjson
+from loguru import logger
 
 
 class Record(object):
@@ -14,21 +15,30 @@ class Record(object):
         self.name = name
         self.data = data
 
-    def to_yaml(self) -> str:
+    def to_json(self) -> str:
         """
         Translate this record into a yaml-list-item format string.
         "time" field for labeling record happening time.
+
+        First time I intended to output the record as yaml or toml format,
+        because these two format aren't require back-closure-symbols like json's brackets.
+        Then I can output records to file with logger as normal log,
+        whenever the program exits the whole file remains parsable,
+        and the output is more clean and has less useless single-brackets lines.
+
+        Then I found this question:
+        https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
+        in which answers point out that yaml parsing (loading) in python is pretty slow.
+
+        Ok, speed is important. I changed the output format to json -
+        I've heard about the effort different json parsing libraries have made.
         """
-        # Remove first line of placeholder (3 chars - "a:\n") for creating a "list-item".
-        # sort_keys=False for not letting pyyaml auto-sort keys to alphabetical order,
-        # so we get a better "understandable" order in report file.
-        return yaml.safe_dump({'a': [{'type': self.name, 'time': datetime.datetime.now(), 'data': self.data}]},
-                              sort_keys=False)[3::]
+        return orjson.dumps({'type': self.name, 'time': datetime.datetime.now(), 'data': self.data}).decode('utf-8')
 
     @staticmethod
-    def from_parsed_yaml(config: dict):
+    def from_parsed_dict(config: dict):
         """
-        Assume that the parameter is a python dictionary type parsed from yaml file by dynaconf or pyyaml.
+        Assume that the parameter is already a dictionary type parsed from a json file.
         """
         return Record(config.get('type', ''), config.get('data', {}))
 
@@ -52,4 +62,5 @@ class Recorder(object):
     @staticmethod
     def record(recordable: Recordable):
         """"""
-        pass
+        logger.info()
+       

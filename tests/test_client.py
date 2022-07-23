@@ -46,7 +46,7 @@ class TestTwitterApiErrors:
         assert error.get('parameter') == p_error.parameter == 'p'
         assert error.get('ref_url') == p_error.ref_url == 't'
 
-        print(record.to_yaml())
+        print(record.to_json())
 
 
 create_time = datetime.now()

@@ -9,7 +9,7 @@ MOCK_TIME_NOW = datetime.datetime(2022, 1, 1)
 
 
 @pytest.fixture(autouse=True)
-def patch_datetime_now(monkeypatch):
+def mock_datetime_now(monkeypatch):
     class MockDatetime:
         @classmethod
         def now(cls):
@@ -20,24 +20,18 @@ def patch_datetime_now(monkeypatch):
 
 
 class TestRecord:
-    def test_to_yaml(self, patch_datetime_now):
-        # to yaml string
-        yaml = Record(name='user', data={'a': {'b': 'c'}, 'd': ['e', 'f']}).to_yaml()
+    def test_to_json(self, mock_datetime_now):
+        assert_that(Record(name='user', data={'a': {'b': 123}, 'd': ['e', 'f']}).to_json(),
+                    all_of(contains_string('"type": "user",'),
+                           contains_string(f'"time": "{MOCK_TIME_NOW.isoformat()}",'),
+                           contains_string('"data": {'),
+                           contains_string('"a": {'),
+                           contains_string('"b": 123'),
+                           contains_string('"d": ['),
+                           contains_string('"e"'),
+                           contains_string('"f"')))
 
-        print(yaml)
-
-        # It's hard to indicate exact position (which line) of fields,
-        # that's depends on pyyaml's inner logic.
-        assert_that(yaml, all_of(contains_string('- type: user'),
-                                 contains_string(f'  time: {MOCK_TIME_NOW}'),
-                                 contains_string('  data:'),
-                                 contains_string('    a:'),
-                                 contains_string('      b: c'),
-                                 contains_string('    d:'),
-                                 contains_string('    - e'),
-                                 contains_string('    - f')))
-
-    def test_parse_from_yaml(self):
-        actual = Record.from_parsed_yaml({'type': 'user', 'data': {'a': {'b': 'c'}, 'd': ['e', 'f']}})
-        expect = Record(name='user', data={'a': {'b': 'c'}, 'd': ['e', 'f']})
+    def test_parse_from_dict(self):
+        actual = Record.from_parsed_dict({'type': 'user', 'data': {'a': {'b': 123}, 'd': ['e', 'f']}})
+        expect = Record(name='user', data={'a': {'b': 123}, 'd': ['e', 'f']})
         assert actual.__eq__(expect)
