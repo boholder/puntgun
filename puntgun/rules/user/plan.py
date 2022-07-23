@@ -3,7 +3,7 @@ from typing import ClassVar, List
 import reactivex as rx
 from reactivex import operators as op, Observable
 
-from recorder import Recordable, Record
+from record import Recordable, Record
 from rules import validate_required_fields_exist, Plan, RuleResult
 from rules.config_parser import ConfigParser
 from rules.user import User
@@ -61,7 +61,6 @@ class UserPlan(Plan):
     """
 
     _keyword: ClassVar[str] = 'user_plan'
-    name: str
     sources: UserSourceRuleResultMergingSet
     filters: UserFilterRuleAnyOfSet
     actions: UserActionRuleResultCollectingSet

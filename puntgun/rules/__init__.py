@@ -83,6 +83,7 @@ def validate_required_fields_exist(rule_keyword, conf: dict, required_field_name
 
 class Plan(FromConfig):
     """This class exists only for :class:`ConfigParser` to recognize plan classes."""
+    name: str = 'plan'
 
 
 class RuleResult(object):

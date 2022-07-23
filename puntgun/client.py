@@ -6,7 +6,7 @@ from loguru import logger
 
 from conf.encrypto import load_or_generate_private_key
 from conf.secret import load_or_request_all_secrets
-from recorder import Recorder, Recordable, Record
+from record import Recorder, Recordable, Record
 from rules.user import User
 
 
