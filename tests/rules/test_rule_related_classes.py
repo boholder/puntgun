@@ -2,7 +2,7 @@ import pytest
 from hamcrest import assert_that, contains_string, all_of
 from pydantic import ValidationError
 
-from rules import FromConfig, NumericFilterRule, RuleResult
+from rules import FromConfig, NumericFilterRule, RuleResult, Plan
 from rules.config_parser import ConfigParser
 
 
@@ -69,3 +69,13 @@ class TestRuleResult:
         r = RuleResult(fake_rule_instance, True)
         assert r.rule is fake_rule_instance
         assert bool(r) is True
+
+
+class TestPlan:
+    def test_incremental_id(self):
+        class P(Plan):
+            pass
+
+        assert P(name='').id == 0
+        assert P(name='').id == 1
+        assert P(name='').id == 2

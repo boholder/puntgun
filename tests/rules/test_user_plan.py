@@ -21,11 +21,13 @@ class TRule(UserActionRule, UserFilterRule):
 
 class TestUserPlanResult:
     def test_to_record(self):
-        actual = UserPlanResult(user=User(id=1, username='uname'),
+        actual = UserPlanResult(plan_id=123,
+                                user=User(id=1, username='uname'),
                                 filtering_result=RuleResult.true(TRule(field_a='a')),
                                 action_results=[RuleResult.true(TRule(field_a='b'))]).to_record()
         expect = Record(name='user_plan_result',
-                        data={'user': {'id': 1, 'username': 'uname'},
+                        data={'plan_id': 123,
+                              'user': {'id': 1, 'username': 'uname'},
                               'decisive_filter_rule': {'keyword': 'ptr', 'value': 'field_a=a'},
                               'action_rule_results': [{'keyword': 'ptr', 'value': 'field_a=a', 'done': True}]})
 
@@ -34,11 +36,13 @@ class TestUserPlanResult:
     def test_parse_from_record(self):
         actual = UserPlanResult.parse_from_record(
             Record(name='user_plan_result',
-                   data={'user': {'id': 1, 'username': 'uname'},
+                   data={'plan_id': 123,
+                         'user': {'id': 1, 'username': 'uname'},
                          'decisive_filter_rule': {'keyword': 'ptr', 'value': 'field_a=a'},
                          'action_rule_results': [{'keyword': 'ptr', 'value': 'field_a=a', 'done': False}]}))
 
-        expect = UserPlanResult(user=User(id=1, username='uname'),
+        expect = UserPlanResult(plan_id=123,
+                                user=User(id=1, username='uname'),
                                 filtering_result=RuleResult.true(None),
                                 action_results=[RuleResult.false(TRule(field_a='b'))])
 
