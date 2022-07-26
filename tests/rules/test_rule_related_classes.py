@@ -1,7 +1,10 @@
+import itertools
+
 import pytest
 from hamcrest import assert_that, contains_string, all_of
 from pydantic import ValidationError
 
+import rules
 from rules import FromConfig, NumericFilterRule, RuleResult, Plan
 from rules.config_parser import ConfigParser
 
@@ -75,6 +78,9 @@ class TestPlan:
     def test_incremental_id(self):
         class P(Plan):
             pass
+
+        # avoid other test cases affection, reset the counter
+        rules.plan_id_iter = itertools.count()
 
         assert P(name='').id == 0
         assert P(name='').id == 1
