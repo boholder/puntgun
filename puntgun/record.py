@@ -41,7 +41,7 @@ class Record(object):
         return orjson.dumps({'type': self.name, 'data': self.data})
 
     @staticmethod
-    def from_parsed_dict(conf: dict):
+    def parse_from_dict(conf: dict):
         """
         Assume that the parameter is already a dictionary type parsed from a json file.
         """
@@ -78,8 +78,10 @@ class Recorder(object):
     """
 
     @staticmethod
-    def _write_to_file(msg: bytes):
-        logger.info(msg)
+    def _write(msg: bytes):
+        """Any else more convenient than this?"""
+        # the logger filter will recognize the "r" field and output this line of log into report file.
+        logger.bind(r=True).info(msg.decode('utf-8'))
 
     @staticmethod
     def record(recordable: Recordable):
@@ -87,7 +89,7 @@ class Recorder(object):
         Log recordable instances into report file as normal log.
         """
         # write as a "records" list item
-        Recorder._write_to_file(recordable.to_record().to_json() + COMMA)
+        Recorder._write(recordable.to_record().to_json() + COMMA)
 
     @staticmethod
     def write_report_header(plans: List[Plan]):
@@ -104,7 +106,7 @@ class Recorder(object):
                 'plan_ids': [{'name': p.name, 'id': p.id} for p in plans],
                 'records': []}
 
-        Recorder._write_to_file(orjson.dumps(head, option=orjson.OPT_INDENT_2)[:-3] + PLACEHOLDER_ITEM)
+        Recorder._write(orjson.dumps(head, option=orjson.OPT_INDENT_2)[:-3] + PLACEHOLDER_ITEM)
 
     @staticmethod
     def write_report_tail():
@@ -112,7 +114,7 @@ class Recorder(object):
         After all records are written, at the end of the program running,
         append this part to remain a corrct json format.
         """
-        Recorder._write_to_file(REPORT_TAIL)
+        Recorder._write(REPORT_TAIL)
 
     @staticmethod
     def load_report(file_content: bytes) -> dict:

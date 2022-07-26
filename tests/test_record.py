@@ -1,6 +1,7 @@
 import datetime
 import re
 
+import loguru
 import orjson
 import pytest
 
@@ -15,7 +16,7 @@ class TestRecord:
         assert actual == expect
 
     def test_parse_from_dict(self):
-        actual = Record.from_parsed_dict({'type': 'user', 'data': {'a': {'b': 123}, 'd': ['e', 'f']}})
+        actual = Record.parse_from_dict({'type': 'user', 'data': {'a': {'b': 123}, 'd': ['e', 'f']}})
         expect = Record(name='user', data={'a': {'b': 123}, 'd': ['e', 'f']})
         assert actual.__eq__(expect)
 
@@ -26,8 +27,11 @@ class MockLogger:
     def __init__(self):
         self.content = ''
 
-    def info(self, msg: bytes):
-        self.content += msg.decode('utf-8')
+    def bind(self, **kwargs):
+        return self
+
+    def info(self, msg: str):
+        self.content += msg
 
     def get_content(self):
         # remove white characters
@@ -55,7 +59,7 @@ def mock_datetime_now(monkeypatch):
     monkeypatch.setattr('record.datetime', MockDatetime)
 
 
-class P(Plan):
+class TPlan(Plan):
     pass
 
 
@@ -92,7 +96,7 @@ class TestRecorder:
         mock_config_settings = {'plans': [{'p': 123}], 'tool_config': {'t': 'c'}}
         monkeypatch.setattr('record.config.settings', mock_config_settings)
 
-        Recorder.write_report_header([P(name='a'), P(name='b')])
+        Recorder.write_report_header([TPlan(name='a'), TPlan(name='b')])
         Recorder.write_report_tail()
 
         actual = orjson.loads(mock_logger.get_content())
@@ -112,3 +116,11 @@ class TestRecorder:
         actual = Recorder.load_report(mock_logger.get_content().encode('utf-8'))
 
         assert actual['records'] == [{'type': 'tr', 'data': {'a': 'b'}}] * 2
+
+    @pytest.mark.skip('will generate the report json file')
+    def test_real_output(self):
+        loguru.logger.add('record.json', format='{message}')
+        Recorder.write_report_header([])
+        Recorder.record(TRecordable())
+        Recorder.record(TRecordable())
+        Recorder.write_report_tail()
