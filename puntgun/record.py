@@ -102,7 +102,8 @@ class Recorder(object):
                 'tool_version': config.puntgun_version,
                 'generate_time': datetime.now(),
                 'plan_configuration': config.settings.get('plans', []),
-                'tool_configuration': config.settings.get('tool_config', {}),
+                # name -> plan_configuration, id -> records,
+                # this list sort of like a relation table.
                 'plan_ids': [{'name': p.name, 'id': p.id} for p in plans],
                 'records': []}
 

@@ -93,7 +93,7 @@ class TestRecorder:
             Recorder.load_report('{'.encode('utf-8'))
 
     def test_write_report_head_tail(self, mock_datetime_now, mock_logger, monkeypatch):
-        mock_config_settings = {'plans': [{'p': 123}], 'tool_config': {'t': 'c'}}
+        mock_config_settings = {'plans': [{'p': 123}]}
         monkeypatch.setattr('record.config.settings', mock_config_settings)
 
         Recorder.write_report_header([TPlan(name='a'), TPlan(name='b')])
@@ -103,7 +103,6 @@ class TestRecorder:
 
         assert actual['generate_time'] == MOCK_TIME_NOW.isoformat()
         assert actual['plan_configuration'] == [{'p': 123}]
-        assert actual['tool_configuration'] == {'t': 'c'}
         assert actual['plan_ids'] == [{'name': 'a', 'id': 0}, {'name': 'b', 'id': 1}]
         assert actual['records'] == [{}, {}]
 
