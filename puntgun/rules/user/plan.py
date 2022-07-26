@@ -15,11 +15,13 @@ from rules.user.source_rules import UserSourceRule
 
 
 class UserPlanResult(Recordable):
+    plan_id: int
     user: User
     filtering_result: RuleResult
     action_results: List[RuleResult]
 
-    def __init__(self, user: User, filtering_result: RuleResult, action_results: List[RuleResult]):
+    def __init__(self, plan_id: int, user: User, filtering_result: RuleResult, action_results: List[RuleResult]):
+        self.plan_id = plan_id
         self.user = user
         self.filtering_result = filtering_result
         self.action_results = action_results
@@ -31,7 +33,8 @@ class UserPlanResult(Recordable):
         # Thanks to the pydantic library, the "str(r.rule)" will output every field's value of the rule,
         # along with rule's keyword, user can figure out what this rule's meaning is.
         return Record(name='user_plan_result',
-                      data={'user': {'id': self.user.id, 'username': self.user.username},
+                      data={'plan_id': self.plan_id,
+                            'user': {'id': self.user.id, 'username': self.user.username},
                             'decisive_filter_rule': {
                                 'keyword': self.filtering_result.rule.keyword(),
                                 'value': str(self.filtering_result.rule)
@@ -45,7 +48,8 @@ class UserPlanResult(Recordable):
     def parse_from_record(record: Record):
         user: dict = record.data.get('user', {})
         action_rule_results: list = record.data.get('action_rule_results', [])
-        return UserPlanResult(user=User(id=user.get('id'), username=user.get('username')),
+        return UserPlanResult(plan_id=record.data.get('plan_id', 0),
+                              user=User(id=user.get('id'), username=user.get('username')),
                               # we don't need this (while parsing from record for "undo" operations)
                               filtering_result=RuleResult.true(None),
                               action_results=[
@@ -108,7 +112,8 @@ class UserPlan(Plan):
 
         return rx.zip(users_need_to_be_performed_with_filtering_result, action_results).pipe(
             # put three values under one tuple, no nested
-            op.map(lambda zipped: UserPlanResult(user=zipped[0][0],
+            op.map(lambda zipped: UserPlanResult(plan_id=self.id,
+                                                 user=zipped[0][0],
                                                  filtering_result=zipped[0][1],
                                                  action_results=zipped[1]))
         )
