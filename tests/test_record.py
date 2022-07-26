@@ -4,26 +4,14 @@ import re
 import orjson
 import pytest
 
-from record import Record, Recorder
-
-MOCK_TIME_NOW = datetime.datetime(2022, 1, 1)
-
-
-@pytest.fixture(autouse=True)
-def mock_datetime_now(monkeypatch):
-    class MockDatetime:
-        @classmethod
-        def now(cls):
-            """make sure datetime.now() returns same instance for assertion convenience"""
-            return MOCK_TIME_NOW
-
-    monkeypatch.setattr('record.datetime', MockDatetime)
+from record import Record, Recorder, Recordable
+from rules import Plan
 
 
 class TestRecord:
-    def test_to_json(self, mock_datetime_now):
+    def test_to_json(self):
         actual = Record(name='user', data={'a': {'b': 123}, 'd': ['e', 'f']}).to_json().decode('utf-8')
-        expect = '{"type":"user","time":"2022-01-01T00:00:00","data":{"a":{"b":123},"d":["e","f"]}}'
+        expect = '{"type":"user","data":{"a":{"b":123},"d":["e","f"]}}'
         assert actual == expect
 
     def test_parse_from_dict(self):
@@ -53,21 +41,46 @@ def mock_logger(monkeypatch):
     return logger
 
 
+MOCK_TIME_NOW = datetime.datetime(2022, 1, 1)
+
+
+@pytest.fixture
+def mock_datetime_now(monkeypatch):
+    class MockDatetime:
+        @classmethod
+        def now(cls):
+            """make sure datetime.now() returns same instance for assertion convenience"""
+            return MOCK_TIME_NOW
+
+    monkeypatch.setattr('record.datetime', MockDatetime)
+
+
+class P(Plan):
+    pass
+
+
+class TRecordable(Recordable):
+
+    def to_record(self) -> Record:
+        return Record(name='tr', data={'a': 'b'})
+
+    @staticmethod
+    def parse_from_record(record: Record):
+        pass
+
+
 class TestRecorder:
     """These test cases are tightly linked to the implementation."""
 
     def test_load_report_correct_format(self):
-        self.assert_report_load_result('{"plans":[{},{"name":"p","records":[{},{"r":1},{}]},{}]}')
+        self.assert_report_load_result('{"records":[{},{"name":"p"},{}]}')
 
     def test_load_report_no_report_tail(self):
-        self.assert_report_load_result('{"plans":[{},{"name":"p","records":[{},{"r":1},{}]},')
-
-    def test_load_report_no_plan_tail_no_report_tail(self):
-        self.assert_report_load_result('{"plans":[{},{"name":"p","records":[{},{"r":1},')
+        self.assert_report_load_result('{"records":[{},{"name":"p"},')
 
     @staticmethod
     def assert_report_load_result(report_content: str):
-        expect = {'plans': [{'name': 'p', 'records': [{'r': 1}]}]}
+        expect = {'records': [{'name': 'p'}]}
         actual = Recorder.load_report(report_content.encode('utf-8'))
         assert actual == expect
 
@@ -75,14 +88,27 @@ class TestRecorder:
         with pytest.raises(ValueError) as _:
             Recorder.load_report('{'.encode('utf-8'))
 
-    def test_write_report_head_tail(self, mock_logger):
-        Recorder.write_report_header()
+    def test_write_report_head_tail(self, mock_datetime_now, mock_logger, monkeypatch):
+        mock_config_settings = {'plans': [{'p': 123}], 'tool_config': {'t': 'c'}}
+        monkeypatch.setattr('record.config.settings', mock_config_settings)
+
+        Recorder.write_report_header([P(name='a'), P(name='b')])
         Recorder.write_report_tail()
-        assert orjson.loads(mock_logger.get_content())['plans'] == [{}, {}]
 
-    def test_write_report_and_plan_head_tail(self, mock_logger):
-        pass
+        actual = orjson.loads(mock_logger.get_content())
 
-    def test(self):
-        # TODO 试一下
-        pass
+        assert actual['generate_time'] == MOCK_TIME_NOW.isoformat()
+        assert actual['plan_configuration'] == [{'p': 123}]
+        assert actual['tool_configuration'] == {'t': 'c'}
+        assert actual['plan_ids'] == [{'name': 'a', 'id': 0}, {'name': 'b', 'id': 1}]
+        assert actual['records'] == [{}, {}]
+
+    def test_write_multiple_records(self, mock_logger):
+        Recorder.write_report_header([])
+        Recorder.record(TRecordable())
+        Recorder.record(TRecordable())
+        Recorder.write_report_tail()
+
+        actual = Recorder.load_report(mock_logger.get_content().encode('utf-8'))
+
+        assert actual['records'] == [{'type': 'tr', 'data': {'a': 'b'}}] * 2
