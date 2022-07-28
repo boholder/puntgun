@@ -21,7 +21,7 @@ like .toml, .ini, .json. In this page we'll use yaml format.
 Currently, the tool only support processing Twitter accounts ("user_plan") (blocking accounts for example),
 but we left a place for processing tweets in the future (like deleting embarrassing past tweets).
 
-## How to write a plan
+## How To Write A Plan
 
 One plan contains at most three types of rules, together they construct a processing pipeline:
 
@@ -72,7 +72,7 @@ plans:
       - block
 ```
 
-## How plans are executed
+## How Plans Are Executed
 
 Plans are executed in the order they are defined in the configuration file,
 one by one i.e. in parallel (so plans won't compete for limited API invocation resources).
@@ -91,7 +91,7 @@ Run **all** `action_rule`s on targets from **any** `source_rule`  that trigger *
 
 You can arrange more complex but flexible execution order by nesting rule sets below.
 
-## Rule sets
+## Rule Sets
 
 Rule sets help us create a layer of abstraction by
 converting a "scattered" SET of rules of the same type into a single result.
@@ -100,7 +100,7 @@ so that we can write nested "trees" of rules with more "dynamic" judgment capabi
 
 For now, we consider that only filter rules are worth writing various (user-usable) rule sets.
 
-### Rule sets inside plan
+### Rule Sets Inside Plan
 
 In fact, plans use rule sets internally to handle the execution and judgments of the rules
 contained in themselves, and there are currently two plan-specific rule sets
@@ -110,10 +110,8 @@ that are not directly available to users:
    into a single data stream and removing duplicate candidate targets.
 2. aggregating the results of all action rules into a result set.
 
-As described in the plan execution part above,
-the plan also uses the `any_of` filter rule set to
-decide a final single filter result of all filter rules as
-a basis for determining whether to process candidate targets.
+As described in the plan execution part above, the plan also uses the `any_of` filter rule set to
+decide a final single filter result of all filter rules as a basis for determining whether to process candidate targets.
 
 ### any_of (filter rule set)
 
@@ -129,7 +127,7 @@ Logical AND:
 * Only if all filter rules are triggered, the rule set is considered to be triggered.
 * If any rule is not triggered, the rule set is not triggered.
 
-## User source rules
+## User Source Rules
 
 ### ids
 
@@ -157,7 +155,7 @@ Specify users with a list of [username](https://help.twitter.com/en/managing-you
 Usernames are easy to get, so this rule is pretty good for your first try with a handful usernames.
 Like the user id, manually typing down or parsing amount of usernames is awkward and not recommended.
 
-## User filter rules
+## User Filter Rules
 
 ### follower
 
@@ -186,7 +184,7 @@ that:
 
 And... the following rule.
 
-## User action rules
+## User Action Rules
 
 ### block
 
