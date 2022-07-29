@@ -130,13 +130,13 @@ so next time you running this tool you needn't enter these annoying unreadable t
 And we'll encrypt them before saving, it's time to load your private key.   
 """)
         encrypt_and_save_secrets_into_file(load_or_generate_public_key(),
-                                           config.secrets_config_file_path,
+                                           config.secrets_file,
                                            **{twitter_api_key_name: api_secrets.key,
                                               twitter_api_key_secret_name: api_secrets.secret,
                                               twitter_access_token_name: access_token_secrets.token,
                                               twitter_access_token_secret_name: access_token_secrets.secret
                                               })
-        print(f"Secrets saved into file.\n({config.secrets_config_file_path})")
+        print(f"Secrets saved into file.\n({config.secrets_file})")
     return {'ak': api_secrets.key,
             'aks': api_secrets.secret,
             'at': access_token_secrets.token,
@@ -209,7 +209,7 @@ def load_and_decrypt_secret_from_settings(private_key: RSAPrivateKey, name: str,
 
 
 def encrypt_and_save_secrets_into_file(public_key: RSAPublicKey,
-                                       file_path: Path = config.secrets_config_file_path,
+                                       file_path: Path = config.secrets_file,
                                        **kwargs):
     """
     Will overwrite the file if already exists.
@@ -226,7 +226,7 @@ def encrypt_and_save_secrets_into_file(public_key: RSAPublicKey,
 
 def secrets_config_file_valid():
     def not_empty_or_has_only_blank_characters():
-        with open(config.secrets_config_file_path, 'r', encoding='utf-8') as f:
+        with open(config.secrets_file, 'r', encoding='utf-8') as f:
             return bool(f.read().strip())
 
-    return config.secrets_config_file_path.exists() and not_empty_or_has_only_blank_characters()
+    return config.secrets_file.exists() and not_empty_or_has_only_blank_characters()

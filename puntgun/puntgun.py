@@ -1,18 +1,30 @@
 import fire
 
+from conf import config
+
+banner = """
+,______________________________________
+|______________________________ [____]  ""-,___..--=====
+Punt Gun - a configurable Twitter \\_____/   ""        |
+             user blocking script    [ ))"---------..__|
+"""
+
 
 class Command(object):
     @staticmethod
-    def fire(plan_file='', config_file='', secrets_file='', block_following=False):
-        """Check & block/mute users base on the given configuration file.
+    def fire(config_path='', plan_file='', settings_file='', private_key_file='', secrets_file='',
+             report_file=''):
+        """Run a plan configuration.
 
-        :param plan_file: the plan configuration file this time.
-        :param config_file: the tool behavior configuration file.
-        :param secrets_file: the file containing the plaintext secrets.
-        :param block_following: whether to block users that you are following.
+        :param config_path: Path of various configuration files the tool needs.
+        :param plan_file: Plan configuration file you'd like to execute.
+        :param settings_file: Global tool settings that will apply to every execution.
+        :param private_key_file: Tool generated password protected private key.
+        :param secrets_file: Tool generated cipher text or user writen plain text file contains secrets.
+        :param report_file: Expect path of the tool generated execution report.
         """
-        print_banner()
-        print(f'start blocking:{plan_file}')
+        config.reload_config_files_base_on_cmd_args(config_path, plan_file, settings_file,
+                                                    private_key_file, secrets_file, report_file)
 
     @staticmethod
     def rebirth(report_file='report.yml'):
@@ -36,15 +48,6 @@ class PreCheckCommand(object):
     def report(report_file='report.yml'):
         """Show a brief of the given report file, number of blocked users for example."""
         print(f"check old record file:{report_file}")
-
-
-def print_banner():
-    print("""
-,______________________________________
-|______________________________ [____]  ""-,___..--=====
-Punt Gun - a configurable Twitter \\_____/   ""         |
-             user blocking script    [ ))"---------..__|
-    """)
 
 
 if __name__ == '__main__':

@@ -28,7 +28,7 @@ def load_or_generate_private_key():
             if err_count > 2:
                 print('Maybe you want to reset the password as described above.')
             try:
-                private_key = load_private_key(util.get_input_from_terminal('Password'), config.pri_key_file_path)
+                private_key = load_private_key(util.get_input_from_terminal('Password'), config.pri_key_file)
                 logger.info("Private key file loaded with correct password")
                 return private_key
             except ValueError:
@@ -38,19 +38,19 @@ def load_or_generate_private_key():
     def generate_and_save():
         pwd = util.get_input_from_terminal('Password')
         pri_key = generate_private_key()
-        dump_private_key(pri_key, pwd, config.pri_key_file_path)
+        dump_private_key(pri_key, pwd, config.pri_key_file)
         print(f'The private key has been saved into the file'
-              f'({config.pri_key_file_path}).')
+              f'({config.pri_key_file}).')
         return pri_key
 
-    if config.pri_key_file_path.exists():
+    if config.pri_key_file.exists():
         print(f"""
 Found the previous saved private key file. 
-({config.pri_key_file_path})
+({config.pri_key_file})
 Now please enter the password.
 
 If you've forget the password, just delete the private key file and the secrets file
-({str(config.secrets_config_file_path.absolute())}) 
+({str(config.secrets_file.absolute())}) 
 and rerun this tool for initializing things again.
 """)
 
@@ -67,7 +67,7 @@ And you should remember this password for using this tool in the future.
 
 If you can't remember it, 
 just delete the private key file and the secrets file in this directory and run it again.
-({config.config_dir_path})
+({config.config_path})
 """)
 
         logger.info("Generated a new private key")

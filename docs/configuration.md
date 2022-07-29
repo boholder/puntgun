@@ -6,19 +6,21 @@ nav_order: 1
 # Configuration
 
 This page is describing configurations of the tool itself, i.e. the contents of [/conf/settings.yml](/conf/settings.yml).
-For all available Plan configurations, please check [the plan configuration document page](plan-configuration.md).
+For all available plan configurations, please check [the plan configuration document page](plan-configuration.md).
+There are two types of tool configuration:
+most of them can be configured in global configuration file or set via environment variable,
+but some special configurations can only be passed through command line argument.
 
 The tool is using the [Dynaconf](https://www.dynaconf.com/) as the configuration parsing library.
 
 ## Loading Priority (Precedence)
 
-The tool will load the tool configurations in the following order:
+The tool will choose the tool configurations in the following order:
 
-1. Command line arguments (if available)
-2. Environment variables[[ref](https://www.dynaconf.com/envvars/)]
-3. User writen plan configuration files
-4. Global settings file and saved secrets file
-5. Default values set inside program
+1. Command line arguments & Environment variables[[ref](https://www.dynaconf.com/envvars/)].
+2. User writen plan configuration files.
+3. Global settings file and secrets file.
+4. Default values set inside program.
 
 ## Setting Via Configuration File
 
@@ -54,8 +56,6 @@ export BULLET_CALIBER="20 ga."
 
 There are some "one-off" configurations
 (value may be different in each execution, so not suitable for the global scope).
-You can also [set environment variables](#setting-via-environment-variable) for them,
-remove double hyphen symbols and that's the name of option (e.g. `--config_path` -> `config_path`).
 
 The tool will use `--secrets_file` and `--private_key_file` to manage secrets in a safe way,
 [here](#let-the-tool-manages-secrets) is more detailed introduction.
@@ -64,7 +64,7 @@ The tool will use `--secrets_file` and `--private_key_file` to manage secrets in
 |----------------------|-----------------------------------------------------------------------------|----------------------------------------------------------------------------------------|
 | `--config_path`      | [`<home directory>`](https://en.wikipedia.org/wiki/Home_directory)/.puntgun | Path of various configuration files the tool needs                                     |
 | `--plan_file`        | `<config path>`/plan.yml                                                    | [Plan configuration file]() you'd like to execute                                      |
-| `--global_file`      | `<config path>`/settings.yml                                                | Global tool settings that will apply to every execution                                |
+| `--settings_file`    | `<config path>`/settings.yml                                                | Global tool settings that will apply to every execution                                |
 | `--private_key_file` | `<config path>`/.puntgun_rsa4096                                            | Tool generated password protected private key                                          |
 | `--secrets_file`     | `<config path>`/.secrets.yml                                                | Tool generated cipher text or user writen plain text file contains [secrets](#secrets) |
 | `--report_file`      | `<same directory with plan file>`/`<plan_file>`_`<time>`_report.json        | Expect path of the tool generated [execution report]()                                 |
@@ -163,6 +163,8 @@ via different approach if you want.
 
 1. You can indicate a file path with `--secrets_file` command line argument when starting the tool,
    in which contains secrets configured like other normal configuration options.
+   (You can even directly write these secrets in you plan file and the tool still can load them,
+   but that's dangerous and not recommended.)
 
 2. You can [set environment variables](#setting-via-environment-variable) for them.
 
