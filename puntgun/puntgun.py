@@ -1,5 +1,6 @@
 import fire
 
+import runner
 from conf import config
 
 banner = r"""
@@ -27,6 +28,7 @@ class Command(object):
         """
         config.reload_config_files_base_on_cmd_args(config_path, plan_file, settings_file,
                                                     private_key_file, secrets_file, report_file)
+        runner.start()
 
 
 if __name__ == '__main__':
