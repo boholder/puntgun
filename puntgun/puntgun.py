@@ -2,11 +2,13 @@ import fire
 
 from conf import config
 
-banner = """
-,______________________________________
-|______________________________ [____]  ""-,___..--=====
-Punt Gun - a configurable Twitter \\_____/   ""        |
-             user blocking script    [ ))"---------..__|
+banner = r"""
+     ____              _      ____
+,___|____\____________|_|____/____|____________________
+|___|_|_)_|_|_|_|_'__\|___|_|_|___|_|_|_|_'__\__[____]  ""-,___..--=====
+    |  __/| |_| | | | | |_  | |_| | |_| | | | |   \\_____/   ""        |
+    |_|    \__,_|_| |_|\__|  \____|\__,_|_| |_|      [ ))"---------..__|
+puntgun - a configurable automation command line tool for Twitter
 """
 
 
@@ -25,29 +27,6 @@ class Command(object):
         """
         config.reload_config_files_base_on_cmd_args(config_path, plan_file, settings_file,
                                                     private_key_file, secrets_file, report_file)
-
-    @staticmethod
-    def rebirth(report_file='report.yml'):
-        """Unblock/mute users in the given report file that this tool generated before."""
-        print(f'start unblocking users in:{report_file}')
-
-    @staticmethod
-    def check():
-        """Perform a dry run on the given file, for checking file's syntactic correctness etc."""
-        return PreCheckCommand()
-
-
-class PreCheckCommand(object):
-    @staticmethod
-    def config(config_file='config_parsing.yml'):
-        """Check the syntactic correctness of the given configuration file,
-        run test cases if the file contains."""
-        print(f"check rule file:{config_file}")
-
-    @staticmethod
-    def report(report_file='report.yml'):
-        """Show a brief of the given report file, number of blocked users for example."""
-        print(f"check old record file:{report_file}")
 
 
 if __name__ == '__main__':
