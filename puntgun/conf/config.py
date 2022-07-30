@@ -4,26 +4,10 @@ No unit tests guard (too implement-coupling to be valuable enough writing test c
 """
 import sys
 from datetime import datetime
-from importlib.metadata import version
 from pathlib import Path
 
 from dynaconf import Dynaconf
 from loguru import logger
-
-# === configs won't changed ===
-
-# For version based branch logic in report-based "undo" operation.
-# (you have different available actions at different version,
-# which may require different "undo" process.)
-# Works sort of like java's serial version uid.
-puntgun_version = version('puntgun')
-
-# The tool's behavior changes base on whether it's facing an interactive shell
-# 1. when is_atty=true, the tool read password through input();
-#    when false, take stdin input as password.
-is_atty = sys.__stdin__.isatty()
-
-# === configs which final values depends on command line arguments ===
 
 config_path = Path.home().joinpath('.puntgun')
 plan_file = config_path.joinpath('plan.yml')

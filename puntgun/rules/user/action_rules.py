@@ -26,8 +26,5 @@ class BlockUserActionRule(UserActionRule, NeedClient):
 
     _keyword: ClassVar[str] = 'block'
 
-    # TODO block_already_followed
-    block_already_followed: bool = False
-
     def __call__(self, user: User):
         return RuleResult(self, self.client.block_user_by_id(user.id))

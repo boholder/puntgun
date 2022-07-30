@@ -24,10 +24,8 @@ The tool will choose the tool configurations in the following order:
 
 ## Setting Via Configuration File
 
-The example configuration is written in yaml format
-(you may want to learn about [yaml's syntax](https://yaml.org/)),
-but you can also use [other supported formats](https://www.dynaconf.com/settings_files/#supported-formats)
-like .toml, .ini, .json. In this page we'll use yaml format.
+You can use [different supported formats](https://www.dynaconf.com/settings_files/#supported-formats)
+like .yaml, .toml, .ini, .json. In this page we'll use yaml format.
 
 The name of one setting option is also the key in configuration file,
 and you can [set an environment variable](#setting-via-environment-variable) for it.
@@ -36,6 +34,9 @@ and you can [set an environment variable](#setting-via-environment-variable) for
 |------------------------|---------|---------------------------------------------------|
 | block_already_followed | false   | Whether to block users that you already followed. |
 | a                      |         | 32                                                |
+
+You can [search](https://github.com/search?q=%22settings.get%22+%22plans%22+repo%3Aboholder%2Fpuntgun+in%3Afile&type=code)
+how particular configuration is used in source code if you are interested.
 
 ## Setting Via Environment Variable
 

@@ -1,5 +1,6 @@
 """Methods that access, modify, and save secrets that need to be encrypted, as well as private key itself."""
 import functools
+import sys
 
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
@@ -11,6 +12,11 @@ from conf import config
 
 encrypt_padding = padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None)
 
+# The tool's behavior changes base on whether it's facing an interactive shell
+# When is_atty=true, the tool reads password through input();
+# When false, take stdin input as password.
+stdin_is_atty = sys.__stdin__.isatty()
+
 
 @functools.lru_cache(maxsize=1)
 def load_or_generate_public_key():
@@ -21,7 +27,7 @@ def load_or_generate_public_key():
 def load_or_generate_private_key():
     """For decrypting secrets."""
 
-    def load():
+    def load_with_password_from_prompt():
         """Trying different passwords in an infinity loop till the user get bored."""
         err_count = 0
         while True:
@@ -34,6 +40,9 @@ def load_or_generate_private_key():
             except ValueError:
                 err_count += 1
                 print('Incorrect password.')
+
+    def load_with_password_from_stdin():
+        return load_private_key("".join(sys.stdin.readlines()), config.pri_key_file)
 
     def generate_and_save():
         pwd = util.get_input_from_terminal('Password')
@@ -50,12 +59,12 @@ Found the previous saved private key file.
 Now please enter the password.
 
 If you've forget the password, just delete the private key file and the secrets file
-({str(config.secrets_file.absolute())}) 
+({config.secrets_file}) 
 and rerun this tool for initializing things again.
 """)
 
         logger.info("Found the existing private key, trying to load with password")
-        return load()
+        return load_with_password_from_prompt() if stdin_is_atty else load_with_password_from_stdin()
     else:
         print(f"""
 It seems that you haven't generated a private key for encrypting secrets before.

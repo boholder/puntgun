@@ -16,6 +16,7 @@ Ok, speed is important. I changed the output format to json -
 I've heard about the effort different json parsing libraries have made.
 """
 from datetime import datetime
+from importlib import metadata
 from typing import List
 
 import orjson
@@ -23,6 +24,12 @@ from loguru import logger
 
 from conf import config
 from rules import Plan
+
+# For version based branch logic in report-based "undo" operation.
+# (you have different available actions at different version,
+# which may require different "undo" process.)
+# Works sort of like java's serial version uid.
+puntgun_version = metadata.version('puntgun')
 
 
 class Record(object):
@@ -99,7 +106,7 @@ class Recorder(object):
         """
 
         head = {'referring_document': '',  # TODO
-                'tool_version': config.puntgun_version,
+                'tool_version': puntgun_version,
                 'generate_time': datetime.now(),
                 'plan_configuration': config.settings.get('plans', []),
                 # name -> plan_configuration, id -> records,

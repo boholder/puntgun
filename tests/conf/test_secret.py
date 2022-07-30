@@ -16,14 +16,14 @@ def test_secrets_save_and_load_via_settings_file(tmp_path):
     # save to file
     encrypt_and_save_secrets_into_file(private_key.public_key(), path, a='token', b='another')
     # read from file (via settings)
-    settings = Dynaconf(settings_files=str(path.absolute()))
+    settings = Dynaconf(settings_files=path)
     assert load_and_decrypt_secret_from_settings(private_key, 'a', settings) == 'token'
     assert load_and_decrypt_secret_from_settings(private_key, 'b', settings) == 'another'
 
 
 def test_secrets_config_file_exists_check(monkeypatch, tmp_path):
     fake_secrets_setting_file = tmp_path.joinpath('s.yml')
-    monkeypatch.setattr('conf.config.secrets_config_file_path', fake_secrets_setting_file)
+    monkeypatch.setattr('conf.config.secrets_file', fake_secrets_setting_file)
 
     def save_content_to_file(content):
         with open(fake_secrets_setting_file, 'w', encoding='utf-8') as f:
@@ -36,7 +36,7 @@ def test_secrets_config_file_exists_check(monkeypatch, tmp_path):
     save_content_to_file('not empty')
     assert secrets_config_file_valid() is True
     # not exist = invalid
-    monkeypatch.setattr('conf.config.secrets_config_file_path', tmp_path.joinpath('b.yml'))
+    monkeypatch.setattr('conf.config.secrets_file', tmp_path.joinpath('b.yml'))
     assert secrets_config_file_valid() is False
 
 
@@ -46,8 +46,8 @@ def mock_secrets_config_file(mock_private_key_file, monkeypatch, tmp_path):
     # load the private key for decrypt secrets
     monkeypatch.setattr('builtins.input', Mock(side_effect=['pwd', 'y']))
     # change the settings to load test configuration file
-    monkeypatch.setattr('conf.config.secrets_config_file_path', secrets_setting_file)
-    monkeypatch.setattr('conf.config.settings', Dynaconf(settings_files=str(secrets_setting_file.absolute())))
+    monkeypatch.setattr('conf.config.secrets_file', secrets_setting_file)
+    monkeypatch.setattr('conf.config.settings', Dynaconf(settings_files=secrets_setting_file))
 
     def save_content_to_file(**kwargs):
         encrypt_and_save_secrets_into_file(mock_private_key_file[1].public_key(), secrets_setting_file, **kwargs)
