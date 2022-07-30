@@ -7,6 +7,7 @@ import sys
 from typing import ClassVar
 
 from pydantic import BaseModel, root_validator, Field
+from reactivex import Observable
 
 
 class FromConfig(BaseModel, abc.ABC):
@@ -110,6 +111,9 @@ class Plan(FromConfig):
     #
     # https://pydantic-docs.helpmanual.io/usage/models/#field-with-dynamic-default-value
     id: int = Field(default_factory=generate_id)
+
+    def __call__(self) -> Observable:
+        raise NotImplementedError
 
 
 class RuleResult(object):

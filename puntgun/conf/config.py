@@ -78,9 +78,21 @@ def config_logging_options():
         "<level>{message}</level>"
     )
 
+    # report file
+    # we're borrowing function of loguru library for writing execution report files.
+    # use 'r' field to mark these logs.
+    # See puntgun.record.Recorder for more info.
+    logger.add(report_file,
+               filter=lambda record: 'r' in record['extra'],
+               # only write the plain message content
+               format='{message}')
+
     # console log
-    logger.add(sys.stderr,
-               filter=lambda record: 'r' not in record['extra'],
+    logger.add(sys.stderr, filter=lambda record: 'r' not in record['extra'], format=logger_format)
+
+    # let logs with "t" field can be logged to both stdout and log file.
+    logger.add(sys.stdout,
+               filter=lambda record: 'r' not in record['extra'] and 't' in record['extra'],
                format=logger_format)
 
     # log file
@@ -88,14 +100,6 @@ def config_logging_options():
                filter=lambda record: 'r' not in record['extra'],
                format=logger_format,
                rotation=settings.get('log_rotation', '100 MB'))
-
-    # report file
-    # we're borrowing function of loguru library for writing execution report files.
-    # See puntgun.record.Recorder for more info.
-    logger.add(report_file,
-               filter=lambda record: 'r' in record['extra'],
-               # only write the plain message content
-               format='{message}')
 
 
 # Configurate logging options only when not in unit testing,
