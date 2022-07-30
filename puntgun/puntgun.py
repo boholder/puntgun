@@ -31,4 +31,5 @@ class Command(object):
 
 if __name__ == '__main__':
     # expose subcommands
+    print(banner)
     fire.Fire(Command)

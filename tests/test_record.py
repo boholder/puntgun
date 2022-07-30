@@ -5,7 +5,7 @@ import loguru
 import orjson
 import pytest
 
-from record import Record, Recorder, Recordable
+from record import Record, Recorder, Recordable, load_report
 from rules import Plan
 
 
@@ -85,12 +85,12 @@ class TestRecorder:
     @staticmethod
     def assert_report_load_result(report_content: str):
         expect = {'records': [{'name': 'p'}]}
-        actual = Recorder.load_report(report_content.encode('utf-8'))
+        actual = load_report(report_content.encode('utf-8'))
         assert actual == expect
 
     def test_load_report_fail(self):
         with pytest.raises(ValueError) as _:
-            Recorder.load_report('{'.encode('utf-8'))
+            load_report('{'.encode('utf-8'))
 
     def test_write_report_head_tail(self, mock_datetime_now, mock_logger, monkeypatch):
         mock_config_settings = {'plans': [{'p': 123}]}
@@ -112,7 +112,7 @@ class TestRecorder:
         Recorder.record(TRecordable())
         Recorder.write_report_tail()
 
-        actual = Recorder.load_report(mock_logger.get_content().encode('utf-8'))
+        actual = load_report(mock_logger.get_content().encode('utf-8'))
 
         assert actual['records'] == [{'type': 'tr', 'data': {'a': 'b'}}] * 2
 
