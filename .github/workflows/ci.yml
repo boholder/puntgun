@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 env:
-  COVERAGE_REPORT_DIR: coverage
+  DOC_DIR: docs
 
 jobs:
   update-coverage-info:
@@ -29,19 +29,18 @@ jobs:
       - name: Run coverage
         # the last "coverage run" is for badge creation, that action doesn't have an INFILE option.
         run: |
-          coverage run --context=github-ci-action --data-file=${COVERAGE_REPORT_DIR}/.coverage -m pytest tests
           coverage run -m pytest tests
 
       - name: Create coverage badge
         uses: tj-actions/coverage-badge-py@v1.6
         with:
-          output: ${COVERAGE_REPORT_DIR}/coverage.svg
+          output: ${DOC_DIR}/coverage.svg
 
       - name: Commit coverage information
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add ${COVERAGE_REPORT_DIR}
+          git add ${DOC_DIR}/coverage.svg
           git commit -m "Update coverage information"
 
       - name: Push changes

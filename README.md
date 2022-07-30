@@ -1,7 +1,7 @@
 # puntgun - a configurable automation command line tool for Twitter
 
 [![ci workflow status badge](https://github.com/boholder/puntgun/actions/workflows/ci.yml/badge.svg)](https://github.com/boholder/puntgun/actions/workflows/ci.yml)
-[![unit test coverage badge](./coverage/coverage.svg)](./coverage)
+[![unit test coverage badge](docs/coverage.svg)](./coverage)
 [![releases total download badge](https://img.shields.io/github/downloads/boholder/puntgun/total)](https://github.com/boholder/puntgun/releases)
 [![pypi python version badge](https://img.shields.io/pypi/pyversions/puntgun)](https://pypi.org/project/puntgun/)
 
