@@ -17,7 +17,7 @@ def generated_key_file(tmp_path):
 
 @pytest.fixture
 def mock_private_key_file(monkeypatch, generated_key_file):
-    monkeypatch.setattr('conf.config.pri_key_file_path', generated_key_file[0])
+    monkeypatch.setattr('conf.config.pri_key_file', generated_key_file[0])
     return generated_key_file
 
 
