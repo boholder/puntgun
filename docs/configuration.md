@@ -171,4 +171,4 @@ via different approach if you want.
 
 3. You can pass your private key file's password through *[stdin](https://en.wikipedia.org/wiki/Standard_streams)*,
    the tool will read the password from *stdin* instead of ask password interactively
-   when it detects it's not facing an interactive shell.
+   when it detects it's not facing an interactive shell (atty stdin).

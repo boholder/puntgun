@@ -15,6 +15,9 @@ even to the benefit of the social platform environment
 
 ## Usage
 
+Currently, the tool can only operate one Twitter account to perform actions,
+which means you can't make multiple Twitter account block same group of users at once run.
+
 ## Disclaimer
 
 There always has to be such a statement (where else would I need to put it?).

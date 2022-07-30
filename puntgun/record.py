@@ -105,7 +105,7 @@ class Recorder(object):
         - for correctly formatting latter records in json format.
         """
 
-        head = {'referring_document': '',  # TODO
+        head = {'reference_document': '',  # TODO doc link
                 'tool_version': puntgun_version,
                 'generate_time': datetime.now(),
                 'plan_configuration': config.settings.get('plans', []),
@@ -124,39 +124,39 @@ class Recorder(object):
         """
         Recorder._write(REPORT_TAIL)
 
-    @staticmethod
-    def load_report(file_content: bytes) -> dict:
-        """
-        Load report into dictionary type from given report file.
-        Responsible to handle json-special format problems.
-        """
 
-        # If the program finished its job and stopped by itself,
-        # correct brackets will be appended at the tail of file,
-        # it's json-format-correct.
-        #
-        # But if the program stopped by user, unexpected exceptions...
-        # the file's content is json-format-broken,
-        # we'll fix it manually as we know what it's missing.
-        #
-        # lambda for lazy calculating
-        cases = [lambda: file_content,
-                 # The bigger the file_content (record file size),
-                 # the slower the appending speed (you need to copy the whole list),
-                 # but thankfully this method runs only once per program running.
-                 lambda: file_content + REPORT_TAIL]
+def load_report(file_content: bytes) -> dict:
+    """
+    Load report into dictionary type from given report file.
+    Responsible to handle json-special format problems.
+    """
 
-        errors = []
-        for case in cases:
-            try:
-                result = orjson.loads(case())
+    # If the program finished its job and stopped by itself,
+    # correct brackets will be appended at the tail of file,
+    # it's json-format-correct.
+    #
+    # But if the program stopped by user, unexpected exceptions...
+    # the file's content is json-format-broken,
+    # we'll fix it manually as we know what it's missing.
+    #
+    # lambda for lazy calculating
+    cases = [lambda: file_content,
+             # The bigger the file_content (record file size),
+             # the slower the appending speed (you need to copy the whole list),
+             # but thankfully this method runs only once per program running.
+             lambda: file_content + REPORT_TAIL]
 
-                # remove additional empty items added by this class when writing report.
-                # "records" list's first and last item is empty item.
-                result['records'] = result['records'][1:-1]
+    errors = []
+    for case in cases:
+        try:
+            result = orjson.loads(case())
 
-                return result
-            except orjson.JSONDecodeError as e:
-                errors.append(e)
+            # remove additional empty items added by this class when writing report.
+            # "records" list's first and last item is empty item.
+            result['records'] = result['records'][1:-1]
 
-        raise ValueError(f'Can not parse given content, all approaches return error: {errors}')
+            return result
+        except orjson.JSONDecodeError as e:
+            errors.append(e)
+
+    raise ValueError(f'Can not parse given content, all approaches return error: {errors}')

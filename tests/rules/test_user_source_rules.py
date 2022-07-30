@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, call
 
 import pytest
 import reactivex as rx
-import reactivex.operators as ops
+import reactivex.operators as op
 from hamcrest import contains_string, assert_that
 from reactivex.internal import SequenceContainsNoElementsError
 
@@ -28,7 +28,7 @@ class TestCommonBehavior:
 
         # the error will be raised out of the pipeline
         with pytest.raises(client.TwitterClientError) as actual_error:
-            rule().pipe(ops.do(rx.Observer(on_error=assertion_consumer))).run()
+            rule().pipe(op.do(rx.Observer(on_error=assertion_consumer))).run()
 
         assert_that(str(actual_error.value), contains_string('client'))
         assert raise_error.called
@@ -42,7 +42,7 @@ class TestCommonBehavior:
 
         # will raise an error inside reactivex
         with pytest.raises(SequenceContainsNoElementsError) as actual_error:
-            rule().pipe(ops.do(rx.Observer(on_next=lambda _: None))).run()
+            rule().pipe(op.do(rx.Observer(on_next=lambda _: None))).run()
         assert str(actual_error.value) == 'Sequence contains no elements'
 
     def test_when_not_all_calls_to_client_return_empty_list(self, mock_client, user_id_sequence_checker):
@@ -51,7 +51,7 @@ class TestCommonBehavior:
         mock_client.get_users_by_usernames = mock_get_users_by_usernames
         rule = NameUserSourceRule.parse_obj({'names': ['first_request'] * 100 + ['second_request']})
 
-        rule().pipe(ops.do(rx.Observer(on_next=user_id_sequence_checker))).run()
+        rule().pipe(op.do(rx.Observer(on_next=user_id_sequence_checker))).run()
         assert mock_get_users_by_usernames.call_count == 2
         assert user_id_sequence_checker.call_count == 1
         assert mock_get_users_by_usernames.call_args_list[1] == call(['second_request'])
@@ -62,7 +62,7 @@ def test_name_user_source_rule(mock_client, user_id_sequence_checker):
     mock_client.get_users_by_usernames = mock_get_users_by_usernames
     rule = ConfigParser.parse({'names': ['first_request'] * 100 + ['second_request']}, UserSourceRule)
     # use the Observable.run() to synchronously start and finish the pipeline.
-    rule().pipe(ops.do(rx.Observer(on_next=user_id_sequence_checker))).run()
+    rule().pipe(op.do(rx.Observer(on_next=user_id_sequence_checker))).run()
 
     # the rule splits the parameter's value into two list
     # and makes two calls to the client
@@ -76,7 +76,7 @@ def test_id_user_source_rule(mock_client, user_id_sequence_checker):
     mock_client.get_users_by_ids = mock_get_users_by_ids
     rule = ConfigParser.parse({'ids': [1] * 100 + [2]}, UserSourceRule)
     # use the Observable.run() to synchronously start and finish the pipeline.
-    rule().pipe(ops.do(rx.Observer(on_next=user_id_sequence_checker))).run()
+    rule().pipe(op.do(rx.Observer(on_next=user_id_sequence_checker))).run()
 
     # the rule splits the parameter's value into two list
     # and makes two calls to the client
