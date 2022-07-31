@@ -5,6 +5,9 @@
 [![releases total download badge](https://img.shields.io/github/downloads/boholder/puntgun/total)](https://github.com/boholder/puntgun/releases)
 [![pypi python version badge](https://img.shields.io/pypi/pyversions/puntgun)](https://pypi.org/project/puntgun/)
 
+> **Warning**
+> This tool is not available yet, it will be soon!
+
 This tool was originally conceived as a configurable automatic Twitter account blocker.
 What could be a better name for it than [the punt gun](https://en.wikipedia.org/wiki/Punt_gun),
 a special hunting weapon used to kill a large number of waterfowl in one shot.
