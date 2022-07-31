@@ -1,8 +1,8 @@
 # puntgun - a configurable automation command line tool for Twitter
 
-[![ci workflow status badge](https://github.com/boholder/puntgun/actions/workflows/ci.yml/badge.svg)](https://github.com/boholder/puntgun/actions/workflows/ci.yml)
-[![unit test coverage badge](docs/coverage.svg)](./coverage)
-[![releases total download badge](https://img.shields.io/github/downloads/boholder/puntgun/total)](https://github.com/boholder/puntgun/releases)
+[![main branch ci workflow status badge](https://github.com/boholder/puntgun/actions/workflows/ci_main.yml/badge.svg)](https://github.com/boholder/puntgun/actions/workflows/ci_main.yml)
+[![Coverage Status](https://coveralls.io/repos/github/boholder/puntgun/badge.svg?branch=main)](https://coveralls.io/github/boholder/puntgun?branch=main)
+[![total downloads badge](https://img.shields.io/github/downloads/boholder/puntgun/total)](https://github.com/boholder/puntgun/releases)
 [![pypi python version badge](https://img.shields.io/pypi/pyversions/puntgun)](https://pypi.org/project/puntgun/)
 
 > **Warning**
