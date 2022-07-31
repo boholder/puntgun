@@ -18,9 +18,7 @@ def test_load_private_key_file_with_wrong_password(generated_key_file):
         load_private_key('wrong_pwd', generated_key_file[0])
 
 
-def test_load_private_key_file_with_correct_password_interactively(mock_private_key_file, monkeypatch):
-    # let the tool believes it is connecting to an atty
-    monkeypatch.setattr('conf.encrypto.stdin_is_atty', True)
+def test_load_private_key_file_with_correct_password_interactively(mock_private_key_file, monkeypatch, atty_stdin):
     # enter password to load private key
     monkeypatch.setattr('builtins.input', Mock(side_effect=['wrong', 'y', 'wrong again', 'y', 'pwd', 'y']))
     expect = mock_private_key_file[1]

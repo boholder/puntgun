@@ -63,3 +63,9 @@ def user_id_sequence_checker():
 @pytest.fixture
 def clean_config_parser():
     ConfigParser.clear_errors()
+
+
+@pytest.fixture
+def atty_stdin(monkeypatch):
+    """let the tool believes it is connecting to an atty"""
+    monkeypatch.setattr('conf.encrypto.stdin_is_atty', True)
