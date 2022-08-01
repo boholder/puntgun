@@ -87,15 +87,17 @@ def config_logging_options():
                # only write the plain message content
                format='{message}')
 
-    # console log
-    logger.add(sys.stderr, filter=lambda record: 'r' not in record['extra'], format=logger_format)
-
-    # let logs with "t" field can be logged to both stdout and log file.
+    # logs that we want user see will show in stdout
     logger.add(sys.stdout,
-               filter=lambda record: 'r' not in record['extra'] and 't' in record['extra'],
+               filter=lambda record: 'o' in record['extra'],
                format=logger_format)
 
-    # log file
+    # technical diagnostic logs go to stderr
+    logger.add(sys.stderr,
+               filter=lambda record: 'r' not in record['extra'] and 'o' not in record['extra'],
+               format=logger_format)
+
+    # log file, saves all but record logs
     logger.add(naming_log_file('_running.log'),
                filter=lambda record: 'r' not in record['extra'],
                format=logger_format,
