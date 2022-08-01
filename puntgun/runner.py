@@ -20,19 +20,22 @@ def start():
 
 
 def parse_plans():
-    # Let the ConfigParser recursively constructing plan instances (and rule instances inside plans).
-    plans = [ConfigParser.parse(p, Plan) for p in config.settings.get('plans', [])]
+    # Let the ConfigParser recursively constructing plan instances and rule instances inside plans.
+    plans: List[Plan] = [ConfigParser.parse(p, Plan) for p in config.settings.get('plans')]
 
     if ConfigParser.errors():
-        _errors = '\n'.join(ConfigParser.errors())
+        _errors = '\n'.join([str(e) for e in ConfigParser.errors()])
+        # TODO plan config reference document URL
         logger.bind(o=True).info(f"""
 Found syntax errors when parsing plan configurations, will exit.
 Please fix these errors in plan configuration file with configuration reference document:
 Plan config file path: {config.plan_file}
-Document: {''}
-Syntax errors: 
+Reference document: {'fake-doc'}
+Syntax errors:
 {_errors}
 """)
+        # Can't continue without a zero-error plan configuration
+        exit(1)
 
     logger.info('Successfully parsed plans from configuration without errors: {}', plans)
     return plans
@@ -54,5 +57,5 @@ def execute_plans(plans: List[Plan]):
 
 
 def process_plan_result(result: Recordable):
-    logger.bind(o=True).info('One candidate triggers filters and has been operated: {}', result)
+    logger.bind(o=True).info('One candidate triggers filters and has been operated: {}', result.to_record())
     Recorder.record(result)
