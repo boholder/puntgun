@@ -69,3 +69,16 @@ def clean_config_parser():
 def atty_stdin(monkeypatch):
     """let the tool believes it is connecting to an atty"""
     monkeypatch.setattr('conf.encrypto.stdin_is_atty', True)
+
+
+@pytest.fixture
+def mock_configuration(monkeypatch):
+    s = {}
+
+    def set_config(new):
+        nonlocal s
+        s = new
+        monkeypatch.setattr('conf.config.settings', s)
+
+    set_config({})
+    return set_config

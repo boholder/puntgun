@@ -5,6 +5,7 @@ from typing import List, TypeVar
 from pydantic import ValidationError
 
 from rules import FromConfig
+from loguru import logger
 
 
 def import_rule_classes():
@@ -61,13 +62,15 @@ class ConfigParser(object):
                     ConfigParser._errors.append(e)
                     return generate_placeholder_instance()
 
-        ConfigParser._errors.append(
-            ValueError(f"Can't find the rule of the [{expected_type}] type from configuration: {conf}"))
+        error = ValueError(f"Can't find the rule of the [{expected_type}] type from configuration: {conf}")
+        logger.error(error)
+        ConfigParser._errors.append(error)
 
         return generate_placeholder_instance()
 
     @staticmethod
     def errors():
+        """Get errors occurred when paring plan configuration"""
         return ConfigParser._errors
 
     @staticmethod

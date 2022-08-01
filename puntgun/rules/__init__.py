@@ -22,7 +22,7 @@ class FromConfig(BaseModel, abc.ABC):
     @classmethod
     def parse_from_config(cls, conf: dict):
         """
-        Most rules have a dictionary structure of fields, their configuration is something like:
+        Most rules have a dictionary structure of fields, their configurations are something like:
         { 'rule_name': {'field_1':1, 'field_2':2,...} }
         Take this format as the default logic so most rules needn't override this function.
 
