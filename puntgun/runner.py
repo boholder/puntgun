@@ -25,7 +25,7 @@ def parse_plans():
 
     if ConfigParser.errors():
         _errors = '\n'.join(ConfigParser.errors())
-        logger.bind(t=True).info(f"""
+        logger.bind(o=True).info(f"""
 Found syntax errors when parsing plan configurations, will exit.
 Please fix these errors in plan configuration file with configuration reference document:
 Plan config file path: {config.plan_file}
@@ -54,5 +54,5 @@ def execute_plans(plans: List[Plan]):
 
 
 def process_plan_result(result: Recordable):
-    logger.bind(t=True).info('One candidate triggers filters and has been operated: {}', result)
+    logger.bind(o=True).info('One candidate triggers filters and has been operated: {}', result)
     Recorder.record(result)
