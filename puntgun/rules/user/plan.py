@@ -32,7 +32,7 @@ class UserPlanResult(Recordable):
         #
         # Thanks to the pydantic library, the "str(r.rule)" will output every field's value of the rule,
         # along with rule's keyword, user can figure out what this rule's meaning is.
-        return Record(name='user_plan_result',
+        return Record(type='user_plan_result',
                       data={'plan_id': self.plan_id,
                             'user': {'id': self.user.id, 'username': self.user.username},
                             'decisive_filter_rule': {

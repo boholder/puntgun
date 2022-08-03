@@ -36,23 +36,26 @@ class Record(object):
     """
     Record wrapper for a recordable object for format uniformity.
     """
-    name: str
+    type: str
     data: dict
 
-    def __init__(self, name: str, data: dict):
-        self.name = name
+    def __init__(self, type: str, data: dict):
+        self.type = type
         self.data = data
 
     def to_json(self):
         """Translate this record into a yaml-list-item format string"""
-        return orjson.dumps({'type': self.name, 'data': self.data})
+        return orjson.dumps({'type': self.type, 'data': self.data})
 
     @staticmethod
     def parse_from_dict(conf: dict):
         """
         Assume that the parameter is already a dictionary type parsed from a json file.
         """
-        return Record(conf.get('type', ''), conf.get('data', {}))
+        return Record(type=conf.get('type', ''), data=conf.get('data', {}))
+
+    def __str__(self):
+        return f'Record(type={self.type}, data={self.data})'
 
 
 class Recordable(object):

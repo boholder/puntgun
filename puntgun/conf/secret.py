@@ -57,19 +57,19 @@ https://developer.twitter.com/en
 And it requires you to bind a phone number with that account.
 You can do unbind after get the credential, and the credential will remain valid.
 
-And don't forget to turn on OAuth 1.0a in your App settings:
+And do not forget to turn on OAuth 1.0a in your App settings:
 
   1. Set the App permissions to "Read and write".
   
   2. Set the callback, website URL to "https://twitter.com" for passing
      the website's validation check.
-     (We'll use the pin based auth method, so we needn't really deploy a server for
+     (We'll use the pin based auth method, so we need not really deploy a server for
      receiving Twitter's callback.)
      
      https://developer.twitter.com/en/docs/authentication/oauth-1-0a/pin-based-oauth
      
-Feel free to terminate this tool if you don't want to register right now.
-(Don't forget to clean the clipboard after copying and pasting secrets to here.)
+Feel free to terminate this tool if you do not want to register right now.
+(Do not forget to clean the clipboard after copying and pasting secrets to here.)
 """)
 
         return TwitterAPISecrets(key=util.get_input_from_terminal('Api key'),
@@ -109,7 +109,7 @@ We just used the API secrets to request Twitter and Twitter returned back an lin
 
 Same as other third-party authentication agreement,
 you'll see a number series called "PIN code" when you open the link,
-enter them back to here. Again, feel free to terminate this tool if you don't want to continue.
+enter them back to here. Again, feel free to terminate this tool if you do not want to continue.
 """)
 
         pin = util.get_input_from_terminal('PIN')
@@ -126,7 +126,7 @@ def load_or_request_all_secrets(pri_key):
     if not secrets_config_file_valid():
         print(f"""
 Before running plans, we'd save secrets into a secret configuration file,
-so next time you running this tool you needn't enter these annoying unreadable tokens again.
+so next time you running this tool you need not enter these annoying unreadable tokens again.
 And we'll encrypt them before saving, it's time to load your private key.   
 """)
         encrypt_and_save_secrets_into_file(load_or_generate_public_key(),

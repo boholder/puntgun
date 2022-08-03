@@ -67,16 +67,16 @@ and rerun this tool for initializing things again.
         return load_with_password_from_prompt() if stdin_is_atty else load_with_password_from_stdin()
     else:
         print(f"""
-It seems that you haven't generated a private key for encrypting secrets before.
+It seems that you have not generated a private key for encrypting secrets before.
 Let's generate one for you, 
 but we need you to set a password for protecting that private key.
 The strength of this password should be the same as your Twitter account password.
 It would be better if you set a different password from the Twitter password.  
 And you should remember this password for using this tool in the future.
 
-If you can't remember it, 
+If you can not remember it, 
 just delete the private key file and the secrets file in this directory and run it again.
-({config.config_path})
+({config.pri_key_file}, {config.secrets_file})
 """)
 
         logger.info("Generated a new private key")
