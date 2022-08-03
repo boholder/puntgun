@@ -35,9 +35,9 @@ Syntax errors:
 {_errors}
 """)
         # Can't continue without a zero-error plan configuration
-        exit(1)
+        raise ValueError("Found errors in plan configuration, can not continue")
 
-    logger.info('Successfully parsed plans from configuration without errors: {}', plans)
+    logger.info('Parsed plans from configuration: {}', plans)
     return plans
 
 
@@ -49,13 +49,13 @@ def execute_plans(plans: List[Plan]):
     for plan in plans:
         logger.info('Begin to execute plan: {}', plan)
         # Explicitly blocking execute plans one by one.
-        # for avoiding limited API invocation resources competition.
+        # for avoiding competition among plans on limited API invocation resources.
         plan().pipe(op.do(rx.Observer(on_next=process_plan_result))).run()
-        logger.info('Successfully finished plan: {}', plan)
+        logger.info('Finished plan: {}', plan)
 
     Recorder.write_report_tail()
 
 
 def process_plan_result(result: Recordable):
-    logger.bind(o=True).info('One candidate triggers filters and has been operated: {}', result.to_record())
+    logger.bind(o=True).info('One has been operated: {}', result.to_record())
     Recorder.record(result)

@@ -79,13 +79,10 @@ class TwitterApiErrors(Exception, Recordable):
         self.query_params = query_params
         self.errors = [TwitterApiError.from_response(e) for e in resp_errors]
 
-        msg = f"Twitter Server returned partial errors when querying API: " \
-              f"function called: [{query_func_name}], " \
-              f"params: [{query_params}], " \
-              f"errors: [{self.errors}]"
-
-        logger.info(msg)
-        super().__init__(msg)
+        super().__init__(f"Twitter Server returned partial errors when querying API: "
+                         f"function called: [{query_func_name}], "
+                         f"params: [{query_params}], "
+                         f"errors: [{self.errors}]")
 
     def __bool__(self):
         return bool(self.errors)
@@ -100,7 +97,7 @@ class TwitterApiErrors(Exception, Recordable):
         return self.errors[index]
 
     def to_record(self):
-        return Record(name='twitter_api_errors',
+        return Record(type='twitter_api_errors',
                       data={'query_func_name': self.query_func_name,
                             'query_params': self.query_params,
                             'errors': [e.__dict__ for e in self.errors]})
@@ -120,7 +117,9 @@ def record_twitter_api_errors(client_func):
     """
 
     def record_api_errors(request_params, resp_errors):
-        Recorder.record(TwitterApiErrors(str(client_func), request_params, resp_errors))
+        api_errors = TwitterApiErrors(str(client_func), request_params, resp_errors)
+        logger.bind(o=True).info(api_errors)
+        Recorder.record(api_errors)
 
     def decorator(*args, **kwargs):
         try:

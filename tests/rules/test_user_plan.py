@@ -25,7 +25,7 @@ class TestUserPlanResult:
                                 user=User(id=1, username='uname'),
                                 filtering_result=RuleResult.true(TRule(field_a='a')),
                                 action_results=[RuleResult.true(TRule(field_a='b'))]).to_record()
-        expect = Record(name='user_plan_result',
+        expect = Record(type='user_plan_result',
                         data={'plan_id': 123,
                               'user': {'id': 1, 'username': 'uname'},
                               'decisive_filter_rule': {'keyword': 'ptr', 'value': 'field_a=a'},
@@ -35,7 +35,7 @@ class TestUserPlanResult:
 
     def test_parse_from_record(self):
         actual = UserPlanResult.parse_from_record(
-            Record(name='user_plan_result',
+            Record(type='user_plan_result',
                    data={'plan_id': 123,
                          'user': {'id': 1, 'username': 'uname'},
                          'decisive_filter_rule': {'keyword': 'ptr', 'value': 'field_a=a'},
@@ -141,7 +141,7 @@ def user_plan_result_checker():
 
 
 class TestUserPlan:
-    def test_required_fields_validation(self, clean_config_parser):
+    def test_required_fields_validation(self, clean_config_parser_errors):
         ConfigParser.parse({'user_plan': ''}, Plan)
         error = ConfigParser.errors()[0]
         # the error message looks like:

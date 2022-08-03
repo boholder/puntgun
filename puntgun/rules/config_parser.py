@@ -62,7 +62,7 @@ class ConfigParser(object):
                     ConfigParser._errors.append(e)
                     return generate_placeholder_instance()
 
-        error = ValueError(f"Can't find the rule of the [{expected_type}] type from configuration: {conf}")
+        error = ValueError(f"Can not find the rule of the [{expected_type}] type from configuration: {conf}")
         logger.error(error)
         ConfigParser._errors.append(error)
 

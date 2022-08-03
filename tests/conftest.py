@@ -1,3 +1,4 @@
+import re
 from unittest.mock import MagicMock
 
 import pytest
@@ -61,7 +62,16 @@ def user_id_sequence_checker():
 
 
 @pytest.fixture
-def clean_config_parser():
+def clean_config_parser_errors():
+    """
+    Add this on test cases that may cause config parsing errors,
+    for avoiding accidentally fail other innocent test cases.
+    """
+    # clean before the test case
+    ConfigParser.clear_errors()
+    # https://docs.pytest.org/en/6.2.x/fixture.html#yield-fixtures-recommended
+    yield
+    # clean after the test case
     ConfigParser.clear_errors()
 
 
@@ -73,12 +83,32 @@ def atty_stdin(monkeypatch):
 
 @pytest.fixture
 def mock_configuration(monkeypatch):
-    s = {}
-
     def set_config(new):
-        nonlocal s
-        s = new
-        monkeypatch.setattr('conf.config.settings', s)
+        monkeypatch.setattr('conf.config.settings', new)
 
-    set_config({})
     return set_config
+
+
+class MockLogger:
+    """Simulate logger and save logs as one string."""
+
+    def __init__(self):
+        self.content = ''
+
+    def bind(self, **kwargs):
+        return self
+
+    def info(self, msg: str):
+        self.content += msg
+
+    def get_content(self):
+        # remove white characters
+        return re.sub(r'\s', '', self.content)
+
+
+@pytest.fixture
+def mock_record_logger(monkeypatch):
+    """For getting json format output for assertion."""
+    logger = MockLogger()
+    monkeypatch.setattr('record.logger', logger)
+    return logger
