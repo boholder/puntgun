@@ -223,17 +223,17 @@ email = ["email-validator (>=1.0.3)"]
 
 [[package]]
 name = "pyhamcrest"
-version = "2.0.3"
+version = "2.0.4"
 description = "Hamcrest framework for matcher objects"
 category = "dev"
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=3.6"
 
 [package.extras]
-dev = ["sphinx (>=3.0,<4.0)", "alabaster (>=0.7,<1.0)", "pytest (>=5.0)", "pytest-sugar", "pytest-xdist", "coverage", "types-mock", "towncrier", "twine", "pytest-mypy", "flake8", "black", "tox", "tox-pyenv", "tox-asdf", "pytest-mypy-plugins"]
-docs = ["sphinx (>=3.0,<4.0)", "alabaster (>=0.7,<1.0)"]
-tests = ["pytest (>=5.0)", "pytest-sugar", "pytest-xdist", "coverage", "types-mock", "pytest-mypy-plugins"]
-tests-numpy = ["pytest (>=5.0)", "pytest-sugar", "pytest-xdist", "coverage", "types-mock", "numpy", "pytest-mypy-plugins"]
+dev = ["black", "flake8", "pyhamcrest", "pytest-mypy", "towncrier", "tox", "tox-asdf", "twine"]
+docs = ["alabaster (>=0.7,<1.0)", "sphinx (>=4.0,<5.0)"]
+tests = ["coverage", "dataclasses", "mypy (!=0.940)", "pytest-mypy-plugins", "pytest-sugar", "pytest-xdist", "pytest (>=5.0)", "types-dataclasses", "types-mock"]
+tests-numpy = ["numpy", "pyhamcrest"]
 
 [[package]]
 name = "pyparsing"
@@ -389,7 +389,7 @@ dev = ["black (>=19.3b0)", "pytest (>=4.6.2)"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "ec088c27add30191a0ad18eeb5ab9831c42002608de94427c997a73b66e95e3e"
+content-hash = "896b70ae02a275bf0f422c49d9bdc8927c35853ecebd50bc88e87c82b617b297"
 
 [metadata.files]
 atomicwrites = [
@@ -626,8 +626,8 @@ pydantic = [
     {file = "pydantic-1.9.1.tar.gz", hash = "sha256:1ed987c3ff29fff7fd8c3ea3a3ea877ad310aae2ef9889a119e22d3f2db0691a"},
 ]
 pyhamcrest = [
-    {file = "PyHamcrest-2.0.3-py3-none-any.whl", hash = "sha256:c29dc977154c49e17c30d1ed49a0a6e31cb0dc7bcf733ac4aa9cb58519c2b00c"},
-    {file = "PyHamcrest-2.0.3.tar.gz", hash = "sha256:dfb19cf6d71743e086fbb761ed7faea5aacbc8ec10c17a08b93ecde39192a3db"},
+    {file = "pyhamcrest-2.0.4-py3-none-any.whl", hash = "sha256:60a41d4783b9d56c9ec8586635d2301db5072b3ea8a51c32dd03c408ae2b0f79"},
+    {file = "pyhamcrest-2.0.4.tar.gz", hash = "sha256:b5d9ce6b977696286cf232ce2adf8969b4d0b045975b0936ac9005e84e67e9c1"},
 ]
 pyparsing = [
     {file = "pyparsing-3.0.9-py3-none-any.whl", hash = "sha256:5026bae9a10eeaefb61dab2f09052b9f4307d44aee4eda64b309723d8d206bbc"},
