@@ -117,7 +117,7 @@ enter them back to here. Again, feel free to terminate this tool if you do not w
         return TwitterAccessTokenSecrets(token=token_pair[0], secret=token_pair[1])
 
 
-def load_or_request_all_secrets(pri_key):
+def load_or_request_all_secrets(pri_key: RSAPrivateKey):
     api_secrets = load_or_request_api_secrets(pri_key)
     access_token_secrets = load_or_request_access_token_secrets(api_secrets, pri_key)
     secrets = {'ak': api_secrets.key,

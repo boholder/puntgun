@@ -14,6 +14,7 @@ plan_file = config_path.joinpath('plan.yml')
 settings_file = config_path.joinpath('settings.yml')
 pri_key_file = config_path.joinpath('.puntgun_rsa4096')
 secrets_file = config_path.joinpath('.secrets.yml')
+secrets_plaintext_file = config_path.joinpath('.secrets_plaintext.yml')
 
 
 def naming_log_file(suffix: str):
@@ -40,7 +41,7 @@ settings = Dynaconf(
 )
 
 
-def reload_config_files_base_on_cmd_args(**kwargs):
+def reload_config_files(**kwargs):
     # Ugly. But don't know how to improve it.
     global config_path
     global plan_file
@@ -48,6 +49,7 @@ def reload_config_files_base_on_cmd_args(**kwargs):
     global pri_key_file
     global secrets_file
     global report_file
+    global secrets_plaintext_file
 
     # after changing config_path, other paths need to be re-computed to propagate change
     if kwargs.get('config_path'):
@@ -56,12 +58,14 @@ def reload_config_files_base_on_cmd_args(**kwargs):
         plan_file = Path(kwargs.get('plan_file'))
     if kwargs.get('settings_file'):
         settings_file = Path(kwargs.get('settings_file'))
-    if kwargs.get('private_key_file'):
-        pri_key_file = Path(kwargs.get('private_key_file'))
+    if kwargs.get('pri_key_file'):
+        pri_key_file = Path(kwargs.get('pri_key_file'))
     if kwargs.get('secrets_file'):
         secrets_file = Path(kwargs.get('secrets_file'))
     if kwargs.get('report_file'):
         report_file = Path(kwargs.get('report_file'))
+    if kwargs.get('secrets_plaintext_file'):
+        report_file = Path(kwargs.get('secrets_plaintext_file'))
 
     # reload configuration files
     settings.configure(settings_files=config_files_order)
