@@ -30,10 +30,11 @@ like .yaml, .toml, .ini, .json. In this page we'll use yaml format.
 The name of one setting option is also the key in configuration file,
 and you can [set an environment variable](#setting-via-environment-variable) for it.
 
-| Name                   | Default | Description                                       |
-|------------------------|---------|---------------------------------------------------|
-| block_already_followed | false   | Whether to block users that you already followed. |
-| a                      |         | 32                                                |
+| Name              | Default | Description                                                                                                                |
+|-------------------|---------|----------------------------------------------------------------------------------------------------------------------------|
+| `log_rotation`    | 100MB   | [Change log files writing method](https://loguru.readthedocs.io/en/stable/api/logger.html#file) (when to split a new file) |
+| `block_following` | false   | Whether to block users that you're following                                                                               |
+| `block_follower`  | true    | Whether to block users that following you                                                                                  |
 
 You can [search](https://github.com/search?q=%22settings.get%22+%22plans%22+repo%3Aboholder%2Fpuntgun+in%3Afile&type=code)
 how particular configuration is used in source code if you are interested.
