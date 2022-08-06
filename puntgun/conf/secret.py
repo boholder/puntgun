@@ -28,7 +28,7 @@ class TwitterAPISecrets(BaseModel):
         # are involved using dynaconf library, and secrets keys in two ways are same after dynaconf loading.
         # (from env: BULLET_SEC --dynaconf--> sec, from settings: SEC --dynaconf--> sec)
         #
-        # So dynaconf couldn't recognize where the secrets from,
+        # So we couldn't recognize where the secrets from through dynaconf,
         # but in env var secrets are plaintext format while in settings file are cipher text.
         #
         # Thankfully these two format have a significant difference - the length.
@@ -117,9 +117,13 @@ enter them back to here. Again, feel free to terminate this tool if you do not w
         return TwitterAccessTokenSecrets(token=token_pair[0], secret=token_pair[1])
 
 
-def load_or_request_all_secrets(pri_key):
+def load_or_request_all_secrets(pri_key: RSAPrivateKey):
     api_secrets = load_or_request_api_secrets(pri_key)
     access_token_secrets = load_or_request_access_token_secrets(api_secrets, pri_key)
+    secrets = {'ak': api_secrets.key,
+               'aks': api_secrets.secret,
+               'at': access_token_secrets.token,
+               'ats': access_token_secrets.secret}
 
     # Save the secrets into file if they are not saved yet.
     # Must save them at once because saving method will override the existing file.
@@ -129,18 +133,10 @@ Before running plans, we'd save secrets into a secret configuration file,
 so next time you running this tool you need not enter these annoying unreadable tokens again.
 And we'll encrypt them before saving, it's time to load your private key.   
 """)
-        encrypt_and_save_secrets_into_file(load_or_generate_public_key(),
-                                           config.secrets_file,
-                                           **{twitter_api_key_name: api_secrets.key,
-                                              twitter_api_key_secret_name: api_secrets.secret,
-                                              twitter_access_token_name: access_token_secrets.token,
-                                              twitter_access_token_secret_name: access_token_secrets.secret
-                                              })
+        encrypt_and_save_secrets_into_file(load_or_generate_public_key(), config.secrets_file, **secrets)
         print(f"Secrets saved into file.\n({config.secrets_file})")
-    return {'ak': api_secrets.key,
-            'aks': api_secrets.secret,
-            'at': access_token_secrets.token,
-            'ats': access_token_secrets.secret}
+
+    return secrets
 
 
 def load_or_request_api_secrets(pri_key: RSAPrivateKey = None):
