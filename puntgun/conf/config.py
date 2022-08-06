@@ -101,6 +101,7 @@ def config_logging_options():
     logger.add(naming_log_file('_running.log'),
                filter=lambda record: 'r' not in record['extra'],
                format=logger_format,
+               # https://loguru.readthedocs.io/en/stable/api/logger.html#file
                rotation=settings.get('log_rotation', '100 MB'))
 
 

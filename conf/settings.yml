@@ -1,18 +1,14 @@
 # The settings of the tool itself.
 # Can be overridden by the same-name ones in the user-writen plan configuration file
 # or in the environment variables.
+# The values of the commented out options are default values
+# Reference document: TODO
 
-name: bob
+# Whether to block users that you're following.
+#block_following: false
 
-users:
-  # user source rule
-  from:
-    # '@Alice', '@Bob' and '@Charlie'
-    - names: [ 'Alice', 'Bob', 'Charlie' ]
-  # user filter rule
-  that:
-    - follower:
-        less_than: 10
-  # user action rule
-  do:
-    - block
+# Whether to block users that following you.
+#block_follower: true
+
+# Change log files writing method (when to split a new file)
+#log_rotation: 100MB

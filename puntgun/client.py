@@ -1,8 +1,9 @@
 import functools
-from typing import List
+from typing import List, Callable, Any
 
 import tweepy
 from loguru import logger
+from tweepy import Response
 
 from conf.encrypto import load_or_generate_private_key
 from conf.secret import load_or_request_all_secrets
@@ -208,6 +209,31 @@ class Client(object):
 
         return self._user_resp_to_user_instances(self.clt.get_users(ids=ids, **self.__user_api_params))
 
+    def get_blocked_users(self):
+        """Get all the users blocked **by this account**."""
+        # TODO untested
+        responses = list(self.get_paged_responses(self.clt.get_blocked))
+        return functools.reduce(lambda a, b: a + b, [self._user_resp_to_user_instances(r) for r in responses], [])
+
+    @staticmethod
+    def get_paged_responses(clt_func: Callable[..., Response]):
+        pagination_token = None
+
+        def next_page():
+            nonlocal pagination_token
+
+            response = clt_func(max_results=1000,
+                                pagination_token=pagination_token if pagination_token else None,
+                                **Client.__user_api_params)
+
+            if response.meta and response.meta.next_token:
+                pagination_token = response.meta.next_token
+                yield response
+            else:
+                return
+
+        return next_page()
+
     @staticmethod
     def _user_resp_to_user_instances(resp: tweepy.Response):
         """Build a list of :class:`User` instances from one response."""
@@ -240,8 +266,19 @@ class Client(object):
         https://help.twitter.com/en/using-twitter/advanced-twitter-block-options
         https://developer.twitter.com/en/docs/twitter-api/users/blocks/api-reference/post-users-user_id-blocking
         """
-
+        # TODO block following? follower?
         return self.clt.block(target_user_id=target_user_id).data['blocking']
+
+    @property
+    @functools.lru_cache(maxsize=1)
+    def cached_blocked_users(self):
+        """
+        Call getting method, cache them, and return the cache on latter calls.
+        Since the tool may be constantly modifying the block list,
+        this method just takes a snapshot of the list, it's sufficient for use.
+        """
+        # TODO
+        pass
 
 
 class NeedClient(object):
