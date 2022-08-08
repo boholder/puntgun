@@ -19,7 +19,7 @@ orjson = "^3.7.11"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
-PyHamcrest = "^2.0.3"
+PyHamcrest = "^2.0.4"
 
 [tool.pytest.ini_options]
 pythonpath = ["puntgun", "tests"]
