@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -34,3 +35,14 @@ def test_gen_secrets(monkeypatch, tmp_path):
     Gen.secrets(output_file=output_file)
 
     assert output_file.read_text(encoding='utf-8') == 'a: 1\nb: 2\n'
+
+
+def test_gen_example_config_files(tmp_path):
+    Gen.config(tmp_path)
+    # will generate two config files
+    generated_files = os.listdir(tmp_path)
+    assert len(generated_files) == 2
+    for file in generated_files:
+        assert file.endswith('.yml')
+        file = tmp_path.joinpath(file)
+        assert file.is_file()

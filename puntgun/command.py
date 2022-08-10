@@ -1,5 +1,7 @@
+from pathlib import Path
+
 import runner
-from conf import config
+from conf import config, example
 from conf.encrypto import load_or_generate_private_key
 from conf.secret import load_or_request_all_secrets
 
@@ -18,10 +20,12 @@ class Gen(object):
             f.writelines(f'{key}: {value}\n' for key, value in secrets.items())
 
     @staticmethod
-    def config(output_file):
-        """Generate example configuration files."""
-        # https://stackoverflow.com/questions/53454049/how-to-include-a-text-file-in-a-python-installed-package
-        print('config')
+    def config(output_path=str(config.config_path)):
+        """Generate example configuration files: tool setting file and plan configuration file."""
+        with open(Path(output_path).joinpath('settings.yml'), 'w', encoding='utf-8') as f:
+            f.write(example.tool_settings)
+        with open(Path(output_path).joinpath('example-plan.yml'), 'w', encoding='utf-8') as f:
+            f.write(example.plan_config)
 
 
 class Command(object):
