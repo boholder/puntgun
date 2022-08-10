@@ -27,14 +27,18 @@ def test_fire(monkeypatch, tmp_path):
         assert actual == Path(expect)
 
 
-def test_gen_secrets(monkeypatch, tmp_path):
+def test_gen_secrets_and_backup_original_file(monkeypatch, tmp_path):
     monkeypatch.setattr('command.load_or_generate_private_key', lambda: 'whatever a value')
     monkeypatch.setattr('command.load_or_request_all_secrets', lambda _: {'a': '1', 'b': '2'})
+
     output_file = tmp_path.joinpath('o.yml')
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write('123')
 
     Gen.secrets(output_file=output_file)
 
     assert output_file.read_text(encoding='utf-8') == 'a: 1\nb: 2\n'
+    assert Path(str(output_file) + '.bak').read_text(encoding='utf-8') == '123'
 
 
 def test_gen_example_config_files(tmp_path):
