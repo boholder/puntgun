@@ -1,3 +1,4 @@
+import sys
 from typing import ClassVar
 
 from reactivex import Observable
@@ -41,9 +42,25 @@ class FollowerUserFilterRule(NumericFilterRule, UserFilterRule):
         return RuleResult(self, super().compare(user.followers_count))
 
 
+class ShortenFollowerUserFilterRule(UserFilterRule):
+    _keyword: ClassVar[str] = 'follower_less_than'
+
+    @classmethod
+    def parse_from_config(cls, conf: dict):
+        return FollowerUserFilterRule(less_than=conf[cls._keyword])
+
+
 class FollowingUserFilterRule(NumericFilterRule, UserFilterRule):
     """Check user's following count."""
     _keyword: ClassVar[str] = 'following'
 
     def __call__(self, user: User):
         return RuleResult(self, super().compare(user.following_count))
+
+
+class ShortenFollowingUserFilterRule(UserFilterRule):
+    _keyword: ClassVar[str] = 'following_more_than'
+
+    @classmethod
+    def parse_from_config(cls, conf: dict):
+        return FollowingUserFilterRule(more_than=conf[cls._keyword])

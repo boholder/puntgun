@@ -22,6 +22,7 @@ class UserActionRule(FromConfig):
 class BlockUserActionRule(UserActionRule, NeedClient):
     """
     Block the given user.
+    TODO untested, no field in manual?
     """
 
     _keyword: ClassVar[str] = 'block'

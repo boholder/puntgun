@@ -165,7 +165,7 @@ that:
       less_than: 10
       more_than: 5
 
-  - follower-less-than: 10
+  - follower_less_than: 10
 ```
 
 Follower count itself doesn't tell much, but it's good to have a rule aiming at it.
@@ -179,7 +179,7 @@ that:
       less_than: 10
       more_than: 5
 
-  - following-more-than: 5
+  - following_more_than: 5
 ```
 
 And... the following rule.
@@ -190,8 +190,7 @@ And... the following rule.
 
 ```yaml
 do:
-  - block:
-      block_already_followed: true
+  - block
 ```
 
 Block users that trigger the filter rules.
