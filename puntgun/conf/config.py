@@ -6,6 +6,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+# import dynaconf before loguru because loguru also uses dynaconf
+# https://github.com/Delgan/loguru/issues/138#issuecomment-610476814
 from dynaconf import Dynaconf
 from loguru import logger
 
@@ -83,6 +85,9 @@ def config_logging_options():
         "<level>{message}</level>"
     )
 
+    # https://loguru.readthedocs.io/en/stable/api/logger.html#levels
+    log_level = settings.get('log_level', 'INFO').upper()
+
     # report file
     # we're borrowing function of loguru library for writing execution report files.
     # use 'r' field to mark these logs.
@@ -90,27 +95,34 @@ def config_logging_options():
     logger.add(report_file,
                filter=lambda record: 'r' in record['extra'],
                # only write the plain message content
-               format='{message}')
+               format='{message}',
+               level=log_level)
 
     # logs that we want user see will show in stdout
     logger.add(sys.stdout,
                filter=lambda record: 'o' in record['extra'],
-               format=logger_format)
+               format=logger_format,
+               level=log_level)
 
     # technical diagnostic logs go to stderr
     logger.add(sys.stderr,
                filter=lambda record: 'r' not in record['extra'] and 'o' not in record['extra'],
-               format=logger_format)
+               format=logger_format,
+               level=log_level)
 
     # log file, saves all but record logs
     logger.add(naming_log_file('running.log'),
                filter=lambda record: 'r' not in record['extra'],
                format=logger_format,
                # https://loguru.readthedocs.io/en/stable/api/logger.html#file
-               rotation=settings.get('log_rotation', '100 MB'))
+               rotation=settings.get('log_rotation', '100 MB'),
+               level='INFO')
 
 
 # Configurate logging options only when not in unit testing,
 # or it will generate files every time tests running, sort of annoying.
+# Another way is set an autorun pytest.fixture for all test cases,
+# I think one line if is far more simple though it breaks the rule that
+# implementation should not add logic considering testing.
 if "pytest" not in sys.modules:
     config_logging_options()

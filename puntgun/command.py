@@ -4,6 +4,7 @@ import runner
 from conf import config, example
 from conf.encrypto import load_or_generate_private_key
 from conf.secret import load_or_request_all_secrets
+from loguru import logger
 
 
 class Gen(object):
@@ -14,6 +15,7 @@ class Gen(object):
                 # this path will only be used here, so we needn't add it to config module.
                 output_file=str(config.config_path.joinpath('.secrets_plaintext.yml'))):
         """Extract secrets from secrets file and save them in plaintext format."""
+        logger.info("Run command [gen secrets]")
         config.reload_config_files(secrets_file=secrets_file)
         secrets = load_or_request_all_secrets(load_or_generate_private_key())
         with open(output_file, 'w', encoding='utf-8') as f:
@@ -22,6 +24,7 @@ class Gen(object):
     @staticmethod
     def config(output_path=str(config.config_path)):
         """Generate example configuration files: tool setting file and plan configuration file."""
+        logger.info("Run command [gen config]")
         with open(Path(output_path).joinpath('settings.yml'), 'w', encoding='utf-8') as f:
             f.write(example.tool_settings)
         with open(Path(output_path).joinpath('example-plan.yml'), 'w', encoding='utf-8') as f:
@@ -50,6 +53,7 @@ class Command(object):
         :param secrets_file: Tool generated cipher text or user writen plain text file contains secrets.
         :param report_file: Expect path of the tool generated execution report.
         """
+        logger.info("Run command [fire]")
         config.reload_config_files(config_path=config_path,
                                    plan_file=plan_file,
                                    settings_file=settings_file,

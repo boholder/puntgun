@@ -1,6 +1,7 @@
 from typing import ClassVar, List
 
 import reactivex as rx
+from loguru import logger
 from reactivex import operators as op, Observable
 
 from record import Recordable, Record
@@ -101,6 +102,9 @@ class UserPlan(Plan):
             op.filter(lambda z: bool(z[1]) is True)
         )
 
+        users_need_to_be_performed_with_filtering_result.subscribe(
+            lambda z: logger.debug('Plan id[{}]: User triggered filter rules: {}', self.id, z[0]))
+
         action_results = users_need_to_be_performed_with_filtering_result.pipe(
             # extract user instance from tuple
             op.map(lambda z: z[0]),
@@ -124,8 +128,10 @@ class UserPlan(Plan):
         result explanation: (<user instance>, <filtering result>)
         :return: rx.Observable(Tuple[User, RuleResult])
         """
-
         users = self.sources()
+
+        users.subscribe(lambda u: logger.debug('Plan id[{}]: User from source: {}', self.id, u))
+
         # flat_map() is needed because calling UserFilterRuleAnyOfSet will return Observable[RuleResult]
         filter_results = users.pipe(op.map(self.filters), op.flat_map(lambda x: x))
         return rx.zip(users, filter_results)

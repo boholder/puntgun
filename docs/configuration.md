@@ -5,7 +5,7 @@ nav_order: 1
 
 # Configuration
 
-This page is describing configurations of the tool itself, i.e. the contents of [/conf/settings.yml](/conf/settings.yml).
+This page is describing configurations of the tool itself.
 For all available plan configurations, please check [the plan configuration document page](plan-configuration.md).
 There are two types of tool configuration:
 most of them can be configured in global configuration file or set via environment variable,
@@ -32,6 +32,7 @@ and you can [set an environment variable](#setting-via-environment-variable) for
 
 | Name              | Default | Description                                                                                                                |
 |-------------------|---------|----------------------------------------------------------------------------------------------------------------------------|
+| `log_level`       | info    | [Log level](https://loguru.readthedocs.io/en/stable/api/logger.html#levels) of the log file and stderr                     |
 | `log_rotation`    | 100MB   | [Change log files writing method](https://loguru.readthedocs.io/en/stable/api/logger.html#file) (when to split a new file) |
 | `block_following` | false   | Whether to block users that you're following                                                                               |
 | `block_follower`  | true    | Whether to block users that following you                                                                                  |
