@@ -2,10 +2,10 @@ import importlib
 import pkgutil
 from typing import List, TypeVar
 
+from loguru import logger
 from pydantic import ValidationError
 
 from rules import FromConfig
-from loguru import logger
 
 
 def import_rule_classes():
@@ -51,6 +51,9 @@ class ConfigParser(object):
             For letting caller continue parsing.
             """
             return type('FakeSubclassOf' + expected_type.__name__, (expected_type,), {})()
+
+        logger.debug('Config parsing called with: expect type:{}, config:{}',
+                     expected_type.__name__, conf)
 
         for subclass in expected_type.__subclasses__():
             if subclass.keyword() in conf:

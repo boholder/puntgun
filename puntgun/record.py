@@ -25,12 +25,6 @@ from loguru import logger
 from conf import config
 from rules import Plan
 
-# For version based branch logic in report-based "undo" operation.
-# (you have different available actions at different version,
-# which may require different "undo" process.)
-# Works sort of like java's serial version uid.
-puntgun_version = metadata.version('puntgun')
-
 
 class Record(object):
     """
@@ -109,7 +103,11 @@ class Recorder(object):
         """
 
         head = {'reference_document': '',  # TODO doc link
-                'tool_version': puntgun_version,
+                # For version based branch logic in report-based "undo" operation.
+                # (you have different available actions at different version,
+                # which may require different "undo" process.)
+                # Works sort of like java's serial version uid.
+                'tool_version': metadata.version('puntgun'),
                 'generate_time': datetime.now(),
                 'plan_configuration': config.settings.get('plans', []),
                 # name -> plan_configuration, id -> records,
