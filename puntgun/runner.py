@@ -2,12 +2,14 @@
 Plans runner at the highest abstraction level of the tool.
 Constructing plans, executing plans, collecting and recording plan results...
 """
+import multiprocessing
 import sys
 from typing import List
 
 import reactivex as rx
 from loguru import logger
 from reactivex import operators as op
+from reactivex.scheduler import ThreadPoolScheduler
 
 from conf import config
 from record import Recordable, Recorder
@@ -41,6 +43,11 @@ Syntax errors:
     return plans
 
 
+# calculate number of CPUs, then create a ThreadPoolScheduler with that number of threads
+optimal_thread_count = multiprocessing.cpu_count()
+pool_scheduler = ThreadPoolScheduler(optimal_thread_count)
+
+
 @logger.catch(onerror=lambda _: sys.exit(1))
 def execute_plans(plans: List[Plan]):
     # Temporal coupling for compose a correct json format output.
@@ -50,7 +57,9 @@ def execute_plans(plans: List[Plan]):
         logger.info('Begin to execute plan: {}', plan)
         # Explicitly blocking execute plans one by one.
         # for avoiding competition among plans on limited API invocation resources.
-        plan().pipe(op.do(rx.Observer(on_next=process_plan_result))).run()
+        plan().pipe(op.subscribe_on(pool_scheduler),
+                    op.do(rx.Observer(on_next=process_plan_result))
+                    ).run()
         logger.info('Finished plan: {}', plan)
 
     Recorder.write_report_tail()
