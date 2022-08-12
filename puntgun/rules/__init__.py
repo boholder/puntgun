@@ -2,9 +2,10 @@
 I'm using this file as util module for rule stuff.
 """
 import abc
+import datetime
 import itertools
 import sys
-from typing import ClassVar
+from typing import ClassVar, List
 
 from pydantic import BaseModel, root_validator, Field
 from reactivex import Observable
@@ -41,46 +42,6 @@ class FromConfig(BaseModel, abc.ABC):
     class Config:
         """https://pydantic-docs.helpmanual.io/usage/models/#private-model-attributes"""
         underscore_attrs_are_private = True
-
-
-class NumericFilterRule(FromConfig):
-    """
-    A filter rule that checks if a numeric value inside a pre-set range (min < v < max).
-    As you see, edge cases (equal) are falsy.
-    """
-    less_than = float(sys.maxsize)
-    more_than = float(-sys.maxsize - 1)
-
-    @root_validator(pre=True)
-    def there_should_be_fields(cls, values):
-        if not values.get('less_than') and not values.get('more_than'):
-            raise ValueError('At least one of "less_than" or "more_than" should be specified.')
-        return values
-
-    @root_validator
-    def validate_two_edges(cls, values):
-        lt, mt = values.get('less_than'), values.get('more_than')
-        if lt <= mt:
-            raise ValueError(f"'less_than'({lt}) should be bigger than 'more_than'({mt})")
-        return values
-
-    def compare(self, num):
-        return self.more_than < num < self.less_than
-
-
-def validate_required_fields_exist(rule_keyword, conf: dict, required_field_names: [str]):
-    """
-    Custom configuration parsing process - :class:`ConfigParser` sort of bypass the pydantic library's
-    validation, so we need to put custom validation inside the custom parsing process when necessary.
-    """
-    missing = []
-    for k in required_field_names:
-        if k not in conf:
-            missing.append(k)
-
-    # point out all errors at once
-    if missing:
-        raise ValueError(f"Missing required field(s) {missing} in configuration [{rule_keyword}]: {conf}")
 
 
 plan_id_iter = itertools.count()
@@ -148,3 +109,94 @@ class RuleResult(object):
     @staticmethod
     def false(rule):
         return RuleResult(rule, False)
+
+
+def validate_required_fields_exist(rule_keyword, conf: dict, required_field_names: [str]):
+    """
+    Custom configuration parsing process
+    - :class:`ConfigParser` sort of bypass the pydantic library's validation,
+    so we need to put custom validation inside the custom parsing process when necessary.
+    """
+    missing = []
+    for k in required_field_names:
+        if k not in conf:
+            missing.append(k)
+
+    # point out all errors at once
+    if missing:
+        raise ValueError(f"Missing required field(s) {missing} "
+                         f"in configuration [{rule_keyword}]: {conf}")
+
+
+def validate_fields_conflict(values, field_groups: List[List[str]]):
+    # only fields that are configured will be count in.
+    for i in range(len(field_groups)):
+        field_groups[i] = [f for f in field_groups[i] if values.get(f)]
+
+    conflicts = []
+    # two-by-two compare
+    while len(field_groups) > 1:
+        # take first group to compare other groups
+        sample_group = field_groups[0]
+
+        for group in field_groups[1:]:
+            # check if both two conflict group have fields that have been configured
+            if any(values.get(f) for f in sample_group) and any(values.get(f) for f in group):
+                conflicts.append((sample_group, group))
+
+        # remove completed group
+        field_groups = field_groups[1:]
+
+    if len(conflicts) > 0:
+        raise ValueError(f"Configured fields have conflicts, you should chose one group of fields "
+                         f"to configurate in each conflict: {conflicts}")
+
+    return values
+
+
+class FieldsRequired(BaseModel):
+    @root_validator(pre=True)
+    def there_should_be_fields(cls, values):
+        if len(values) == 0:
+            raise ValueError('At least one field should be configured.')
+        return values
+
+
+class NumericRangeFilterRule(FromConfig, FieldsRequired):
+    """
+    A filter rule delegating agent that
+    checks if-within-a-range (min < v < max) of a numeric value.
+    Equal-to-edge cases are regard as falsy.
+    """
+    less_than = float(sys.maxsize)
+    more_than = float(-sys.maxsize - 1)
+
+    @root_validator
+    def validate_config(cls, values):
+        lt, mt = values.get('less_than'), values.get('more_than')
+        if lt <= mt:
+            raise ValueError(f"Invalid range, right 'less_than'({lt}) "
+                             f"should be bigger than left 'more_than'({mt})")
+        return values
+
+    def compare(self, num):
+        return self.more_than < num < self.less_than
+
+
+class TemporalRangeFilterRule(FromConfig, FieldsRequired):
+    """
+    Temporal value version of within-range checking agent.
+    """
+    before = datetime.datetime.max
+    after = datetime.datetime.min
+
+    @root_validator
+    def validate_config(cls, values):
+        b, a = values.get('before'), values.get('after')
+        if b <= a:
+            raise ValueError(f"Invalid range, right time 'before'({b}) "
+                             f"should be after left time 'after'({a})")
+        return values
+
+    def compare(self, time):
+        return self.after < time < self.before

@@ -1,9 +1,9 @@
-import sys
+import datetime
 from typing import ClassVar
 
 from reactivex import Observable
 
-from rules import NumericFilterRule, FromConfig, RuleResult
+from rules import NumericRangeFilterRule, FromConfig, RuleResult, TemporalRangeFilterRule
 from rules.user import User
 
 
@@ -34,7 +34,7 @@ class PlaceHolderUserFilterRule(UserFilterRule):
         return RuleResult.true(self)
 
 
-class FollowerUserFilterRule(NumericFilterRule, UserFilterRule):
+class FollowerUserFilterRule(NumericRangeFilterRule, UserFilterRule):
     """Check user's follower count."""
     _keyword: ClassVar[str] = 'follower'
 
@@ -50,7 +50,7 @@ class ShortenFollowerUserFilterRule(UserFilterRule):
         return FollowerUserFilterRule(less_than=conf[cls._keyword])
 
 
-class FollowingUserFilterRule(NumericFilterRule, UserFilterRule):
+class FollowingUserFilterRule(NumericRangeFilterRule, UserFilterRule):
     """Check user's following count."""
     _keyword: ClassVar[str] = 'following'
 
@@ -64,3 +64,23 @@ class ShortenFollowingUserFilterRule(UserFilterRule):
     @classmethod
     def parse_from_config(cls, conf: dict):
         return FollowingUserFilterRule(more_than=conf[cls._keyword])
+
+
+class CreatedUserFilterRule(TemporalRangeFilterRule, UserFilterRule):
+    _keyword: ClassVar[str] = 'user_created'
+
+    def __call__(self, user: User):
+        return RuleResult(self, super().compare(user.created_at))
+
+
+class CreatedWithinDaysUserFilterRule(UserFilterRule):
+    _keyword: ClassVar[str] = 'user_created_within_days'
+    within_days: int
+
+    @classmethod
+    def parse_from_config(cls, conf: dict):
+        return CreatedWithinDaysUserFilterRule(within_days=conf[cls._keyword])
+
+    def __call__(self, user: User):
+        edge = datetime.datetime.utcnow() - datetime.timedelta(days=self.within_days)
+        return RuleResult(self, edge < user.created_at)
