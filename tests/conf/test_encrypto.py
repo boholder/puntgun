@@ -18,7 +18,7 @@ def test_load_private_key_file_with_wrong_password(generated_key_file):
         load_private_key('wrong_pwd', generated_key_file[0])
 
 
-def test_load_private_key_file_with_correct_password_interactively(mock_private_key_file, monkeypatch, atty_stdin):
+def test_load_private_key_file_with_correct_password_interactively(mock_private_key_file, monkeypatch):
     # enter password to load private key
     monkeypatch.setattr('builtins.input', Mock(side_effect=['wrong', 'y', 'wrong again', 'y', 'pwd', 'y']))
     expect = mock_private_key_file[1]
@@ -26,9 +26,9 @@ def test_load_private_key_file_with_correct_password_interactively(mock_private_
     assert 'text' == decrypt(actual, encrypt(expect.public_key(), 'text'))
 
 
-def test_load_private_key_file_from_stdin(mock_private_key_file, monkeypatch):
-    # let the tool believes it is in a pipeline
-    monkeypatch.setattr('conf.encrypto.stdin_is_atty', False)
+def test_load_private_key_file_from_stdin(mock_private_key_file, monkeypatch, mock_configuration):
+    # let the tool read password from stdin
+    mock_configuration({'read_password_from_stdin': True})
     # mock stdin to input password
     monkeypatch.setattr('sys.stdin', StringIO('pwd'))
     expect = mock_private_key_file[1]

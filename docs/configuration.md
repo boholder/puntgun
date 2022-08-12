@@ -30,12 +30,13 @@ like .yaml, .toml, .ini, .json. In this page we'll use yaml format.
 The name of one setting option is also the key in configuration file,
 and you can [set an environment variable](#setting-via-environment-variable) for it.
 
-| Name              | Default | Description                                                                                                                |
-|-------------------|---------|----------------------------------------------------------------------------------------------------------------------------|
-| `log_level`       | info    | [Log level](https://loguru.readthedocs.io/en/stable/api/logger.html#levels) of the log file and stderr                     |
-| `log_rotation`    | 100MB   | [Change log files writing method](https://loguru.readthedocs.io/en/stable/api/logger.html#file) (when to split a new file) |
-| `block_following` | false   | Whether to block users that you're following                                                                               |
-| `block_follower`  | true    | Whether to block users that following you                                                                                  |
+| Name                       | Default | Description                                                                                                                |
+|----------------------------|---------|----------------------------------------------------------------------------------------------------------------------------|
+| `log_level`                | info    | [Log level](https://loguru.readthedocs.io/en/stable/api/logger.html#levels) of the log file and stderr                     |
+| `log_rotation`             | 100MB   | [Change log files writing method](https://loguru.readthedocs.io/en/stable/api/logger.html#file) (when to split a new file) |
+| `block_following`          | false   | Whether to block users that you're following                                                                               |
+| `block_follower`           | true    | Whether to block users that following you                                                                                  |
+| `read_password_from_stdin` | false   | Instead of ask user input the password (for loading private key file) through terminal                                     |
 
 You can [search](https://github.com/search?q=%22settings.get%22+%22plans%22+repo%3Aboholder%2Fpuntgun+in%3Afile&type=code)
 how particular configuration is used in source code if you are interested.
@@ -173,4 +174,4 @@ via different approach if you want.
 
 3. You can pass your private key file's password through *[stdin](https://en.wikipedia.org/wiki/Standard_streams)*,
    the tool will read the password from *stdin* instead of ask password interactively
-   when it detects it's not facing an interactive shell (atty stdin).
+   when the `read_password_from_stdin` tool setting is set to `true`.

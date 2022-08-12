@@ -65,7 +65,7 @@ class TestLoadApiSecretsInteractively:
         monkeypatch.setattr('conf.config.settings', Dynaconf(envvar_prefix='BULLET'))
         self.assert_result()
 
-    def test_load_from_settings(self, mock_secrets_config_file, atty_stdin):
+    def test_load_from_settings(self, mock_secrets_config_file):
         mock_secrets_config_file(ak='key', aks='secret')
         self.assert_result()
 
@@ -93,7 +93,7 @@ class TestLoadAccessTokenSecretsInteractively:
         monkeypatch.setattr('conf.config.settings', Dynaconf(envvar_prefix='BULLET'))
         self.assert_result()
 
-    def test_load_from_settings(self, mock_secrets_config_file, atty_stdin):
+    def test_load_from_settings(self, mock_secrets_config_file):
         mock_secrets_config_file(at='key', ats='secret')
         self.assert_result()
 

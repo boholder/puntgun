@@ -12,11 +12,6 @@ from conf import config
 
 encrypt_padding = padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None)
 
-# The tool's behavior changes base on whether it's facing an interactive shell
-# When is_atty=true, the tool reads password through input();
-# When false, take stdin input as password.
-stdin_is_atty = sys.__stdin__.isatty()
-
 
 @functools.lru_cache(maxsize=1)
 def load_or_generate_public_key():
@@ -64,7 +59,11 @@ and rerun this tool for initializing things again.
 """)
 
         logger.info("Found the existing private key, trying to load with password")
-        return load_with_password_from_prompt() if stdin_is_atty else load_with_password_from_stdin()
+        if config.settings.get('read_password_from_stdin', False):
+            return load_with_password_from_stdin()
+        else:
+            return load_with_password_from_prompt()
+
     else:
         print(f"""
 It seems that you have not generated a private key for encrypting secrets before.

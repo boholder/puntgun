@@ -24,6 +24,12 @@ tool_settings = """
 
 # Whether to block users that following you.
 #block_follower: true
+
+# Let the tool read the password (for loading private key file) from stdin 
+# instead of ask user input it through terminal.
+# One of several ways to automate the running of this tool.
+#read_password_from_stdin: false
+
 """
 
 plan_config = """
