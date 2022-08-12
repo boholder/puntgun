@@ -27,10 +27,10 @@ class TestCommonBehavior:
         rule = NameUserSourceRule.parse_obj({'names': ['uname']})
 
         # the error will be raised out of the pipeline
-        with pytest.raises(client.TwitterClientError) as actual_error:
+        with pytest.raises(client.TwitterClientError) as e:
             rule().pipe(op.do(rx.Observer(on_error=assertion_consumer))).run()
 
-        assert_that(str(actual_error.value), contains_string('client'))
+        assert_that(str(e), contains_string('client'))
         assert raise_error.called
         assert assertion_consumer.called
 
@@ -41,9 +41,9 @@ class TestCommonBehavior:
         rule = NameUserSourceRule.parse_obj({'names': ['uname']})
 
         # will raise an error inside reactivex
-        with pytest.raises(SequenceContainsNoElementsError) as actual_error:
+        with pytest.raises(SequenceContainsNoElementsError) as e:
             rule().pipe(op.do(rx.Observer(on_next=lambda _: None))).run()
-        assert str(actual_error.value) == 'Sequence contains no elements'
+        assert str(e.value) == 'Sequence contains no elements'
 
     def test_when_not_all_calls_to_client_return_empty_list(self, mock_client, user_id_sequence_checker):
         # as long as not all calls to the client returns empty lists, it's ok

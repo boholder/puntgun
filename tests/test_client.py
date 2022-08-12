@@ -95,7 +95,7 @@ class TestUserQuerying:
         mock_tweepy_client.get_users = MagicMock(side_effect=tweepy.errors.TweepyException('inner'))
         with pytest.raises(TwitterClientError) as e:
             Client(mock_tweepy_client).get_users_by_usernames(['whatever'])
-        assert_that(str(e.value), contains_string('client'))
+        assert_that(str(e), contains_string('client'))
         assert_that(str(e.value.__cause__), contains_string('inner'))
 
     def test_get_normal_user(self, normal_user_response, mock_user_getting_tweepy_client):
@@ -143,11 +143,11 @@ class TestUserQuerying:
     def test_pass_more_than_100_users_will_raise_error(self, normal_user_response, mock_user_getting_tweepy_client):
         with pytest.raises(ValueError) as e:
             Client(mock_user_getting_tweepy_client(normal_user_response)).get_users_by_ids(['1'] * 101)
-        assert_that(str(e.value), contains_string('100'))
+        assert_that(str(e), contains_string('100'))
 
         with pytest.raises(ValueError) as e:
             Client(mock_user_getting_tweepy_client(normal_user_response)).get_users_by_ids([1] * 101)
-        assert_that(str(e.value), contains_string('100'))
+        assert_that(str(e), contains_string('100'))
 
     @pytest.fixture
     def normal_user_response(self):

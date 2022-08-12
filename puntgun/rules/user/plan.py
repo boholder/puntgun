@@ -77,7 +77,8 @@ class UserPlan(Plan):
     @classmethod
     def parse_from_config(cls, conf: dict):
         # we won't directly extract values from configuration and assign them to fields,
-        # so custom validation is needed.
+        # so custom validation is needed
+        # as we can't use pydantic library's validating function on fields.
         validate_required_fields_exist(cls._keyword, conf, ['from', 'do'])
 
         # need at least one default filter rule to keep plan execution functionally

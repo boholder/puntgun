@@ -1,4 +1,12 @@
-# puntgun - a configurable automation command line tool for Twitter
+```text
+     ____              _      ____
+,___|____\____________|_|____/____|____________________
+|___|_|_)_|_|_|_|_'__\|___|_|_|___|_|_|_|_'__\__[____]  ""-,___..--=====
+    |  __/| |_| | | | | |_  | |_| | |_| | | | |   \\_____/   ""        |
+    |_|    \__,_|_| |_|\__|  \____|\__,_|_| |_|      [ ))"---------..__|
+
+puntgun - A configurable automation command line tool for Twitter
+```
 
 [![main branch ci workflow status badge](https://github.com/boholder/puntgun/actions/workflows/ci_main.yml/badge.svg)](https://github.com/boholder/puntgun/actions/workflows/ci_main.yml)
 [![Coverage Status](https://coveralls.io/repos/github/boholder/puntgun/badge.svg?branch=main)](https://coveralls.io/github/boholder/puntgun?branch=main)
