@@ -14,7 +14,7 @@ fire = "^0.4.0"
 from-root = "^1.0.2"
 cryptography = "^37.0.4"
 loguru = "^0.6.0"
-pydantic = "^1.9.1"
+pydantic = "^1.9.2"
 orjson = "^3.7.11"
 
 [tool.poetry.dev-dependencies]
