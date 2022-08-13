@@ -122,3 +122,18 @@ class FollowingCountRatioLessThanUserFilterRule(UserFilterRule):
     @classmethod
     def parse_from_config(cls, conf: dict):
         return FollowingCountRatioUserFilterRule(less_than=conf[cls._keyword])
+
+
+class TweetCountUserFilterRule(NumericRangeFilterRule, UserFilterRule):
+    _keyword: ClassVar[str] = 'tweet_count'
+
+    def __call__(self, user: User):
+        return RuleResult(self, super().compare(user.tweet_count))
+
+
+class TweetCountLessThanUserFilterRule(UserFilterRule):
+    _keyword: ClassVar[str] = 'tweet_count_less_than'
+
+    @classmethod
+    def parse_from_config(cls, conf: dict):
+        return TweetCountUserFilterRule(less_than=conf[cls._keyword])

@@ -9,7 +9,6 @@ from typing import List
 
 import pytest
 from dynaconf import Dynaconf
-from from_root import from_here
 
 from rules.config_parser import ConfigParser
 from rules.user import User
@@ -149,3 +148,16 @@ def test_following_count_ratio_less_than_filter_rule():
     r = ConfigParser.parse({'following_count_ratio_less_than': 1}, UserFilterRule)
     assert r(User(followers_count=1, following_count=2))
     assert not r(User(followers_count=3, following_count=2))
+
+
+def test_tweet_count_filter_rule():
+    r = ConfigParser.parse({'tweet_count': {'less_than': 20, 'more_than': 10}}, UserFilterRule)
+    assert r(User(tweet_count=15))
+    assert not r(User(tweet_count=0))
+    assert not r(User(tweet_count=30))
+
+
+def test_tweet_count_less_than_filter_rule():
+    r = ConfigParser.parse({'tweet_count_less_than': 10}, UserFilterRule)
+    assert r(User(tweet_count=5))
+    assert not r(User(tweet_count=20))

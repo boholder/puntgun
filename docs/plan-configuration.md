@@ -249,6 +249,19 @@ But there is a pretty small possibility that this account is a hook or marker.
 When one user switches from public to protected state, the existing followers can still see the updates,
 this is the meaning of early following I can think of.
 
+### tweet_count
+
+```yaml
+that:
+  - tweet_count:
+      more_than: 10
+      less_than: 1000
+
+  - tweet_count_less_than: 1000
+```
+
+Low tweet count (including retweets) means the user doesn't post much, leave a rule for it.
+
 ## User Action Rules
 
 ### block
