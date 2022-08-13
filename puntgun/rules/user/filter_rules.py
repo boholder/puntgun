@@ -67,10 +67,19 @@ class ShortenFollowingUserFilterRule(UserFilterRule):
 
 
 class CreatedUserFilterRule(TemporalRangeFilterRule, UserFilterRule):
+    """Check user (account) creating date."""
     _keyword: ClassVar[str] = 'user_created'
 
     def __call__(self, user: User):
         return RuleResult(self, super().compare(user.created_at))
+
+
+class CreatedAfterUserFilterRule(UserFilterRule):
+    _keyword: ClassVar[str] = 'user_created_after'
+
+    @classmethod
+    def parse_from_config(cls, conf: dict):
+        return CreatedUserFilterRule(after=conf[cls._keyword])
 
 
 class CreatedWithinDaysUserFilterRule(UserFilterRule):

@@ -137,11 +137,8 @@ from:
 ```
 
 Specify users with a list of user id as source.
-Where to get them? Somehow you can get them from another automatic twitter processing tool I guess.
-If you want to get one user's id manually, maybe you can find it in the [Twitter Web Client](https://twitter.com)'s
-[XHRs](https://developer.mozilla.org/en_US/docs/Web/API/XMLHttpRequest) via browser developer console?
-And there are some online websites that allows you to get the id of a user with its name,
-google 'Twitter user id' and you'll find them.
+
+[Details](detailed-plan-configuration.md#ids)
 
 ### names
 
@@ -171,6 +168,8 @@ that:
 Follower count itself doesn't tell much, but it's good to have a rule aiming at it.
 The `follower-less-than` is a shortcut for `follower: { less_than: n }`.
 
+[Details](detailed-plan-configuration.md#follower-following)
+
 ### following
 
 ```yaml
@@ -182,7 +181,35 @@ that:
   - following_more_than: 5
 ```
 
-And... the following rule.
+Correspondingly... the following number filter rule.
+
+[Details](detailed-plan-configuration.md#follower-following)
+
+### user_created
+
+```yaml
+that:
+  - user_created:
+      before: 2022-12-01 01:01:01
+      after: 2022-01-01T01:01:01Z
+
+  - user_created_after: 2022-01-01
+```
+
+The creation time of an account is a reflection of how much the Twitter platform trusts that user,
+and although the Twitter report&suspend mechanism has been unreliable, it is still working.
+In general, the longer the account is created, the more we "trust" that the user is a human and not a bot.
+
+[Details](detailed-plan-configuration.md#time-type-values)
+
+### user_created_within_days
+
+```yaml
+that:
+  - user_created_within_days: 90
+```
+
+Another flexable account creating time judging rule.
 
 ## User Action Rules
 

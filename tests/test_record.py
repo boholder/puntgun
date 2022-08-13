@@ -28,8 +28,8 @@ MOCK_TIME_NOW = datetime.datetime(2022, 1, 1)
 def mock_datetime_now(monkeypatch):
     class MockDatetime:
         @classmethod
-        def now(cls):
-            """make sure datetime.now() returns same instance for assertion convenience"""
+        def utcnow(cls):
+            """make sure datetime.utcnow() returns same instance for assertion convenience"""
             return MOCK_TIME_NOW
 
     monkeypatch.setattr('record.datetime', MockDatetime)

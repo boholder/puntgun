@@ -47,7 +47,7 @@ class TestTwitterApiErrors:
         assert error.get('ref_url') == p_error.ref_url == 't'
 
 
-create_time = datetime.now()
+create_time = datetime.utcnow()
 image_url = 'https://example.com'
 
 

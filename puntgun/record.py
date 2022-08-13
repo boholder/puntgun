@@ -108,7 +108,7 @@ class Recorder(object):
                 # which may require different "undo" process.)
                 # Works sort of like java's serial version uid.
                 'tool_version': metadata.version('puntgun'),
-                'generate_time': datetime.now(),
+                'generate_time': datetime.utcnow(),
                 'plan_configuration': config.settings.get('plans', []),
                 # name -> plan_configuration, id -> records,
                 # this list sort of like a relation table.

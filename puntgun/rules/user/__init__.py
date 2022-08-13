@@ -3,6 +3,8 @@ from typing import Optional
 
 from pydantic import BaseModel, validator
 
+default_time = datetime.utcnow()
+
 
 class User(BaseModel):
     """
@@ -22,7 +24,7 @@ class User(BaseModel):
     name: Optional[str] = ''
     username: Optional[str] = ''
     profile_image_url: Optional[str] = ''
-    created_at: Optional[datetime] = datetime.now()
+    created_at: Optional[datetime] = default_time
     protected: Optional[bool] = False
     verified: Optional[bool] = False
     location: Optional[str] = ''

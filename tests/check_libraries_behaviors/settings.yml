@@ -1,0 +1,13 @@
+s:
+  # whether it can be parsed by dynaconf
+  dates:
+    # yes datetime.datetime(2022, 1, 1, 1, 1, 1)
+    - date: 2022-01-01 01:01:01
+    # yes datetime.date(2022, 1, 1)
+    - date: 2022-01-01
+    # no
+    - date: 2022/01/01 01:01:01
+    # yes datetime.datetime(2022, 1, 1, 1, 1, 1)
+    - date: 2022-01-01T01:01:01Z
+    # no
+    - date: 01/01/2022 01:01:01
