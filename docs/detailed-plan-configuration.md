@@ -5,7 +5,7 @@ which field is required (must be set) in one rule, what value can a field takes.
 If you are confused about usage of a rule, the answer is most likely written on this page of the document.
 (Can't find what you want? [Ask questions](https://github.com/boholder/puntgun/issues) to remind us to improve the documentation.)
 
-## Tool Scope Consensus
+## Tool Scope Concepts
 
 ### Time Type Values
 
@@ -18,15 +18,40 @@ There are three available time formats for configuration:
 2. `2022-01-01` -> `datetime.date(2022, 1, 1)` (the time part is `00:00:00`)
 3. `2022-01-01T01:01:01Z` -> `datetime.datetime(2022, 1, 1, 1, 1, 1)`
 
+### Tips About Searching And Matching
+
+For more information about Twitter search queries, please refer to [the official documentation](https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-recent).
+
+Both tweet search and regular matching are simple yet powerful rules.
+They are extremely easy to misuse because they just match characters in text rather than the semantics of the text.
+For example, let's say you want to select people who hate cats and use `hate cats` as the keyword,
+but instead you get a match for `I hate cockroach!!! Love cats so much ♥♥♥♥`.
+
+Our advice is to carefully choose words that only your target group will say:
+
+1. Use short phrases that are long enough not to confuse semantics but iconic as keywords, such as campaign slogans, taglines or hashtags.
+2. Make keywords contain special words that are so highly emotional or so intensely offensive that people outside the target group won't use them.
+
+### Regular Expression
+
+Things become complicated when it comes to regular expressions.
+Not only do we have to understand [the syntax of regular expressions (in python)](https://docs.python.org/3/howto/regex.html),
+but we also have to cross the hurdle of configuration language's
+and [Python's](https://docs.python.org/3/howto/regex.html#the-backslash-plague) character escaping concepts.
+
+You can test your (configuration language escaping is not concerned) regular expression on convenient online websites,
+[this website](https://regex101.com/) for example.
+Our advice is try not to use too complex expression, or split one rule with complex expression into multiple rules with simpler ones.
+
 ## User Source Rules
 
 ### ids
 
-* Where to get them? Somehow you can get them from another automatic twitter processing tool.
-  If you want to get one user's id manually, maybe you can find it in the [Twitter Web Client](https://twitter.com)'s
-  [XHRs](https://developer.mozilla.org/en_US/docs/Web/API/XMLHttpRequest) via browser developer console?
-  And there are some online websites that allows you to get the id of a user with its name,
-  google "Twitter user id" and you'll find them.
+Where to get them? Somehow you can get them from another automatic twitter processing tool.
+If you want to get one user's id manually, maybe you can find it in the [Twitter Web Client](https://twitter.com)'s
+[XHRs](https://developer.mozilla.org/en_US/docs/Web/API/XMLHttpRequest) via browser developer console?
+And there are some online websites that allows you to get the id of a user with its name,
+google "Twitter user id" and you'll find them.
 
 * The type of list elements can be `number` or `string`.
 

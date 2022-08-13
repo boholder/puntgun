@@ -5,10 +5,15 @@ Most functions of these rules are tested when testing delegating agents,
 so only basic "parsing" logic will be tested in this test module.
 """
 import datetime
+from typing import List
+
+import pytest
+from dynaconf import Dynaconf
+from from_root import from_here
 
 from rules.config_parser import ConfigParser
 from rules.user import User
-from rules.user.filter_rules import UserFilterRule
+from rules.user.filter_rules import UserFilterRule, TextMatchUserFilterRule
 
 
 def test_follower_user_filter_rule():
@@ -62,3 +67,72 @@ def test_created_within_days_filter_rule():
     r = ConfigParser.parse({'created_within_days': 1}, UserFilterRule)
     assert r(User(created_at=time))
     assert not r(User(created_at=time - datetime.timedelta(days=2)))
+
+
+class TestTextMatchUserFilterRule:
+    """
+    Start from letting dynaconf load the config file,
+    to check character escaping concern of regex.
+    """
+
+    @pytest.fixture
+    def config_plan_file_with(self, tmp_path):
+        def wrapper(content: str):
+            file = tmp_path.joinpath("f.yml")
+            with open(file, 'w', encoding='utf-8') as f:
+                f.write(content)
+            return Dynaconf(settings_files=[file])
+
+        return wrapper
+
+    @pytest.fixture
+    def run_assert(self, config_plan_file_with):
+        def wrapper(regex: str, text: str, expect: bool):
+            def user_texts(_texts: List[str]):
+                words = [t if t else '' for t in _texts[0:3]]
+                return User(name=words[0], description=words[1], pinned_tweet_text=words[2])
+
+            # let the regex goes through dynaconf
+            _regex = config_plan_file_with(f're: {regex}').get('re')
+            rule = TextMatchUserFilterRule.parse_from_config({'profile_text_matches': _regex})
+
+            # rotate valid text to different position to represent different rules text
+            texts = [text, '', '']
+            for _ in range(3):
+                texts = texts[1:] + [texts[0]]
+                assert rule(user_texts(texts)) == expect
+
+        return wrapper
+
+    def test_match_without_escaping_concern(self, run_assert):
+        run_assert('a', 'abc', True)
+        run_assert('abc', 'def', False)
+
+        run_assert('你好', '你好', True)
+        run_assert('Здравствуйте', 'Здравствуйте', True)
+
+    def test_yaml_escaping(self, run_assert):
+        # escaping ":" and "-"
+
+        # no escaping will cause error
+        with pytest.raises(Exception):
+            run_assert('- a: b', '- a: b', True)
+
+        # escape with quote
+        run_assert("'- a: b'", '- a: b', True)
+        run_assert('"- a: b"', '- a: b', True)
+
+        # escaping quote symbol itself (using another quote symbol)
+        run_assert('\'\"\'', '"', True)
+        run_assert('\"\'\"', "'", True)
+
+    def test_python_backslash_escaping(self, run_assert):
+        # backslash as part of "\d"
+        run_assert(r'\d+', '123', True)
+
+        # literal backslash without quote
+        run_assert(r'^a\\b$', r'a\b', True)
+        # literal backslash with quote
+        run_assert(r"'^a\\b$'", r'a\b', True)
+        # don't know why we need double amount of backslash when using double quote
+        run_assert(r'"^a\\\\b$"', r'a\b', True)

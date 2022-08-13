@@ -97,13 +97,13 @@ class CreatedWithinDaysUserFilterRule(UserFilterRule):
 
 
 class TextMatchUserFilterRule(UserFilterRule):
-    _keyword: ClassVar[str] = 'any_user_texts_match'
-    pattern: re.Pattern
+    _keyword: ClassVar[str] = 'profile_text_matches'
+    pattern: str
 
     @classmethod
     def parse_from_config(cls, conf: dict):
-        return CreatedWithinDaysUserFilterRule(pattern=re.compile(conf[cls._keyword]))
+        return cls(pattern=conf[cls._keyword])
 
     def __call__(self, user: User):
-        return any(self.pattern.search(text) for text in
+        return any(re.compile(self.pattern).search(text) for text in
                    [user.name, user.description, user.pinned_tweet_text])

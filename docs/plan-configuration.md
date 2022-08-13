@@ -200,7 +200,7 @@ The creation time of an account is a reflection of how much the Twitter platform
 and although the Twitter report&suspend mechanism has been unreliable, it is still working.
 In general, the longer the account is created, the more we "trust" that the user is a human and not a bot.
 
-[Details](detailed-plan-configuration.md#time-type-values)
+[Details about time type values](detailed-plan-configuration.md#time-type-values)
 
 ### created_within_days
 
@@ -210,6 +210,24 @@ that:
 ```
 
 Another flexable account creating time judging rule.
+
+### profile_text_matches
+
+```yaml
+that:
+  - profile_text_matches: hate 
+```
+
+It's actually check three parts of texts, ont only the profile.
+Check if any text below matches configured [regular expression](https://docs.python.org/3/howto/regex.html):
+
+1. user's name (the name you see aside the avatar, without "@")
+2. user's description (also the profile)
+3. pinned tweet's text
+
+[Details about regular expression](detailed-plan-configuration.md#regular-expression)
+
+> Make sure you've read [tips about how to build a proper expression](detailed-plan-configuration.md#tips-about-searching-and-matching).
 
 ## User Action Rules
 
