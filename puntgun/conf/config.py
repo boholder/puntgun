@@ -69,34 +69,22 @@ def reload_config_files(**kwargs):
     settings.configure(settings_files=config_files_order)
 
 
-def config_logging_options():
+# source: https://github.com/Delgan/loguru/issues/586#issuecomment-1030819250
+logger_format = (
+    "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
+    "<level>{level: <5}</level> | "
+    "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | "
+    "<level>{message}</level>"
+)
+
+# https://loguru.readthedocs.io/en/stable/api/logger.html#levels
+log_level = settings.get('log_level', 'INFO').upper()
+
+
+def config_log_stream():
     """
     Logs about current executing process to stdout will go with print(), not so much lines.
     """
-
-    # remove default logging sink (stderr)
-    logger.remove()
-
-    # source: https://github.com/Delgan/loguru/issues/586#issuecomment-1030819250
-    logger_format = (
-        "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
-        "<level>{level: <5}</level> | "
-        "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | "
-        "<level>{message}</level>"
-    )
-
-    # https://loguru.readthedocs.io/en/stable/api/logger.html#levels
-    log_level = settings.get('log_level', 'INFO').upper()
-
-    # report file
-    # we're borrowing function of loguru library for writing execution report files.
-    # use 'r' field to mark these logs.
-    # See puntgun.record.Recorder for more info.
-    logger.add(report_file,
-               filter=lambda record: 'r' in record['extra'],
-               # only write the plain message content
-               format='{message}',
-               level=log_level)
 
     # logs that we want user see will show in stdout
     logger.add(sys.stdout,
@@ -110,19 +98,29 @@ def config_logging_options():
                format=logger_format,
                level=log_level)
 
+
+def config_log_file():
+    """Only configurate log file and report file when running file command."""
+    # report file
+    # we're borrowing function of loguru library for writing execution report files.
+    # use 'r' field to mark these logs.
+    # See puntgun.record.Recorder for more info.
+    logger.add(report_file,
+               filter=lambda record: 'r' in record['extra'],
+               # only write the plain message content
+               format='{message}',
+               level=log_level)
+
     # log file, saves all but record logs
     logger.add(naming_log_file('running.log'),
                filter=lambda record: 'r' not in record['extra'],
                format=logger_format,
                # https://loguru.readthedocs.io/en/stable/api/logger.html#file
                rotation=settings.get('log_rotation', '100 MB'),
-               level='INFO')
+               level=log_level)
 
 
-# Configurate logging options only when not in unit testing,
-# or it will generate files every time tests running, sort of annoying.
-# Another way is set an autorun pytest.fixture for all test cases,
-# I think one line if is far more simple though it breaks the rule that
-# implementation should not add logic considering testing.
-if "pytest" not in sys.modules:
-    config_logging_options()
+# remove default logging sink (stderr)
+logger.remove()
+# reconfig logging options
+config_log_stream()

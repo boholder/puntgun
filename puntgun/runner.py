@@ -29,17 +29,20 @@ def parse_plans():
         _errors = '\n'.join([str(e) for e in ConfigParser.errors()])
         # TODO plan config reference document URL
         logger.bind(o=True).info(f"""
-Found syntax errors when parsing plan configurations, will exit.
-Please fix these errors in plan configuration file with configuration reference document:
-Plan config file path: {config.plan_file}
+Checking {config.plan_file} FAIL,
+Please fix these errors in plan configuration file with reference document.
 Reference document: {'fake-doc'}
-Syntax errors:
+Errors:
 {_errors}
 """)
         # Can't continue without a zero-error plan configuration
         raise ValueError("Found errors in plan configuration, can not continue")
 
-    logger.info('Parsed plans from configuration: {}', plans)
+    logger.bind(o=True).info(f"""
+Checking {config.plan_file} SUCCESS,
+{len(plans)} plans found.
+""")
+    logger.info('Parsed plans: {}', plans)
     return plans
 
 
