@@ -185,15 +185,15 @@ Correspondingly... the following number filter rule.
 
 [Details](detailed-plan-configuration.md#follower-following)
 
-### user_created
+### created
 
 ```yaml
 that:
-  - user_created:
+  - created:
       before: 2022-12-01 01:01:01
       after: 2022-01-01T01:01:01Z
 
-  - user_created_after: 2022-01-01
+  - created_after: 2022-01-01
 ```
 
 The creation time of an account is a reflection of how much the Twitter platform trusts that user,
@@ -202,11 +202,11 @@ In general, the longer the account is created, the more we "trust" that the user
 
 [Details](detailed-plan-configuration.md#time-type-values)
 
-### user_created_within_days
+### created_within_days
 
 ```yaml
 that:
-  - user_created_within_days: 90
+  - created_within_days: 90
 ```
 
 Another flexable account creating time judging rule.

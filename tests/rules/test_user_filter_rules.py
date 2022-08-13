@@ -37,11 +37,11 @@ def test_following_more_than_filter_rule():
     assert not r(User(following_count=5))
 
 
-def test_user_created_filter_rule():
+def test_created_filter_rule():
     time = datetime.datetime.utcnow()
     timedelta = datetime.timedelta(hours=1)
     # -1 <-> 1
-    r = ConfigParser.parse({'user_created': {'after': time - timedelta, 'before': time + timedelta}},
+    r = ConfigParser.parse({'created': {'after': time - timedelta, 'before': time + timedelta}},
                            UserFilterRule)
     # 0, pass
     assert r(User(created_at=time))
@@ -50,15 +50,15 @@ def test_user_created_filter_rule():
     assert not r(User(created_at=time - timedelta * 2))
 
 
-def test_user_created_after_filter_rule():
+def test_created_after_filter_rule():
     time = datetime.datetime.utcnow()
-    r = ConfigParser.parse({'user_created_after': time}, UserFilterRule)
+    r = ConfigParser.parse({'created_after': time}, UserFilterRule)
     assert r(User(created_at=time + datetime.timedelta(hours=1)))
     assert not r(User(created_at=time - datetime.timedelta(hours=1)))
 
 
-def test_user_created_within_days_filter_rule():
+def test_created_within_days_filter_rule():
     time = datetime.datetime.utcnow()
-    r = ConfigParser.parse({'user_created_within_days': 1}, UserFilterRule)
+    r = ConfigParser.parse({'created_within_days': 1}, UserFilterRule)
     assert r(User(created_at=time))
     assert not r(User(created_at=time - datetime.timedelta(days=2)))

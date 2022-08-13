@@ -1,4 +1,5 @@
 import datetime
+import re
 from typing import ClassVar
 
 from reactivex import Observable
@@ -68,14 +69,14 @@ class ShortenFollowingUserFilterRule(UserFilterRule):
 
 class CreatedUserFilterRule(TemporalRangeFilterRule, UserFilterRule):
     """Check user (account) creating date."""
-    _keyword: ClassVar[str] = 'user_created'
+    _keyword: ClassVar[str] = 'created'
 
     def __call__(self, user: User):
         return RuleResult(self, super().compare(user.created_at))
 
 
 class CreatedAfterUserFilterRule(UserFilterRule):
-    _keyword: ClassVar[str] = 'user_created_after'
+    _keyword: ClassVar[str] = 'created_after'
 
     @classmethod
     def parse_from_config(cls, conf: dict):
@@ -83,7 +84,7 @@ class CreatedAfterUserFilterRule(UserFilterRule):
 
 
 class CreatedWithinDaysUserFilterRule(UserFilterRule):
-    _keyword: ClassVar[str] = 'user_created_within_days'
+    _keyword: ClassVar[str] = 'created_within_days'
     within_days: int
 
     @classmethod
@@ -93,3 +94,16 @@ class CreatedWithinDaysUserFilterRule(UserFilterRule):
     def __call__(self, user: User):
         edge = datetime.datetime.utcnow() - datetime.timedelta(days=self.within_days)
         return RuleResult(self, edge < user.created_at)
+
+
+class TextMatchUserFilterRule(UserFilterRule):
+    _keyword: ClassVar[str] = 'any_user_texts_match'
+    pattern: re.Pattern
+
+    @classmethod
+    def parse_from_config(cls, conf: dict):
+        return CreatedWithinDaysUserFilterRule(pattern=re.compile(conf[cls._keyword]))
+
+    def __call__(self, user: User):
+        return any(self.pattern.search(text) for text in
+                   [user.name, user.description, user.pinned_tweet_text])
