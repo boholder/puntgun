@@ -107,3 +107,18 @@ class TextMatchUserFilterRule(UserFilterRule):
     def __call__(self, user: User):
         return any(re.compile(self.pattern).search(text) for text in
                    [user.name, user.description, user.pinned_tweet_text])
+
+
+class FollowingCountRatioUserFilterRule(NumericRangeFilterRule, UserFilterRule):
+    _keyword: ClassVar[str] = 'following_count_ratio'
+
+    def __call__(self, user: User):
+        return RuleResult(self, super().compare(user.followers_count / user.following_count))
+
+
+class FollowingCountRatioLessThanUserFilterRule(UserFilterRule):
+    _keyword: ClassVar[str] = 'following_count_ratio_less_than'
+
+    @classmethod
+    def parse_from_config(cls, conf: dict):
+        return FollowingCountRatioUserFilterRule(less_than=conf[cls._keyword])

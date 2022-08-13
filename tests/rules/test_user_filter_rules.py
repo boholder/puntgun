@@ -136,3 +136,16 @@ class TestTextMatchUserFilterRule:
         run_assert(r"'^a\\b$'", r'a\b', True)
         # don't know why we need double amount of backslash when using double quote
         run_assert(r'"^a\\\\b$"', r'a\b', True)
+
+
+def test_following_count_ratio_filter_rule():
+    r = ConfigParser.parse({'following_count_ratio': {'less_than': 2, 'more_than': 1}}, UserFilterRule)
+    assert r(User(followers_count=3, following_count=2))
+    assert not r(User(followers_count=4, following_count=2))
+    assert not r(User(followers_count=1, following_count=2))
+
+
+def test_following_count_ratio_less_than_filter_rule():
+    r = ConfigParser.parse({'following_count_ratio_less_than': 1}, UserFilterRule)
+    assert r(User(followers_count=1, following_count=2))
+    assert not r(User(followers_count=3, following_count=2))

@@ -198,7 +198,7 @@ that:
 
 The creation time of an account is a reflection of how much the Twitter platform trusts that user,
 and although the Twitter report&suspend mechanism has been unreliable, it is still working.
-In general, the longer the account is created, the more we "trust" that the user is a human and not a bot.
+In general, the longer the account is created, the more we "trust" that the user is a human rather than a bot.
 
 [Details about time type values](detailed-plan-configuration.md#time-type-values)
 
@@ -227,7 +227,27 @@ Check if any text below matches configured [regular expression](https://docs.pyt
 
 [Details about regular expression](detailed-plan-configuration.md#regular-expression)
 
-> Make sure you've read [tips about how to build a proper expression](detailed-plan-configuration.md#tips-about-searching-and-matching).
+> Make sure you've read [tips about how to build a proper match](detailed-plan-configuration.md#tips-about-searching-and-matching).
+
+### following_count_ratio
+
+```yaml
+that:
+  - following_count_ratio:
+      # 1 follower / 10 following 
+      more_than: 0.1
+      # 10 follower / 1 following, wow pretty famous
+      less_than: 10
+
+  # 5 follower / 100 following
+  - following_count_ratio_less_than: 0.05
+```
+
+What do you think when you see a user who has a dozen or single digit followers, but follows thousands of people?
+There's a good chance on just that this person only read and does not talk or interact with others often.
+But there is a pretty small possibility that this account is a hook or marker.
+When one user switches from public to protected state, the existing followers can still see the updates,
+this is the meaning of early following I can think of.
 
 ## User Action Rules
 
