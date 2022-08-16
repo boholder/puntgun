@@ -107,13 +107,9 @@ Follow the instruction below:
 
 2. Turn on "OAuth 1.0a" in your App settings:
     1. Set the App permissions to "Read and write".
-
-    2. Set the callback, website URL to "https://twitter.com" for passing
-    3.
-   Stay in simple, for encrypting that file we need a private key (another secret value),   
-   the website's validation check.
-   (We'll use the pin-based auth method, so we needn't really deploy a server for
-   receiving Twitter's callback.)
+    2. Set the callback, website URL to "https://twitter.com" for passing the website's validation check.
+       (We'll use the [pin-based auth method](https://developer.twitter.com/en/docs/authentication/oauth-1-0a/pin-based-oauth),
+       so we needn't really deploy a server for receiving Twitter's callback.)
 
 All set, now you can directly paste them into the tool.
 You must run the tool at least once to authorize this tool
@@ -131,13 +127,13 @@ Keep reading if you interest about details or skip if you don't.
 
 First we talk about secrets saving. If the tool can't find some secrets in environment variables,
 it will ask you to input secrets through terminal, then save all secrets into an encrypted file
-(named as `<secrets_file>`), sort of like put them into a box and lock the box.
+(named as `<secrets_file>`), sort of like put them into a chest and lock the chest.
 No one can figure out the secret values even they can read the `<secrets_file>`,
 there are just meaningless cipher text, no plain text.
 
 Stay in simple, for encrypting that `<secrets_file>`, we'll need a private key (another secret value),
 the tool will automatically generate one for you.
-This private key can act as both "key" and "lock" of the `<secrets_file>` "box".
+This private key (with the public key it generates) can act as both "key" and "lock" of the `<secrets_file>` "chest".
 We can't remember, and it's inconvenient to re-input this long value,
 so we need to save this value down to a file,
 or we'll lose it after reboot the computer like your poor office files,
