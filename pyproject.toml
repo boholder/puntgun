@@ -15,7 +15,7 @@ from-root = "^1.0.2"
 cryptography = "^37.0.4"
 loguru = "^0.6.0"
 pydantic = "^1.9.2"
-orjson = "^3.7.11"
+orjson = "^3.7.12"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
