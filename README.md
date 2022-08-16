@@ -1,11 +1,11 @@
+# puntgun - A configurable automation command line tool for Twitter
+
 ```text
      ____              _      ____
 ,___|____\____________|_|____/____|____________________
 |___|_|_)_|_|_|_|_'__\|___|_|_|___|_|_|_|_'__\__[____]  ""-,___..--=====
     |  __/| |_| | | | | |_  | |_| | |_| | | | |   \\_____/   ""        |
     |_|    \__,_|_| |_|\__|  \____|\__,_|_| |_|      [ ))"---------..__|
-
-puntgun - A configurable automation command line tool for Twitter
 ```
 
 [![main branch ci workflow status badge](https://github.com/boholder/puntgun/actions/workflows/ci_main.yml/badge.svg)](https://github.com/boholder/puntgun/actions/workflows/ci_main.yml)
@@ -37,6 +37,7 @@ However, we have the cheek to state that such errors are still covered by the di
 although we will still suffer from a guilty conscience and
 do our best to fix them if these god-forbidden things happen:
 
+> **Warning**
 > This tool may have unrecoverable effects on users' Twitter accounts.
 > By using this tool, the user is aware of the dangers and agrees to take full responsibility
 > for all consequences resulting from the use of this tool.
