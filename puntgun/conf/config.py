@@ -2,6 +2,7 @@
 All the loaded settings and global variables for many modules to use.
 No unit tests guard (too implement-coupling to be valuable enough writing test cases), stay sharp.
 """
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -11,7 +12,13 @@ from pathlib import Path
 from dynaconf import Dynaconf
 from loguru import logger
 
+# I treat this tool as a... shortly running executable tool, not consistent running service,
+# so it didn't need a fixed directory to store configuration files, executable, logs or so,
+# just like other tools, use a configuration directory under the home directory.
 config_path = Path.home().joinpath('.puntgun')
+if not config_path.exists():
+    os.makedirs(config_path)
+
 plan_file = config_path.joinpath('plan.yml')
 settings_file = config_path.joinpath('settings.yml')
 pri_key_file = config_path.joinpath('.puntgun_rsa4096')
@@ -19,7 +26,7 @@ secrets_file = config_path.joinpath('.secrets.yml')
 
 
 def naming_log_file(suffix: str):
-    # YYYYMMDDHHMMSS
+    # as: YYYYmmddHHMMSS
     time = datetime.now().strftime('%Y%m%d%H%M%S')
     # loguru will follow given path to create log files.
     # so the log files will be generated under same directory with plan configuration file.
@@ -28,18 +35,22 @@ def naming_log_file(suffix: str):
 
 report_file = naming_log_file('report.json')
 
-# Dynaconf works in a layered override mode based on the above order,
-# the precedence will be based on the loading order.
-# *manually tested and searched: https://dynaconf.readthedocs.io/en/docs_223/guides/usage.html
-config_files_order = [plan_file, settings_file, secrets_file]
 
-# load configuration files
-settings = Dynaconf(
-    # environment variables' prefix
-    envvar_prefix='BULLET',
-    settings_files=config_files_order,
-    apply_default_on_none=True
-)
+def load_settings():
+    return Dynaconf(
+        # environment variables' prefix
+        envvar_prefix='BULLET',
+        # Dynaconf works in a layered override mode based on the above order,
+        # the precedence will be based on the loading order.
+        # manually tested and searched:
+        # https://dynaconf.readthedocs.io/en/docs_223/guides/usage.html
+        settings_files=[plan_file, settings_file, secrets_file],
+        apply_default_on_none=True
+    )
+
+
+# Load configuration files with default config paths, as a default settings option
+settings = load_settings()
 
 
 def reload_config_files(**kwargs):
@@ -66,7 +77,8 @@ def reload_config_files(**kwargs):
         report_file = Path(kwargs.get('report_file'))
 
     # reload configuration files
-    settings.configure(settings_files=config_files_order)
+    global settings
+    settings = load_settings()
 
 
 # source: https://github.com/Delgan/loguru/issues/586#issuecomment-1030819250
@@ -100,24 +112,28 @@ def config_log_stream():
 
 
 def config_log_file():
-    """Only configurate log file and report file when running file command."""
-    # report file
-    # we're borrowing function of loguru library for writing execution report files.
-    # use 'r' field to mark these logs.
-    # See puntgun.record.Recorder for more info.
-    logger.add(report_file,
-               filter=lambda record: 'r' in record['extra'],
-               # only write the plain message content
-               format='{message}',
-               level=log_level)
+    """
+    Only configurate log file and report file when running file command
+    and isn't in unit testing.
+    """
+    if "pytest" not in sys.modules:
+        # report file
+        # we're borrowing function of loguru library for writing execution report files.
+        # use 'r' field to mark these logs.
+        # See puntgun.record.Recorder for more info.
+        logger.add(report_file,
+                   filter=lambda record: 'r' in record['extra'],
+                   # only write the plain message content
+                   format='{message}',
+                   level=log_level)
 
-    # log file, saves all but record logs
-    logger.add(naming_log_file('running.log'),
-               filter=lambda record: 'r' not in record['extra'],
-               format=logger_format,
-               # https://loguru.readthedocs.io/en/stable/api/logger.html#file
-               rotation=settings.get('log_rotation', '100 MB'),
-               level=log_level)
+        # log file, saves all but record logs
+        logger.add(naming_log_file('running.log'),
+                   filter=lambda record: 'r' not in record['extra'],
+                   format=logger_format,
+                   # https://loguru.readthedocs.io/en/stable/api/logger.html#file
+                   rotation=settings.get('log_rotation', '100 MB'),
+                   level=log_level)
 
 
 # remove default logging sink (stderr)

@@ -21,9 +21,23 @@ def start():
     execute_plans(parse_plans())
 
 
+@logger.catch(onerror=lambda _: sys.exit(1))
 def parse_plans():
-    # Let the ConfigParser recursively constructing plan instances and rule instances inside plans.
-    plans: List[Plan] = [ConfigParser.parse(p, Plan) for p in config.settings.get('plans')]
+    """Let the ConfigParser recursively constructing plan instances and rule instances inside plans."""
+    # TODO poetry run python puntgun fire 把所有提示用logger.error抓起来，不要报堆栈
+    plans_config = config.settings.get('plans')
+    # TODO 三个配置文件的有效性检查移到config中，config写单元测试。
+    if plans_config is None:
+        logger.bind(o=True).error(f"""
+No plan configuration is loaded.
+This is the plan file the tool trying to load:
+{config.plan_file}
+Check if its content is valid by running "puntgun check plan --plan_file=...".
+If There is no 
+""")
+        exit(1)
+
+    plans: List[Plan] = [ConfigParser.parse(p, Plan) for p in plans_config]
 
     if ConfigParser.errors():
         _errors = '\n'.join([str(e) for e in ConfigParser.errors()])
