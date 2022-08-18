@@ -94,6 +94,7 @@ def decrypt(pri_key: RSAPrivateKey, ciphertext: bytes):
 
 def dump_private_key(pri_key: RSAPrivateKey, pwd: str, file_path):
     """will overwrite the file if it already exists"""
+    util.backup_if_exists(file_path)
     with open(file_path, 'wb') as f:
         f.write(pri_key.private_bytes(
             # just some human-recognizable formats

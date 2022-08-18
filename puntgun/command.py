@@ -1,10 +1,9 @@
-import os.path
-import shutil
 from pathlib import Path
 
 from loguru import logger
 
 import runner
+import util
 from conf import config, example
 from conf.encrypto import load_or_generate_private_key
 from conf.secret import load_or_request_all_secrets
@@ -28,7 +27,7 @@ class Gen(object):
         secrets = load_or_request_all_secrets(load_or_generate_private_key())
 
         output_file = Path(output_file)
-        backup_if_exists(output_file)
+        util.backup_if_exists(output_file)
         with open(output_file, 'w', encoding='utf-8') as f:
             f.writelines(f'{key}: {value}\n' for key, value in secrets.items())
 
@@ -40,12 +39,12 @@ class Gen(object):
         """
 
         example_settings_file = Path(output_path).joinpath('example-settings.yml')
-        backup_if_exists(example_settings_file)
+        util.backup_if_exists(example_settings_file)
         with open(example_settings_file, 'w', encoding='utf-8') as f:
             f.write(example.tool_settings)
 
         example_plan_file = Path(output_path).joinpath('example-plan.yml')
-        backup_if_exists(example_plan_file)
+        util.backup_if_exists(example_plan_file)
         with open(example_plan_file, 'w', encoding='utf-8') as f:
             f.write(example.plan_config)
 
@@ -54,12 +53,6 @@ Example configuration files generated:
 settings: {example_settings_file}
 plan: {example_plan_file}
 """)
-
-
-def backup_if_exists(path: Path):
-    if path.exists():
-        logger.warning("Indicated output file [{}] already exists, back up the origin file", path)
-        shutil.copy2(path, path.with_suffix(os.path.splitext(path)[1] + '.bak'))
 
 
 class Check(object):
