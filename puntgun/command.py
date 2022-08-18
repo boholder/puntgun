@@ -49,6 +49,12 @@ class Gen(object):
         with open(example_plan_file, 'w', encoding='utf-8') as f:
             f.write(example.plan_config)
 
+        logger.bind(o=True).info(f"""
+Example configuration files generated:
+settings: {example_settings_file}
+plan: {example_plan_file}
+""")
+
 
 def backup_if_exists(path: Path):
     if path.exists():

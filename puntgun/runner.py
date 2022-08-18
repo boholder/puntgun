@@ -17,9 +17,22 @@ from rules import Plan
 from rules.config_parser import ConfigParser
 
 
+class InvalidConfigurationError(ValueError):
+    """
+    Need a "checked" (already know will be raised) error type to terminate the tool,
+    without be caught by loguru and print a lot of meaningless dialog stack trace to stderr
+    (it will make the user confused).
+    """
+    pass
+
+
 @logger.catch(onerror=lambda _: sys.exit(1))
 def start():
-    execute_plans(parse_plans())
+    # the "exclude" option of @logger.catch won't stop outputting stack trace
+    try:
+        execute_plans(parse_plans())
+    except InvalidConfigurationError:
+        exit(1)
 
 
 def parse_plans():
@@ -33,11 +46,12 @@ def parse_plans():
 No plan is loaded.
 The tool is trying to load from this plan configuration file:
 {config.plan_file}
-Check if its content is valid by running "puntgun check plan --plan_file=...",
+If it not exists, generate example configuration files with "puntgun gen config".
+If it exists, check if its content is valid with "puntgun check plan --plan_file=...",
 and fix it with reference documentation:
 fake-doc 
 """)
-            raise ValueError
+            raise InvalidConfigurationError
         return plans_config
 
     def parse_plans_config(_plans_config):
@@ -55,7 +69,7 @@ fake-doc
 Errors:
 {_errors}
 """)
-            raise ValueError("Found errors in plan configuration, can not continue")
+            raise InvalidConfigurationError("Found errors in plan configuration, can not continue")
 
         return plans
 

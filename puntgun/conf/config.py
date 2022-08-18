@@ -15,24 +15,31 @@ from loguru import logger
 # so it didn't need a fixed directory to store configuration files, executable, logs or so,
 # just like other tools, use a configuration directory under the home directory.
 config_path = Path.home().joinpath('.puntgun')
-if not config_path.exists():
-    os.makedirs(config_path)
 
 plan_file = config_path.joinpath('plan.yml')
 settings_file = config_path.joinpath('settings.yml')
 pri_key_file = config_path.joinpath('.puntgun_rsa4096')
 secrets_file = config_path.joinpath('.secrets.yml')
 
+# == log file and report file's path ==
+# as: YYYYmmddHHMMSS
+report_path = config_path.joinpath('reports')
+log_path = config_path.joinpath('logs')
 
-def naming_log_file(suffix: str):
-    # as: YYYYmmddHHMMSS
-    time = datetime.now().strftime('%Y%m%d%H%M%S')
-    # loguru will follow given path to create log files.
-    # so the log files will be generated under same directory with plan configuration file.
-    return f"{plan_file}_{time}_{suffix}"
+# a/b/c/plan.yml -> 'plan'
+plan_file_name = os.path.basename(plan_file).split('.')[0]
+log_time = datetime.now().strftime('%Y%m%d%H%M%S')
 
+report_file = report_path.joinpath(f'{plan_file_name}_{log_time}_report.json')
+log_file = log_path.joinpath(f'{plan_file_name}_{log_time}.log')
 
-report_file = naming_log_file('report.json')
+# generate required directories
+if not config_path.exists():
+    os.makedirs(config_path)
+if not log_path.exists():
+    os.makedirs(log_path)
+if not report_path.exists():
+    os.makedirs(report_path)
 
 
 def load_settings():
@@ -48,7 +55,7 @@ def load_settings():
     )
 
 
-# Load configuration files with default config paths, as a default settings option
+# Load configuration files with default config paths
 settings = load_settings()
 
 
@@ -112,8 +119,8 @@ def config_log_stream():
 
 def config_log_file():
     """
-    Only configurate log file and report file when running file command
-    and isn't in unit testing.
+    Only configurate log file and report file when running file command and isn't in unit testing.
+    loguru will follow given path to create log files.
     """
     if "pytest" not in sys.modules:
         # report file
@@ -127,7 +134,7 @@ def config_log_file():
                    level=log_level)
 
         # log file, saves all but record logs
-        logger.add(naming_log_file('running.log'),
+        logger.add(log_file,
                    filter=lambda record: 'r' not in record['extra'],
                    format=logger_format,
                    # https://loguru.readthedocs.io/en/stable/api/logger.html#file

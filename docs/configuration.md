@@ -71,7 +71,7 @@ The tool will use `--secrets_file` and `--private_key_file` to manage secrets in
 | `--settings_file`    | `<config path>`/settings.yml                                                | Global tool settings that will apply to every execution                                |
 | `--private_key_file` | `<config path>`/.puntgun_rsa4096                                            | Tool generated password protected private key                                          |
 | `--secrets_file`     | `<config path>`/.secrets.yml                                                | Tool generated cipher text or user writen plain text file contains [secrets](#secrets) |
-| `--report_file`      | `<same directory with plan file>`/`<plan_file>`_`<time>`_report.json        | Expect path of the tool generated [execution report]()                                 |
+| `--report_file`      | `<config path>`/reports/`<plan_file>`_`<time>`_report.json                  | Expect path of the tool generated execution report                                     |
 
 ## Secrets
 

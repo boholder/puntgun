@@ -4,8 +4,7 @@ save all content of example config files as text blocks.
 Any better idea?
 """
 # TODO doc link
-tool_settings = """
-# The settings of the tool itself.
+tool_settings = """# The settings of the tool itself.
 # Options can be overridden by the same-name ones in the user-writen plan configuration file
 # or in the environment variables.
 # The values of the commented out options are default values
@@ -29,11 +28,8 @@ tool_settings = """
 # instead of ask user input it through terminal.
 # One of several ways to automate the running of this tool.
 #read_password_from_stdin: false
-
 """
 # TODO doc link
-plan_config = """
-# This is an example configuration file of plan.
+plan_config = """# This is an example configuration file of plan.
 # Reference documentation: TODO
- 
-"""
+ """
