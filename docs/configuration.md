@@ -6,7 +6,7 @@ nav_order: 1
 # Configuration
 
 This page is describing configurations of the tool itself.
-For all available plan configurations, please check [the plan configuration document page](plan-configuration.md).
+For all available plan configurations, please check [the plan configuration documentation page](plan-configuration.md).
 There are two types of tool configuration:
 most of them can be configured in global configuration file or set via environment variable,
 but some special configurations can only be passed through command line argument.

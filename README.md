@@ -67,7 +67,7 @@ Currently, we use the [RSA4096](https://en.wikipedia.org/wiki/RSA_(cryptosystem)
 the cryptographic library [Cryptography](https://github.com/pyca/cryptography/)
 for processing secrets to prevent them being saved into configuration file in plaintext format.
 For implementation details, check [these source codes](puntgun/conf/encrypto.py).
-For Cryptography's security limitation, check [this document](https://cryptography.io/en/latest/limitations/).
+For Cryptography's security limitation, check [this documentation](https://cryptography.io/en/latest/limitations/).
 
 When the tool is running, the secrets will stay inside a client object of the Twitter API client library [Tweepy](https://docs.tweepy.org),
 and it seems that they are [stored as plaintext string](https://github.com/tweepy/tweepy/blob/master/tweepy/client.py#L48).

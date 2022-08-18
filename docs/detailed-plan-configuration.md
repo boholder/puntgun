@@ -2,7 +2,7 @@
 
 This page contains all details and cautions about plan configuration:
 which field is required (must be set) in one rule, what value can a field takes...
-If you are confused about usage of a rule, the answer is most likely written on this page of the document.
+If you are confused about usage of a rule, the answer is most likely written on this page of the documentation.
 (Can't find what you want? [Ask questions](https://github.com/boholder/puntgun/issues) to remind us to improve the documentation.)
 
 ## Tool Scope Concepts

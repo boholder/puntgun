@@ -10,6 +10,7 @@ banner = r"""
     |_|    \__,_|_| |_|\__|  \____|\__,_|_| |_|      [ ))"---------..__|
 
 puntgun - a configurable automation command line tool for Twitter
+> https://github.com/boholder/puntgun/
 """
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 # Configuration Manual
 
 Configuration file is written in YAML format.
-Your can refer [official document](https://yaml.org/) for the syntax.
+Your can refer [official documentation](https://yaml.org/) for the syntax.
 For character escaping content, read [this part](https://pyyaml.org/wiki/PyYAMLDocumentation#scalars).
 
 ## Index

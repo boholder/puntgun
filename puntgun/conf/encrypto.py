@@ -74,7 +74,7 @@ It would be better if you set a different password from the Twitter password.
 And you should remember this password for using this tool in the future.
 
 If you can not remember it, 
-just delete the private key file and the secrets file in this directory and run it again.
+just delete the private key file and the secrets file and run it again.
 ({config.pri_key_file}, {config.secrets_file})
 """)
 

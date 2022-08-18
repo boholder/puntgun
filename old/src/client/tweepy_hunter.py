@@ -255,7 +255,7 @@ def init_tweepy_client() -> tweepy.Client:
     # access token pair to represent the user's authorization about operating the account
     access_token, access_token_secret = get_access_token_and_secret(api_key, api_secret)
 
-    # It's ok (secure) to save them into env, document isn't mention that,
+    # It's ok (secure) to save them into env, documentation isn't mention that,
     # but it looks like (and base on my manually test)
     # changing `os.environ` inside python won't affect the host's env.
     # So these value would disappear after python program quit.
