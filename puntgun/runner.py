@@ -17,46 +17,56 @@ from rules import Plan
 from rules.config_parser import ConfigParser
 
 
+@logger.catch(onerror=lambda _: sys.exit(1))
 def start():
     execute_plans(parse_plans())
 
 
-@logger.catch(onerror=lambda _: sys.exit(1))
 def parse_plans():
     """Let the ConfigParser recursively constructing plan instances and rule instances inside plans."""
-    # TODO poetry run python puntgun fire 把所有提示用logger.error抓起来，不要报堆栈
-    plans_config = config.settings.get('plans')
-    # TODO 三个配置文件的有效性检查移到config中，config写单元测试。
-    if plans_config is None:
-        logger.bind(o=True).error(f"""
-No plan configuration is loaded.
-This is the plan file the tool trying to load:
+
+    def get_and_validate_plan_config():
+        plans_config = config.settings.get('plans')
+        if plans_config is None:
+            # TODO doc link
+            logger.bind(o=True).error(f"""
+No plan is loaded.
+The tool is trying to load from this plan configuration file:
 {config.plan_file}
-Check if its content is valid by running "puntgun check plan --plan_file=...".
-If There is no 
+Check if its content is valid by running "puntgun check plan --plan_file=...",
+and fix it with reference documentation:
+fake-doc 
 """)
-        exit(1)
+            raise ValueError
+        return plans_config
 
-    plans: List[Plan] = [ConfigParser.parse(p, Plan) for p in plans_config]
+    def parse_plans_config(_plans_config):
+        plans: List[Plan] = [ConfigParser.parse(p, Plan) for p in _plans_config]
 
-    if ConfigParser.errors():
-        _errors = '\n'.join([str(e) for e in ConfigParser.errors()])
-        # TODO plan config reference document URL
-        logger.bind(o=True).info(f"""
+        # Can't continue without a zero-error plan configuration
+        if ConfigParser.errors():
+            _errors = '\n'.join([str(e) for e in ConfigParser.errors()])
+            # TODO doc link
+            logger.bind(o=True).error(f"""
 Checking {config.plan_file} FAIL,
 Please fix these errors in plan configuration file with reference document.
-Reference document: {'fake-doc'}
+Reference documentation: 
+fake-doc
 Errors:
 {_errors}
 """)
-        # Can't continue without a zero-error plan configuration
-        raise ValueError("Found errors in plan configuration, can not continue")
+            raise ValueError("Found errors in plan configuration, can not continue")
+
+        return plans
+
+    plans = parse_plans_config(get_and_validate_plan_config())
 
     logger.bind(o=True).info(f"""
 Checking {config.plan_file} SUCCESS,
 {len(plans)} plans found.
 """)
     logger.info('Parsed plans: {}', plans)
+
     return plans
 
 
@@ -65,7 +75,6 @@ optimal_thread_count = multiprocessing.cpu_count()
 pool_scheduler = ThreadPoolScheduler(optimal_thread_count)
 
 
-@logger.catch(onerror=lambda _: sys.exit(1))
 def execute_plans(plans: List[Plan]):
     # Temporal coupling for compose a correct json format output.
     Recorder.write_report_header(plans)
@@ -83,5 +92,5 @@ def execute_plans(plans: List[Plan]):
 
 
 def process_plan_result(result: Recordable):
-    logger.bind(o=True).info('One has been operated: {}', result.to_record())
+    logger.bind(o=True).info('Finished actions on one target: {}', result.to_record())
     Recorder.record(result)

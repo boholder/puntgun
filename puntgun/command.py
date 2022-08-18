@@ -24,7 +24,7 @@ class Gen(object):
         :param output_file: In which you want to save plaintext secrets
         """
 
-        config.reload_config_files(secrets_file=secrets_file)
+        config.reload_important_files(secrets_file=secrets_file)
         secrets = load_or_request_all_secrets(load_or_generate_private_key())
 
         output_file = Path(output_file)
@@ -36,7 +36,6 @@ class Gen(object):
     def config(output_path=str(config.config_path)):
         """
         Generate example configuration files: tool setting file and plan configuration file.
-
         :param output_path: path to output directory.
         """
 
@@ -66,16 +65,13 @@ class Check(object):
         Validate plan configuration file's syntax.
         :param plan_file: Plan configuration file you'd like to check.
         """
-        config.reload_config_files(plan_file=plan_file)
-        # TODO untested
+        config.reload_important_files(plan_file=plan_file)
         runner.parse_plans()
 
 
 class Command(object):
-
-    def __init__(self):
-        self.gen = Gen()
-        self.check = Check()
+    gen = Gen()
+    check = Check()
 
     @staticmethod
     def fire(config_path=str(config.config_path),
@@ -85,8 +81,7 @@ class Command(object):
              secrets_file=str(config.secrets_file),
              report_file=str(config.report_file)):
         """
-        Run a plan configuration.
-
+        Start processing base on given configuration files.
         :param config_path: Path of various configuration files the tool needs.
         :param plan_file: Plan configuration file you'd like to execute.
         :param settings_file: Global tool settings that will apply to every execution.
@@ -96,11 +91,11 @@ class Command(object):
         :param report_file: Expect path of the tool generated execution report.
         """
         logger.info("Run command [fire]")
-        config.reload_config_files(config_path=config_path,
-                                   plan_file=plan_file,
-                                   settings_file=settings_file,
-                                   pri_key_file=private_key_file,
-                                   secrets_file=secrets_file,
-                                   report_file=report_file)
+        config.reload_important_files(config_path=config_path,
+                                      plan_file=plan_file,
+                                      settings_file=settings_file,
+                                      pri_key_file=private_key_file,
+                                      secrets_file=secrets_file,
+                                      report_file=report_file)
         config.config_log_file()
         runner.start()

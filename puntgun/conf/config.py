@@ -1,6 +1,5 @@
 """
 All the loaded settings and global variables for many modules to use.
-No unit tests guard (too implement-coupling to be valuable enough writing test cases), stay sharp.
 """
 import os
 import sys
@@ -53,7 +52,7 @@ def load_settings():
 settings = load_settings()
 
 
-def reload_config_files(**kwargs):
+def reload_important_files(**kwargs):
     # Ugly. But don't know how to improve it.
     global config_path
     global plan_file
