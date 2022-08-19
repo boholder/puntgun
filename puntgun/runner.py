@@ -30,19 +30,18 @@ class InvalidConfigurationError(ValueError):
 def start():
     # the "exclude" option of @logger.catch won't stop outputting stack trace
     try:
-        execute_plans(parse_plans())
+        plans = parse_plans_config(get_and_validate_plan_config())
+        logger.info('Parsed plans: {}', plans)
+        execute_plans(plans)
     except InvalidConfigurationError:
         exit(1)
 
 
-def parse_plans():
-    """Let the ConfigParser recursively constructing plan instances and rule instances inside plans."""
-
-    def get_and_validate_plan_config():
-        plans_config = config.settings.get('plans')
-        if plans_config is None:
-            # TODO doc link
-            logger.bind(o=True).error(f"""
+def get_and_validate_plan_config():
+    plans_config = config.settings.get('plans')
+    if plans_config is None:
+        # TODO doc link
+        logger.bind(o=True).error(f"""
 No plan is loaded.
 The tool is trying to load from this plan configuration file:
 {config.plan_file}
@@ -51,17 +50,19 @@ If it exists, check if its content is valid with "puntgun check plan --plan_file
 and fix it with reference documentation:
 fake-doc 
 """)
-            raise InvalidConfigurationError
-        return plans_config
+        raise InvalidConfigurationError
+    return plans_config
 
-    def parse_plans_config(_plans_config):
-        plans: List[Plan] = [ConfigParser.parse(p, Plan) for p in _plans_config]
 
-        # Can't continue without a zero-error plan configuration
-        if ConfigParser.errors():
-            _errors = '\n'.join([str(e) for e in ConfigParser.errors()])
-            # TODO doc link
-            logger.bind(o=True).error(f"""
+def parse_plans_config(_plans_config):
+    """Let the ConfigParser recursively constructing plan instances and rule instances inside plans."""
+    plans: List[Plan] = [ConfigParser.parse(p, Plan) for p in _plans_config]
+
+    # Can't continue without a zero-error plan configuration
+    if ConfigParser.errors():
+        _errors = '\n'.join([str(e) for e in ConfigParser.errors()])
+        # TODO doc link
+        logger.bind(o=True).error(f"""
 Checking {config.plan_file} FAIL,
 Please fix these errors in plan configuration file with reference document.
 Reference documentation: 
@@ -69,18 +70,12 @@ fake-doc
 Errors:
 {_errors}
 """)
-            raise InvalidConfigurationError("Found errors in plan configuration, can not continue")
-
-        return plans
-
-    plans = parse_plans_config(get_and_validate_plan_config())
+        raise InvalidConfigurationError("Found errors in plan configuration, can not continue")
 
     logger.bind(o=True).info(f"""
-Checking {config.plan_file} SUCCESS,
-{len(plans)} plans found.
-""")
-    logger.info('Parsed plans: {}', plans)
-
+    Checking {config.plan_file} SUCCESS,
+    {len(plans)} plans found.
+    """)
     return plans
 
 

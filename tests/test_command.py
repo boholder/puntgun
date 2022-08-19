@@ -11,6 +11,7 @@ def test_fire(monkeypatch):
     # just don't really start
     mock_runner_start_func = MagicMock()
     monkeypatch.setattr('runner.start', mock_runner_start_func)
+    monkeypatch.setattr('client.Client.singleton', lambda: 1)
 
     Command.fire(config_path='cf', plan_file='pf', settings_file='sf',
                  private_key_file='pkf', secrets_file='scf', report_file='rf')
@@ -38,7 +39,7 @@ def test_gen_secrets_and_backup_original_file(monkeypatch, tmp_path):
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write('123')
 
-    Gen.secrets(output_file=output_file)
+    Gen.plain_secrets(output_file=output_file)
 
     assert output_file.read_text(encoding='utf-8') == 'a: 1\nb: 2\n'
     assert Path(str(output_file) + '.bak').read_text(encoding='utf-8') == '123'

@@ -142,7 +142,7 @@ so here is the second file - `<private_key_file>`.
 It may disappoint you but, for saving the private key into the `<private_key_file>`
 we need another password (passphrase) to protect the dumped value,
 this time it's short and human-readable just like other normal passwords,
-it's created and inputted by you, and you should remember it for future usage.
+it's created and inputted by you, and you should remember it for future use.
 
 Make sense? Loading secrets when restart the tool afterwards is in plain reversed order.
 You enter the password (through terminal), the tool load the private key,

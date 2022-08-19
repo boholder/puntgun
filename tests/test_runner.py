@@ -9,7 +9,7 @@ from reactivex import operators as op
 from record import Recordable, Record, load_report
 from rules import Plan, FromConfig
 from rules.config_parser import ConfigParser
-from runner import parse_plans, execute_plans
+from runner import parse_plans_config, get_and_validate_plan_config, execute_plans
 
 
 @pytest.fixture
@@ -27,7 +27,7 @@ def mock_plan_configuration(mock_configuration):
 
 
 def test_parse_plans_success(mock_plan_configuration):
-    actual_plans = parse_plans()
+    actual_plans = parse_plans_config(get_and_validate_plan_config())
     assert actual_plans[0].rules == [TRule(f=0), TRule(f=1)]
     assert actual_plans[1].rules == [TRule(f=2), TRule(f=3)]
 
@@ -38,7 +38,7 @@ def test_parse_plans_fail(mock_configuration, clean_config_parser_errors):
     ]})
 
     with pytest.raises(ValueError) as e:
-        parse_plans()
+        parse_plans_config(get_and_validate_plan_config())
 
     assert_that(str(e), contains_string('plan configuration'))
     assert len(ConfigParser.errors()) == 1
@@ -46,7 +46,7 @@ def test_parse_plans_fail(mock_configuration, clean_config_parser_errors):
 
 
 def test_execute_success(mock_record_logger, mock_plan_configuration):
-    execute_plans(parse_plans())
+    execute_plans(parse_plans_config(get_and_validate_plan_config()))
     records_in_report = load_report(mock_record_logger.get_content()).get('records')
     assert_that(records_in_report, contains_inanyorder(*[{'type': 'tr', 'data': {'v': i}} for i in range(4)]))
 

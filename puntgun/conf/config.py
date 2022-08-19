@@ -60,6 +60,11 @@ settings = load_settings()
 
 
 def reload_important_files(**kwargs):
+    """
+    Change file paths base on command arguments passed by user,
+    and reload configuration from new files.
+    """
+
     # Ugly. But don't know how to improve it.
     global config_path
     global plan_file
@@ -99,29 +104,15 @@ logger_format = (
 log_level = settings.get('log_level', 'INFO').upper()
 
 
-def config_log_stream():
-    """
-    Logs about current executing process to stdout will go with print(), not so much lines.
-    """
-
-    # logs that we want user see will show in stdout
-    logger.add(sys.stdout,
-               filter=lambda record: 'o' in record['extra'],
-               format=logger_format,
-               level=log_level)
-
+def config_logging_options():
     # technical diagnostic logs go to stderr
     logger.add(sys.stderr,
                filter=lambda record: 'r' not in record['extra'] and 'o' not in record['extra'],
                format=logger_format,
                level=log_level)
 
-
-def config_log_file():
-    """
-    Only configurate log file and report file when running file command and isn't in unit testing.
-    loguru will follow given path to create log files.
-    """
+    # Only configurate log file and report file when running file command and isn't in unit testing.
+    # loguru will follow given path to create log files.
     if "pytest" not in sys.modules:
         # report file
         # we're borrowing function of loguru library for writing execution report files.
@@ -144,5 +135,9 @@ def config_log_file():
 
 # remove default logging sink (stderr)
 logger.remove()
-# reconfig logging options
-config_log_stream()
+# reconfig logging options,
+# logs that we want user see will show in stdout
+logger.add(sys.stdout,
+           filter=lambda record: 'o' in record['extra'],
+           format=logger_format,
+           level=log_level)

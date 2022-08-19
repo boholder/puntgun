@@ -47,6 +47,7 @@ def load_or_generate_private_key():
               f'({config.pri_key_file}).')
         return pri_key
 
+    # == start logic ==
     if config.pri_key_file.exists():
         print(f"""
 Found the previous saved private key file. 
