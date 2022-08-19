@@ -5,9 +5,9 @@ Any better idea?
 """
 # TODO doc link
 tool_settings = """# The settings of the tool itself.
-# Options can be overridden by the same-name ones in the user-writen plan configuration file
-# or in the environment variables.
-# The values of the commented out options are default values
+# Options can be overridden by the same-name ones 
+# in the user-writen plan configuration file or in the environment variables.
+# The values of the commented out options are default values.
 # Reference documentation: TODO
 
 # Log level of the log file and stderr
@@ -30,6 +30,25 @@ tool_settings = """# The settings of the tool itself.
 #read_password_from_stdin: false
 """
 # TODO doc link
-plan_config = """# This is an example configuration file of plan.
+plan_config = """# This is an example plan configuration file.
+# This file does not cover all available rules, 
+# you'd better check the documentation for more detailed description.
 # Reference documentation: TODO
+
+plans:
+  # Name (explain) of this plan
+  - user_plan: Do block on three users depend on their follower number
+    from:
+      # '@Alice', '@Bob' and '@Charlie'
+      - names: [ 'Alice', 'Bob', 'Charlie' ]
+    that:
+      # who has less than ten followers
+      - follower:
+            less_than: 10
+      # or has more than one thousand followings 
+      - following:
+            more_than: 1000
+    do:
+      # block them
+      - block
  """

@@ -16,8 +16,6 @@ class FilterRule(Option, ABC):
     """
     Let the subclasses choose their type and left this base class as merely a tag.
     """
-    # TODO 单个rule抛异常不应该影响其他rule，更不能断掉程序，抛个自定义RuleError
-    # TODO 在解析plan(init)时rule抛异常，说明输入有问题，直接断掉程序。
 
 
 class ImmediateFilterRule(FilterRule, ABC):

@@ -43,7 +43,6 @@ class AnyOfRuleSet(RuleSet):
     def judge(self, users: rx.Observable[User]) \
             -> Tuple[rx.Observable[Decision], rx.Observable[TwitterApiError]]:
         pass
-    # TODO 如何并发并适时取消？取消的rule调用的请求还会继续运行吗？
 
 
 class WightCondition(MapOption):
