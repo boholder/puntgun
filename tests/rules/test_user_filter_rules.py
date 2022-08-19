@@ -10,9 +10,9 @@ from typing import List
 import pytest
 from dynaconf import Dynaconf
 
-from rules.config_parser import ConfigParser
-from rules.user import User
-from rules.user.filter_rules import UserFilterRule, TextMatchUserFilterRule
+from puntgun.rules.config_parser import ConfigParser
+from puntgun.rules.user import User
+from puntgun.rules.user.filter_rules import UserFilterRule, TextMatchUserFilterRule
 
 
 def test_follower_user_filter_rule():

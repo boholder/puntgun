@@ -1,14 +1,13 @@
 import functools
-from typing import List, Callable, Any
+from typing import List, Callable
 
 import tweepy
 from loguru import logger
 from tweepy import Response
 
-from conf.encrypto import load_or_generate_private_key
-from conf.secret import load_or_request_all_secrets
-from record import Recorder, Recordable, Record
-from rules.user import User
+from puntgun.conf import encrypto, secret
+from puntgun.record import Recorder, Recordable, Record
+from puntgun.rules.user import User
 
 
 class TwitterClientError(Exception):
@@ -181,7 +180,7 @@ class Client(object):
     @staticmethod
     @functools.lru_cache(maxsize=1)
     def singleton():
-        secrets = load_or_request_all_secrets(load_or_generate_private_key())
+        secrets = secret.load_or_request_all_secrets(encrypto.load_or_generate_private_key())
         return Client(tweepy.Client(consumer_key=secrets['ak'],
                                     consumer_secret=secrets['aks'],
                                     access_token=secrets['at'],

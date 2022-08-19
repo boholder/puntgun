@@ -3,22 +3,21 @@ from unittest.mock import MagicMock
 
 import pytest
 
-import client
-from conf.encrypto import generate_private_key, dump_private_key
-from rules.config_parser import ConfigParser
+from puntgun.conf import encrypto
+from puntgun.rules.config_parser import ConfigParser
 
 
 @pytest.fixture
 def generated_key_file(tmp_path):
     file = tmp_path.joinpath('pri_key_file')
-    origin_key = generate_private_key()
-    dump_private_key(origin_key, 'pwd', file)
+    origin_key = encrypto.generate_private_key()
+    encrypto.dump_private_key(origin_key, 'pwd', file)
     return file, origin_key
 
 
 @pytest.fixture
 def mock_private_key_file(monkeypatch, generated_key_file):
-    monkeypatch.setattr('conf.config.pri_key_file', generated_key_file[0])
+    monkeypatch.setattr('puntgun.conf.config.pri_key_file', generated_key_file[0])
     return generated_key_file
 
 
@@ -26,7 +25,7 @@ def mock_private_key_file(monkeypatch, generated_key_file):
 def mock_client(monkeypatch):
     c = MagicMock()
     # set client field for each rule to mock_client
-    monkeypatch.setattr(client.Client, 'singleton', lambda: c)
+    monkeypatch.setattr('puntgun.client.Client.singleton', lambda: c)
     return c
 
 
@@ -78,7 +77,7 @@ def clean_config_parser_errors():
 @pytest.fixture
 def mock_configuration(monkeypatch):
     def set_config(new):
-        monkeypatch.setattr('conf.config.settings', new)
+        monkeypatch.setattr('puntgun.conf.config.settings', new)
 
     return set_config
 
@@ -104,5 +103,5 @@ class MockLogger:
 def mock_record_logger(monkeypatch):
     """For getting json format output for assertion."""
     logger = MockLogger()
-    monkeypatch.setattr('record.logger', logger)
+    monkeypatch.setattr('puntgun.record.logger', logger)
     return logger

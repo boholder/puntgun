@@ -11,10 +11,10 @@ from loguru import logger
 from reactivex import operators as op
 from reactivex.scheduler import ThreadPoolScheduler
 
-from conf import config
-from record import Recordable, Recorder
-from rules import Plan
-from rules.config_parser import ConfigParser
+from puntgun.conf import config
+from puntgun.record import Recordable, Recorder
+from puntgun.rules import Plan
+from puntgun.rules.config_parser import ConfigParser
 
 
 class InvalidConfigurationError(ValueError):

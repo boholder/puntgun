@@ -2,17 +2,16 @@ from pathlib import Path
 
 from loguru import logger
 
-import runner
-import util
-from client import Client
-from conf import config, example
-from conf.encrypto import load_or_generate_private_key
-from conf.secret import load_or_request_all_secrets
+from puntgun.client import Client
+from puntgun.conf import config, example
+from puntgun import runner
+from puntgun import util
+from puntgun.conf import encrypto, secret
 
 
 def load_secrets_with_keyboard_interrupt_exit():
     try:
-        return load_or_request_all_secrets(load_or_generate_private_key())
+        return secret.load_or_request_all_secrets(encrypto.load_or_generate_private_key())
     except KeyboardInterrupt:
         logger.bind(o=True).info("The tool is stopped by the keyboard.")
         exit(1)

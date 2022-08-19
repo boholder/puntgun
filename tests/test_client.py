@@ -5,9 +5,9 @@ import pytest
 import tweepy
 from hamcrest import assert_that, is_, contains_string
 
-from client import Client, ResourceNotFoundError, TwitterApiErrors, TwitterClientError
-from record import Record
-from rules.user import User
+from puntgun.client import Client, ResourceNotFoundError, TwitterApiErrors, TwitterClientError
+from puntgun.record import Record
+from puntgun.rules.user import User
 
 
 class TestTwitterApiErrors:
@@ -114,7 +114,7 @@ class TestUserQuerying:
     def test_get_not_exist_user(self, not_exist_user_response, mock_user_getting_tweepy_client, monkeypatch):
         # check get by username method
         mock_recorder = MagicMock()
-        monkeypatch.setattr('record.Recorder.record', mock_recorder)
+        monkeypatch.setattr('puntgun.record.Recorder.record', mock_recorder)
         Client(mock_user_getting_tweepy_client(not_exist_user_response)).get_users_by_usernames(['whatever'])
         # recorder received api error
         self.assert_user_not_exist_error(mock_recorder)
@@ -127,7 +127,7 @@ class TestUserQuerying:
     def test_get_all_users(self, mixed_response, mock_user_getting_tweepy_client, monkeypatch):
         # check get by username method
         mock_recorder = MagicMock()
-        monkeypatch.setattr('record.Recorder.record', mock_recorder)
+        monkeypatch.setattr('puntgun.record.Recorder.record', mock_recorder)
         users = Client(mock_user_getting_tweepy_client(mixed_response)).get_users_by_usernames(['whatever'])
         self.assert_normal_user(users[0])
         self.assert_no_pinned_tweet_user(users[1])

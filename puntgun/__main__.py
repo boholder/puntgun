@@ -1,6 +1,6 @@
 import fire
 
-from command import Command
+from puntgun.command import Command
 
 banner = r"""
      ____              _      ____

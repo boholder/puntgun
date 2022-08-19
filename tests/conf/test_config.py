@@ -1,8 +1,7 @@
 import datetime
-import importlib
 from pathlib import Path
 
-from conf import config
+from puntgun.conf import config
 
 
 def test_reload_config_files(monkeypatch, tmp_path):
@@ -41,6 +40,3 @@ def test_reload_config_files(monkeypatch, tmp_path):
     assert config.settings.get('a') == 123
     assert config.settings.get('b') == 'hello'
     assert config.settings.get('c') == datetime.datetime(2022, 1, 1, 1, 1, 1)
-
-    # fix corrupted paths
-    importlib.reload(config)

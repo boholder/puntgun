@@ -12,13 +12,13 @@ import reactivex as rx
 from pydantic import BaseModel
 from reactivex import operators as op, Observable
 
-from client import NeedClient
-from rules import RuleResult
-from rules.config_parser import ConfigParser
-from rules.user import User
-from rules.user.action_rules import UserActionRule
-from rules.user.filter_rules import UserFilterRule
-from rules.user.source_rules import UserSourceRule
+from puntgun.client import NeedClient
+from puntgun.rules import RuleResult
+from puntgun.rules.config_parser import ConfigParser
+from puntgun.rules.user import User
+from puntgun.rules.user.action_rules import UserActionRule
+from puntgun.rules.user.filter_rules import UserFilterRule
+from puntgun.rules.user.source_rules import UserSourceRule
 
 
 class UserSourceRuleResultMergingSet(UserSourceRule):

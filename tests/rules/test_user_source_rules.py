@@ -6,10 +6,10 @@ import reactivex.operators as op
 from hamcrest import contains_string, assert_that
 from reactivex.internal import SequenceContainsNoElementsError
 
-import client
-from rules.config_parser import ConfigParser
-from rules.user import User
-from rules.user.source_rules import NameUserSourceRule, UserSourceRule
+from puntgun import client
+from puntgun.rules.config_parser import ConfigParser
+from puntgun.rules.user import User
+from puntgun.rules.user.source_rules import NameUserSourceRule, UserSourceRule
 
 
 class TestCommonBehavior:

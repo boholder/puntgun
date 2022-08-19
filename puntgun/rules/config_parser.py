@@ -5,7 +5,7 @@ from typing import List, TypeVar
 from loguru import logger
 from pydantic import ValidationError
 
-from rules import FromConfig
+from puntgun.rules import FromConfig
 
 
 def import_rule_classes():
@@ -17,10 +17,10 @@ def import_rule_classes():
     This function will do this job.
     """
 
-    for rule_module_name in ['rules.user']:
+    for rule_module_name in ['puntgun.rules.user']:
         rule_module = importlib.import_module(rule_module_name)
         for _, name, _ in list(pkgutil.iter_modules(rule_module.__path__)):
-            importlib.import_module(f'{rule_module_name}.{name}', 'puntgun')
+            importlib.import_module(f'{rule_module_name}.{name}')
 
 
 class ConfigParser(object):

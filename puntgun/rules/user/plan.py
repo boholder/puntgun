@@ -4,15 +4,16 @@ import reactivex as rx
 from loguru import logger
 from reactivex import operators as op, Observable
 
-from record import Recordable, Record
-from rules import validate_required_fields_exist, Plan, RuleResult
-from rules.config_parser import ConfigParser
-from rules.user import User
-from rules.user.action_rules import UserActionRule
-from rules.user.filter_rules import UserFilterRule
-from rules.user.rule_sets import UserSourceRuleResultMergingSet, UserFilterRuleAnyOfSet, \
+from puntgun import rules
+from puntgun.record import Recordable, Record
+from puntgun.rules import Plan, RuleResult
+from puntgun.rules.config_parser import ConfigParser
+from puntgun.rules.user import User
+from puntgun.rules.user.action_rules import UserActionRule
+from puntgun.rules.user.filter_rules import UserFilterRule
+from puntgun.rules.user.rule_sets import UserSourceRuleResultMergingSet, UserFilterRuleAnyOfSet, \
     UserActionRuleResultCollectingSet
-from rules.user.source_rules import UserSourceRule
+from puntgun.rules.user.source_rules import UserSourceRule
 
 
 class UserPlanResult(Recordable):
@@ -79,7 +80,7 @@ class UserPlan(Plan):
         # we won't directly extract values from configuration and assign them to fields,
         # so custom validation is needed
         # as we can't use pydantic library's validating function on fields.
-        validate_required_fields_exist(cls._keyword, conf, ['from', 'do'])
+        rules.validate_required_fields_exist(cls._keyword, conf, ['from', 'do'])
 
         # need at least one default filter rule to keep plan execution functionally
         if 'that' not in conf:

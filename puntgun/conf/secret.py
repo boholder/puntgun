@@ -6,9 +6,9 @@ from loguru import logger
 from pydantic import BaseModel
 from tweepy import OAuth1UserHandler
 
-import util
-from conf import config
-from conf.encrypto import encrypt, decrypt, load_or_generate_public_key, load_or_generate_private_key
+from puntgun import util
+from puntgun.conf import config
+from puntgun.conf import encrypto
 
 # names of secrets in the secret settings file
 twitter_api_key_name = 'AK'
@@ -133,7 +133,7 @@ Before running plans, we'd save secrets into a secret configuration file,
 so next time you running this tool you need not enter these annoying unreadable tokens again.
 And we'll encrypt them before saving, it's time to load your private key.   
 """)
-        encrypt_and_save_secrets_into_file(load_or_generate_public_key(), config.secrets_file, **secrets)
+        encrypt_and_save_secrets_into_file(encrypto.load_or_generate_public_key(), config.secrets_file, **secrets)
         print(f"Secrets saved into file.\n({config.secrets_file})")
 
     return secrets
@@ -158,7 +158,7 @@ def load_or_request_api_secrets(pri_key: RSAPrivateKey = None):
             # By changing default values assignments to this none checking form,
             # you only need to mock that exactly function.
             if not pri_key:
-                pri_key = load_or_generate_private_key()
+                pri_key = encrypto.load_or_generate_private_key()
             return TwitterAPISecrets.from_settings(pri_key)
         except (ValueError, TypeError):
             logger.info("Failed to load api secrets from settings, trying to get API secrets from input")
@@ -176,7 +176,7 @@ def load_or_request_access_token_secrets(api_secrets: TwitterAPISecrets, pri_key
         logger.info("Found previous secrets config file")
         try:
             if not pri_key:
-                pri_key = load_or_generate_private_key()
+                pri_key = encrypto.load_or_generate_private_key()
             return TwitterAccessTokenSecrets.from_settings(pri_key)
         except (ValueError, TypeError):
             logger.info("Failed to load access token secrets from settings,"
@@ -201,7 +201,7 @@ def load_settings_from_environment_variables(name: str, dynaconf_settings=None):
 def load_and_decrypt_secret_from_settings(private_key: RSAPrivateKey, name: str, dynaconf_settings=None):
     if not dynaconf_settings:
         dynaconf_settings = config.settings
-    return decrypt(private_key, binascii.unhexlify(dynaconf_settings.get(name)))
+    return encrypto.decrypt(private_key, binascii.unhexlify(dynaconf_settings.get(name)))
 
 
 def encrypt_and_save_secrets_into_file(public_key: RSAPublicKey,
@@ -213,7 +213,7 @@ def encrypt_and_save_secrets_into_file(public_key: RSAPublicKey,
     """
 
     def transform(msg):
-        return binascii.hexlify(encrypt(public_key, msg)).decode('utf-8')
+        return binascii.hexlify(encrypto.encrypt(public_key, msg)).decode('utf-8')
 
     with open(file_path, 'w', encoding='utf-8') as f:
         # if we do not add '\n' at the tail, all items are printed into one line

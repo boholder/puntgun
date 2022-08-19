@@ -4,9 +4,9 @@ import reactivex as rx
 from loguru import logger
 from reactivex import operators as op, Observable
 
-from client import NeedClient
-from rules import FromConfig
-from rules.user import User
+from puntgun.client import NeedClient
+from puntgun.rules import FromConfig
+from puntgun.rules.user import User
 
 
 def handle_errors(func):

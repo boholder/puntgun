@@ -3,15 +3,15 @@ import reactivex as rx
 from hamcrest import assert_that, contains_string, all_of
 from reactivex import operators as op
 
-from record import Record
-from rules import Plan, RuleResult
-from rules.config_parser import ConfigParser
-from rules.user import User
-from rules.user.action_rules import UserActionRule
-from rules.user.filter_rules import UserFilterRule
-from rules.user.plan import UserPlanResult
-from rules.user.rule_sets import UserSourceRuleResultMergingSet, UserFilterRuleAnyOfSet
-from rules.user.source_rules import UserSourceRule
+from puntgun.record import Record
+from puntgun.rules import Plan, RuleResult
+from puntgun.rules.config_parser import ConfigParser
+from puntgun.rules.user import User
+from puntgun.rules.user.action_rules import UserActionRule
+from puntgun.rules.user.filter_rules import UserFilterRule
+from puntgun.rules.user.plan import UserPlanResult
+from puntgun.rules.user.rule_sets import UserSourceRuleResultMergingSet, UserFilterRuleAnyOfSet
+from puntgun.rules.user.source_rules import UserSourceRule
 
 
 class TRule(UserActionRule, UserFilterRule):

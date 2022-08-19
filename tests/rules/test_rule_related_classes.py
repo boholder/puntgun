@@ -5,9 +5,9 @@ import pydantic
 import pytest
 from hamcrest import assert_that, contains_string, all_of
 
-import rules
-from rules import FromConfig, RuleResult, Plan, NumericRangeFilterRule, TemporalRangeFilterRule
-from rules.config_parser import ConfigParser
+from puntgun import rules
+from puntgun.rules import FromConfig, RuleResult, Plan, NumericRangeFilterRule, TemporalRangeFilterRule
+from puntgun.rules.config_parser import ConfigParser
 
 
 class TestRuleType:

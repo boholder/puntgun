@@ -1,17 +1,17 @@
-import importlib
 import os
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from command import Command, Gen
-from conf import config
+from puntgun.command import Command, Gen
 
 
 def test_fire(monkeypatch):
     # just don't really start
     mock_runner_start_func = MagicMock()
-    monkeypatch.setattr('runner.start', mock_runner_start_func)
-    monkeypatch.setattr('client.Client.singleton', lambda: 1)
+    monkeypatch.setattr('puntgun.runner.start', mock_runner_start_func)
+    monkeypatch.setattr('puntgun.client.Client.singleton', lambda: 1)
+    mock_reload_important_files_func = MagicMock()
+    monkeypatch.setattr('puntgun.conf.config.reload_important_files', mock_reload_important_files_func)
 
     Command.fire(config_path='cf', plan_file='pf', settings_file='sf',
                  private_key_file='pkf', secrets_file='scf', report_file='rf')
@@ -19,21 +19,19 @@ def test_fire(monkeypatch):
     mock_runner_start_func.assert_called_once()
 
     # expect the real runner can use updated config file paths
-    for actual, expect in [(config.config_path, 'cf'),
-                           (config.plan_file, 'pf'),
-                           (config.settings_file, 'sf'),
-                           (config.pri_key_file, 'pkf'),
-                           (config.secrets_file, 'scf'),
-                           (config.report_file, 'rf')]:
-        assert actual == Path(expect)
-
-    # fix corrupted paths
-    importlib.reload(config)
+    input_args = mock_reload_important_files_func.call_args[1]
+    for key, expect in [('config_path', 'cf'),
+                        ('plan_file', 'pf'),
+                        ('settings_file', 'sf'),
+                        ('pri_key_file', 'pkf'),
+                        ('secrets_file', 'scf'),
+                        ('report_file', 'rf')]:
+        assert input_args[key] == expect
 
 
 def test_gen_secrets_and_backup_original_file(monkeypatch, tmp_path):
-    monkeypatch.setattr('command.load_or_generate_private_key', lambda: 'whatever a value')
-    monkeypatch.setattr('command.load_or_request_all_secrets', lambda _: {'a': '1', 'b': '2'})
+    monkeypatch.setattr('puntgun.conf.encrypto.load_or_generate_private_key', lambda: 'whatever a value')
+    monkeypatch.setattr('puntgun.conf.secret.load_or_request_all_secrets', lambda _: {'a': '1', 'b': '2'})
 
     output_file = tmp_path.joinpath('o.yml')
     with open(output_file, 'w', encoding='utf-8') as f:

@@ -15,15 +15,15 @@ in which answers point out that yaml parsing (loading) in python is pretty slow.
 Ok, speed is important. I changed the output format to json -
 I've heard about the effort different json parsing libraries have made.
 """
-from datetime import datetime
+import datetime
 from importlib import metadata
 from typing import List
 
 import orjson
 from loguru import logger
 
-from conf import config
-from rules import Plan
+from puntgun.conf import config
+from puntgun.rules import Plan
 
 
 class Record(object):
@@ -108,7 +108,7 @@ class Recorder(object):
                 # which may require different "undo" process.)
                 # Works sort of like java's serial version uid.
                 'tool_version': metadata.version('puntgun'),
-                'generate_time': datetime.utcnow(),
+                'generate_time': datetime.datetime.utcnow(),
                 'plan_configuration': config.settings.get('plans', []),
                 # name -> plan_configuration, id -> records,
                 # this list sort of like a relation table.

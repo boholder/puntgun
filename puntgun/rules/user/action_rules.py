@@ -1,8 +1,8 @@
 from typing import ClassVar
 
-from client import NeedClient
-from rules import FromConfig, RuleResult
-from rules.user import User
+from puntgun.client import NeedClient
+from puntgun.rules import FromConfig, RuleResult
+from puntgun.rules.user import User
 
 
 class UserActionRule(FromConfig):

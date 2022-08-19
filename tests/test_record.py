@@ -5,8 +5,8 @@ import orjson
 import pytest
 from reactivex import Observable
 
-from record import Record, Recorder, Recordable, load_report
-from rules import Plan
+from puntgun.record import Record, Recorder, Recordable, load_report
+from puntgun.rules import Plan
 
 
 class TestRecord:
@@ -32,7 +32,7 @@ def mock_datetime_now(monkeypatch):
             """make sure datetime.utcnow() returns same instance for assertion convenience"""
             return MOCK_TIME_NOW
 
-    monkeypatch.setattr('record.datetime', MockDatetime)
+    monkeypatch.setattr('datetime.datetime', MockDatetime)
 
 
 class TPlan(Plan):
@@ -69,9 +69,8 @@ class TestRecorder:
         with pytest.raises(ValueError) as _:
             load_report('{'.encode('utf-8'))
 
-    def test_write_report_head_tail(self, mock_datetime_now, mock_record_logger, monkeypatch):
-        mock_config_settings = {'plans': [{'p': 123}]}
-        monkeypatch.setattr('record.config.settings', mock_config_settings)
+    def test_write_report_head_tail(self, mock_datetime_now, mock_record_logger, mock_configuration):
+        mock_configuration({'plans': [{'p': 123}]})
 
         Recorder.write_report_header([TPlan(name='a'), TPlan(name='b')])
         Recorder.write_report_tail()
