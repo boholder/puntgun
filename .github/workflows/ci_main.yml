@@ -20,11 +20,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install pdm "coverage[toml]"
-          pdm global install
+          python -m pip install pdm
+          pdm install
+          pdm add setuptools pip wheel "coverage[toml]"
 
       - name: Run coverage
-        run: coverage run -m pytest tests
+        run: pdm run coverage run -m pytest tests
 
       - name: Coveralls
         # https://github.com/AndreMiras/coveralls-python-action/pull/16#issuecomment-1003445652
