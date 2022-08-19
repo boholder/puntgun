@@ -21,7 +21,7 @@ class FromConfig(BaseModel, abc.ABC):
     _keyword: ClassVar[str] = 'corresponding_rule_name_in_config_of_this_rule'
 
     @classmethod
-    def parse_from_config(cls, conf: dict):
+    def parse_from_config(cls, conf: dict | str):
         """
         Most rules have a dictionary structure of fields, their configurations are something like:
         { 'rule_name': {'field_1':1, 'field_2':2,...} }
@@ -30,6 +30,7 @@ class FromConfig(BaseModel, abc.ABC):
         There are some special cases when parsing a rule from configuration.
         For example, some rules declare fields which names are not the same as the configuration:
         the plan type has a 'from' field which is a reserved keyword in Python.
+        Some rules' config texts only contain their string type keywords, not even a dictionary.
 
         Anyway, we need this polymorphic method to let rules to custom their parsing processes.
         """
