@@ -1,32 +1,53 @@
-[tool.poetry]
+[project]
+# PEP 621 project metadata
+# See https://www.python.org/dev/peps/pep-0621/
 name = "puntgun"
 version = "0.1.0"
 description = "A configurable automation command line tool for Twitter."
-authors = ["boholder <bottleholder@anche.no>"]
-license = "MIT"
+authors = [
+    { name = "boholder", email = "bottleholder@anche.no" },
+]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.10,<3.11"
+dependencies = [
+    "dynaconf<4.0.0,>=3.1.9",
+    "tweepy<5.0.0,>=4.10.0",
+    "reactivex<5.0.0,>=4.0.4",
+    "fire<1.0.0,>=0.4.0",
+    "from-root<2.0.0,>=1.0.2",
+    "cryptography<38.0.0,>=37.0.4",
+    "loguru<1.0.0,>=0.6.0",
+    "pydantic<2.0.0,>=1.9.2",
+    "orjson<4.0.0,>=3.7.12",
+]
+classifiers = [
+    "Environment :: Console",
+    "Operating System :: OS Independent",
+    "Intended Audience :: End Users/Desktop"
+]
 
-[tool.poetry.dependencies]
-python = ">=3.10,<3.11"
-dynaconf = "^3.1.9"
-tweepy = "^4.10.0"
-reactivex = "^4.0.4"
-fire = "^0.4.0"
-from-root = "^1.0.2"
-cryptography = "^37.0.4"
-loguru = "^0.6.0"
-pydantic = "^1.9.2"
-orjson = "^3.7.12"
+[build-system]
+requires = ["pdm-pep517>=1.0.0"]
+build-backend = "pdm.pep517.api"
 
-[tool.poetry.dev-dependencies]
-pytest = "^7.1.2"
-PyHamcrest = "^2.0.4"
+[project.urls]
+"Homepage" = "https://github.com/boholder/puntgun"
+"Bug Tracker" = "https://github.com/boholder/puntgun/issues"
+"Discussions" = "https://github.com/boholder/puntgun/discussions"
+
+[tool.pdm]
+[tool.pdm.dev-dependencies]
+dev = [
+    "pytest<8.0.0,>=7.1.2",
+    "PyHamcrest<3.0.0,>=2.0.4",
+]
+
+[tool.pdm.build]
+includes = []
 
 [tool.pytest.ini_options]
 pythonpath = ["puntgun", "tests"]
 
 [tool.coverage.run]
 relative_files = true
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
