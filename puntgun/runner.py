@@ -37,21 +37,35 @@ def start():
         exit(1)
 
 
-def get_and_validate_plan_config():
-    plans_config = config.settings.get('plans')
-    if plans_config is None:
-        # TODO doc link
-        logger.bind(o=True).error(f"""
-No plan is loaded.
+# TODO doc link
+NO_PLAN_LOAD = """No plan is loaded.
 The tool is trying to load from this plan configuration file:
-{config.plan_file}
+{plan_file}
 If it not exists, generate example configuration files with "puntgun gen config".
 If it exists, check if its content is valid with "puntgun check plan --plan_file=...",
 and fix it with reference documentation:
-fake-doc 
-""")
-        raise InvalidConfigurationError
+fake-doc """
+
+
+def get_and_validate_plan_config():
+    plans_config = config.settings.get('plans')
+    if plans_config is None:
+        print(NO_PLAN_LOAD.format(plan_file=config.plan_file))
+        raise InvalidConfigurationError('No plan is loaded')
     return plans_config
+
+
+# TODO doc link
+# copy the format from Prometheus's promtool
+CHECK_PLAN_FAIL = """Checking {plan_file} FAIL,
+Please fix these errors in plan configuration file with reference document.
+Reference documentation: 
+fake-doc
+Errors:
+{errors}"""
+
+CHECK_PLAN_SUCC = """Checking {plan_file} SUCCESS,
+{plan_num} plans found."""
 
 
 def parse_plans_config(_plans_config):
@@ -60,22 +74,11 @@ def parse_plans_config(_plans_config):
 
     # Can't continue without a zero-error plan configuration
     if ConfigParser.errors():
-        _errors = '\n'.join([str(e) for e in ConfigParser.errors()])
-        # TODO doc link
-        logger.bind(o=True).error(f"""
-Checking {config.plan_file} FAIL,
-Please fix these errors in plan configuration file with reference document.
-Reference documentation: 
-fake-doc
-Errors:
-{_errors}
-""")
-        raise InvalidConfigurationError("Found errors in plan configuration, can not continue")
+        errors = '\n'.join([str(e) for e in ConfigParser.errors()])
+        print(CHECK_PLAN_FAIL.format(plan_file=config.plan_file, errors=errors))
+        raise InvalidConfigurationError("Found errors in plan configuration")
 
-    logger.bind(o=True).info(f"""
-    Checking {config.plan_file} SUCCESS,
-    {len(plans)} plans found.
-    """)
+    print(CHECK_PLAN_SUCC.format(plan_file=config.plan_file, plan_num=len(plans)))
     return plans
 
 

@@ -16,39 +16,7 @@ twitter_api_key_secret_name = 'AKS'
 twitter_access_token_name = 'AT'
 twitter_access_token_secret_name = 'ATS'
 
-
-class TwitterAPISecrets(BaseModel):
-    key: str
-    secret: str
-
-    class Config:
-        # Checking the length is a trick:
-        #
-        # Both loading secrets from environment variables and from setting file
-        # are involved using dynaconf library, and secrets keys in two ways are same after dynaconf loading.
-        # (from env: BULLET_SEC --dynaconf--> sec, from settings: SEC --dynaconf--> sec)
-        #
-        # So we couldn't recognize where the secrets from through dynaconf,
-        # but in env var secrets are plaintext format while in settings file are cipher text.
-        #
-        # Thankfully these two format have a significant difference - the length.
-        # plaintexts length are below 50 characters, but I'll set to 100 for compatibility.
-        max_anystr_length = 100
-
-    @staticmethod
-    def from_environment():
-        return TwitterAPISecrets(key=load_settings_from_environment_variables(twitter_api_key_name),
-                                 secret=load_settings_from_environment_variables(twitter_api_key_secret_name))
-
-    @staticmethod
-    def from_settings(pri_key: RSAPrivateKey):
-        return TwitterAPISecrets(key=load_and_decrypt_secret_from_settings(pri_key, twitter_api_key_name),
-                                 secret=load_and_decrypt_secret_from_settings(pri_key, twitter_api_key_secret_name))
-
-    @staticmethod
-    def from_input():
-        print("""
-Now we need a "Twitter Dev OAuth App API" to continue.
+GET_API_SECRETS_FROM_INPUT = """Now we need a "Twitter Dev OAuth App API" to continue.
 With this, we can request the developer APIs provided by Twitter.
 You can get one by signing up on link below for free if you have a Twitter account.
 
@@ -69,11 +37,55 @@ And do not forget to turn on OAuth 1.0a in your App settings:
      https://developer.twitter.com/en/docs/authentication/oauth-1-0a/pin-based-oauth
      
 Feel free to terminate this tool if you do not want to register right now.
-(Do not forget to clean the clipboard after copying and pasting secrets to here.)
-""")
+(Do not forget to clean the clipboard after copying and pasting secrets to here.)"""
 
+
+class TwitterAPISecrets(BaseModel):
+    key: str
+    secret: str
+
+    class Config:
+        # Checking the length is a trick:
+        #
+        # Both loading secrets from environment variables and from setting file
+        # are involved using dynaconf library, and secrets keys in two ways are same after dynaconf loading.
+        # (from env: BULLET_SEC --dynaconf--> sec, from settings: SEC --dynaconf--> sec)
+        #
+        # So we couldn't recognize where the secrets from through dynaconf,
+        # but in env var secrets are plaintext format while in settings file are ciphertext.
+        #
+        # Thankfully these two format have a significant difference - the length.
+        # plaintexts length are below 50 characters, but I'll set to 100 for compatibility.
+        max_anystr_length = 100
+
+    @staticmethod
+    def from_environment():
+        return TwitterAPISecrets(key=load_settings_from_environment_variables(twitter_api_key_name),
+                                 secret=load_settings_from_environment_variables(twitter_api_key_secret_name))
+
+    @staticmethod
+    def from_settings(pri_key: RSAPrivateKey):
+        return TwitterAPISecrets(key=load_and_decrypt_secret_from_settings(pri_key, twitter_api_key_name),
+                                 secret=load_and_decrypt_secret_from_settings(pri_key, twitter_api_key_secret_name))
+
+    @staticmethod
+    def from_input():
+        print(GET_API_SECRETS_FROM_INPUT)
         return TwitterAPISecrets(key=util.get_input_from_terminal('Api key'),
                                  secret=util.get_input_from_terminal('Api key secret'))
+
+
+AUTH_URL = """We have gotten a pair of API secrets. Cool. But we still need to do one last thing:
+tell Twitter you allowed this API secrets pair to operate your account 
+(which is indispensable for executing block operation etc.). How?
+We just used the API secrets to request Twitter and Twitter returned a link.
+
+{auth_url}
+
+Same as other third-party authentication agreement,
+you'll see a number sequence called "PIN code" when you open the link,
+enter them back to here. Again, feel free to terminate this tool if you do not want to continue.
+"""
 
 
 class TwitterAccessTokenSecrets(BaseModel):
@@ -98,23 +110,15 @@ class TwitterAccessTokenSecrets(BaseModel):
     @staticmethod
     def from_input(api_secrets: TwitterAPISecrets):
         oauth1_user_handler = OAuth1UserHandler(api_secrets.key, api_secrets.secret, callback='oob')
-
-        print(f"""
-We've gotten a pair of API secrets. Cool. But we still need to do one last thing:
-tell Twitter you allowed this API secrets pair to operate your account 
-(which is indispensable for executing block operation etc.). How?
-We just used the API secrets to request Twitter and Twitter returned back an link.
-
-{oauth1_user_handler.get_authorization_url()}
-
-Same as other third-party authentication agreement,
-you'll see a number series called "PIN code" when you open the link,
-enter them back to here. Again, feel free to terminate this tool if you do not want to continue.
-""")
-
+        print(AUTH_URL.format(auth_url=oauth1_user_handler.get_authorization_url()))
         pin = util.get_input_from_terminal('PIN')
         token_pair = oauth1_user_handler.get_access_token(pin)
         return TwitterAccessTokenSecrets(token=token_pair[0], secret=token_pair[1])
+
+
+SAVE_SECRETS = """Before running plans, we'd save secrets into a secret configuration file,
+so next time you running this tool you need not enter these annoying unreadable tokens again.
+And we'll encrypt them before saving, it's time to load your private key."""
 
 
 def load_or_request_all_secrets(pri_key: RSAPrivateKey):
@@ -128,13 +132,9 @@ def load_or_request_all_secrets(pri_key: RSAPrivateKey):
     # Save the secrets into file if they are not saved yet.
     # Must save them at once because saving method will override the existing file.
     if not secrets_config_file_valid():
-        print(f"""
-Before running plans, we'd save secrets into a secret configuration file,
-so next time you running this tool you need not enter these annoying unreadable tokens again.
-And we'll encrypt them before saving, it's time to load your private key.   
-""")
+        print(SAVE_SECRETS)
         encrypt_and_save_secrets_into_file(encrypto.load_or_generate_public_key(), config.secrets_file, **secrets)
-        print(f"Secrets saved into file.\n({config.secrets_file})")
+        logger.bind(o=True).info(f"Secrets saved into file:\n({config.secrets_file})")
 
     return secrets
 
@@ -170,7 +170,7 @@ def load_or_request_access_token_secrets(api_secrets: TwitterAPISecrets, pri_key
     try:
         return TwitterAccessTokenSecrets.from_environment()
     except ValueError:
-        logger.info('Failed to load access token secrets from environment')
+        logger.info("Failed to load access token secrets from environment")
 
     if secrets_config_file_valid():
         logger.info("Found previous secrets config file")
@@ -179,8 +179,8 @@ def load_or_request_access_token_secrets(api_secrets: TwitterAPISecrets, pri_key
                 pri_key = encrypto.load_or_generate_private_key()
             return TwitterAccessTokenSecrets.from_settings(pri_key)
         except (ValueError, TypeError):
-            logger.info("Failed to load access token secrets from settings,"
-                        " trying to get access token secrets from input")
+            logger.info("Failed to load access token secrets from settings, "
+                        "trying to get access token secrets from input")
 
     # here we need the api secrets to generate new access token.
     return TwitterAccessTokenSecrets.from_input(api_secrets)

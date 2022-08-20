@@ -2,7 +2,8 @@ import os
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from puntgun.command import Command, Gen
+from puntgun import command
+from puntgun.command import Gen
 
 
 def test_fire(monkeypatch):
@@ -13,8 +14,7 @@ def test_fire(monkeypatch):
     mock_reload_important_files_func = MagicMock()
     monkeypatch.setattr('puntgun.conf.config.reload_important_files', mock_reload_important_files_func)
 
-    Command.fire(config_path='cf', plan_file='pf', settings_file='sf',
-                 private_key_file='pkf', secrets_file='scf', report_file='rf')
+    command.fire('pf', 'rf', 'sf', 'cf', 'scf', 'pkf')
 
     mock_runner_start_func.assert_called_once()
 
@@ -37,7 +37,7 @@ def test_gen_secrets_and_backup_original_file(monkeypatch, tmp_path):
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write('123')
 
-    Gen.plain_secrets(output_file=output_file)
+    Gen.plain_secrets(output_file=output_file, private_key_file='', secrets_file='')
 
     assert output_file.read_text(encoding='utf-8') == 'a: 1\nb: 2\n'
     assert Path(str(output_file) + '.bak').read_text(encoding='utf-8') == '123'

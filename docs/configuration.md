@@ -70,7 +70,7 @@ The tool will use `--secrets_file` and `--private_key_file` to manage secrets in
 | `--plan_file`        | `<config path>`/plan.yml                                                    | [Plan configuration file]() you'd like to execute                                      |
 | `--settings_file`    | `<config path>`/settings.yml                                                | Global tool settings that will apply to every execution                                |
 | `--private_key_file` | `<config path>`/.puntgun_rsa4096                                            | Tool generated password protected private key                                          |
-| `--secrets_file`     | `<config path>`/.secrets.yml                                                | Tool generated cipher text or user writen plain text file contains [secrets](#secrets) |
+| `--secrets_file`     | `<config path>`/.secrets.yml                                                | Tool generated ciphertext or user writen plain text file contains [secrets](#secrets) |
 | `--report_file`      | `<config path>`/reports/`<plan_file>`_`<time>`_report.json                  | Expect path of the tool generated execution report                                     |
 
 ## Secrets
@@ -129,7 +129,7 @@ First we talk about secrets saving. If the tool can't find some secrets in envir
 it will ask you to input secrets through terminal, then save all secrets into an encrypted file
 (named as `<secrets_file>`), sort of like put them into a chest and lock the chest.
 No one can figure out the secret values even they can read the `<secrets_file>`,
-there are just meaningless cipher text, no plain text.
+there are just meaningless ciphertext, no plain text.
 
 Stay in simple, for encrypting that `<secrets_file>`, we'll need a private key (another secret value),
 the tool will automatically generate one for you.

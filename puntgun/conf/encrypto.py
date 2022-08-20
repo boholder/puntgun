@@ -19,8 +19,30 @@ def load_or_generate_public_key():
     return load_or_generate_private_key().public_key()
 
 
+ENTER_PWD = """Found the previous saved private key file.
+({pri_key_file})
+Now please enter the password.
+
+If you have forgotten the password, 
+just delete the private key file and the secrets file
+({secrets_file})
+and rerun this tool for initializing things again."""
+
+GENERATE_PRI_KEY = """It seems that you have not generated a private key for encrypting secrets before.
+Let's generate one for you, 
+but we need you to set a password for protecting that private key.
+The strength of this password should be the same as your Twitter account password.
+It would be better if you set a different password from the Twitter password.  
+And you should remember this password for using this tool in the future.
+
+If you can not remember it, 
+just delete the private key file and the secrets file and run it again.
+{pri_key_file} 
+{secrets_file}"""
+
+
 def load_or_generate_private_key():
-    """For decrypting secrets."""
+    """Load private key for decrypting secrets."""
 
     def load_with_password_from_prompt():
         """Trying different passwords in an infinity loop till the user get bored."""
@@ -43,42 +65,19 @@ def load_or_generate_private_key():
         pwd = util.get_input_from_terminal('Password')
         pri_key = generate_private_key()
         dump_private_key(pri_key, pwd, config.pri_key_file)
-        print(f'The private key has been saved into the file'
-              f'({config.pri_key_file}).')
+        logger.bind(o=True).info(f"The private key has been saved into the file:\n{config.pri_key_file}")
         return pri_key
 
     # == start logic ==
     if config.pri_key_file.exists():
-        print(f"""
-Found the previous saved private key file. 
-({config.pri_key_file})
-Now please enter the password.
-
-If you've forget the password, just delete the private key file and the secrets file
-({config.secrets_file}) 
-and rerun this tool for initializing things again.
-""")
-
+        print(ENTER_PWD.format(pri_key_file=config.pri_key_file, secrets_file=config.secrets_file))
         logger.info("Found the existing private key, trying to load with password")
         if config.settings.get('read_password_from_stdin', False):
             return load_with_password_from_stdin()
         else:
             return load_with_password_from_prompt()
-
     else:
-        print(f"""
-It seems that you have not generated a private key for encrypting secrets before.
-Let's generate one for you, 
-but we need you to set a password for protecting that private key.
-The strength of this password should be the same as your Twitter account password.
-It would be better if you set a different password from the Twitter password.  
-And you should remember this password for using this tool in the future.
-
-If you can not remember it, 
-just delete the private key file and the secrets file and run it again.
-({config.pri_key_file}, {config.secrets_file})
-""")
-
+        print(GENERATE_PRI_KEY.format(pri_key_file=config.pri_key_file, secrets_file=config.secrets_file))
         logger.info("Generated a new private key")
         return generate_and_save()
 

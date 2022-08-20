@@ -16,7 +16,6 @@ Ok, speed is important. I changed the output format to json -
 I've heard about the effort different json parsing libraries have made.
 """
 import datetime
-from importlib import metadata
 from typing import List
 
 import orjson
@@ -107,7 +106,7 @@ class Recorder(object):
                 # (you have different available actions at different version,
                 # which may require different "undo" process.)
                 # Works sort of like java's serial version uid.
-                'tool_version': metadata.version('puntgun'),
+                'tool_version': config.tool_version,
                 'generate_time': datetime.datetime.utcnow(),
                 'plan_configuration': config.settings.get('plans', []),
                 # name -> plan_configuration, id -> records,

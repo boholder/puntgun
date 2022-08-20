@@ -4,6 +4,7 @@ All the loaded settings and global variables for many modules to use.
 import os
 import sys
 from datetime import datetime
+from importlib import metadata
 from pathlib import Path
 
 # import dynaconf before loguru because loguru also uses dynaconf
@@ -40,6 +41,8 @@ if not log_path.exists():
     os.makedirs(log_path)
 if not report_path.exists():
     os.makedirs(report_path)
+
+tool_version = metadata.version('puntgun')
 
 
 def load_settings():
