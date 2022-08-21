@@ -52,7 +52,7 @@ class ConfigParser(object):
             """
             return type('FakeSubclassOf' + expected_type.__name__, (expected_type,), {})()
 
-        logger.debug('[config parse] expect type:{}, config:{}', expected_type.__name__, conf)
+        logger.debug('[Config parser] expect type:{}, config:{}', expected_type.__name__, conf)
 
         for subclass in expected_type.__subclasses__():
             if subclass.keyword() in conf:

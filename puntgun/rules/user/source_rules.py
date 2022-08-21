@@ -49,8 +49,11 @@ class NameUserSourceRule(UserSourceRule, NeedClient):
             # in a single request up to 100 like this one.
             # At least we needn't query one by one.
             op.buffer_with_count(100),
+            # log for debug
+            op.do(rx.Observer(on_next=lambda users: logger.debug("Buffered user names: {}", users))),
             op.map(self.client.get_users_by_usernames),
             op.flat_map(lambda x: x),
+            op.do(rx.Observer(on_next=lambda u: logger.debug("User from client: {}", u))),
         )
 
     @classmethod

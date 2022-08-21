@@ -75,3 +75,29 @@ def my_concurrency_test():
     )
 
     input("Press Enter key to exit\n")
+
+
+def is_recalculate_upstream_elements_for_every_subscriber():
+    """
+    No, but it does so when using, something wrong in my usage.
+    Found the solution:
+    https://stackoverflow.com/a/68482112/11397457
+    """
+    source_call_count = 0
+
+    def on_next(i):
+        print(f'i:{i}, call count:{source_call_count}')
+
+    def source():
+        nonlocal source_call_count
+        old = source_call_count
+        source_call_count += 1
+        return old
+
+    s = rx.start(source)
+    s.pipe(
+        op.do(rx.Observer(on_next=on_next)),
+        op.do(rx.Observer(on_next=on_next))
+    ).run()
+    s.subscribe(on_next=on_next)
+    s.subscribe(on_next=on_next)

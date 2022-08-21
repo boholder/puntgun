@@ -99,25 +99,24 @@ class UserPlan(Plan):
         result explanation: (<user instance>, <filtering result>, <action results>)
         :return: rx.Observable(Tuple[ Tuple[User, RuleResult], List[RuleResult] ])
         """
-        users_need_to_be_performed_with_filtering_result = self._filtering().pipe(
-            # take users that triggered filter rules
-            op.filter(lambda z: bool(z[1]) is True)
-        )
+        # take users that triggered filter rules
+        target_users = self._filtering().pipe(op.filter(lambda z: bool(z[1]) is True))
 
-        users_need_to_be_performed_with_filtering_result.subscribe(
-            lambda z: logger.debug('Plan[id={}]: User triggered filter rules: {}', self.id, z[0]))
-
-        action_results = users_need_to_be_performed_with_filtering_result.pipe(
+        action_results = target_users.pipe(
+            # log for debug
+            op.do(rx.Observer(on_next=lambda z: logger.debug(
+                "Plan[id={}]: User triggered filter rules: {}", self.id, z[0]))),
             # extract user instance from tuple
             op.map(lambda z: z[0]),
-            # apply actions on users
+            # apply actions on target users
             op.map(self.actions),
             # flat_map() is needed
             op.flat_map(lambda x: x),
+            op.share(),
         )
 
-        return rx.zip(users_need_to_be_performed_with_filtering_result, action_results).pipe(
-            # put three values under one tuple, no nested
+        return rx.zip(target_users, action_results).pipe(
+            # Convert results into a DTO instance
             op.map(lambda zipped: UserPlanResult(plan_id=self.id,
                                                  user=zipped[0][0],
                                                  filtering_result=zipped[0][1],
@@ -130,10 +129,19 @@ class UserPlan(Plan):
         result explanation: (<user instance>, <filtering result>)
         :return: rx.Observable(Tuple[User, RuleResult])
         """
-        users = self.sources()
-
-        users.subscribe(lambda u: logger.debug('Plan[id={}]: User from source: {}', self.id, u))
-
-        # flat_map() is needed because calling UserFilterRuleAnyOfSet will return Observable[RuleResult]
-        filter_results = users.pipe(op.map(self.filters), op.flat_map(lambda x: x))
+        users = self.sources().pipe(
+            # log for debug
+            op.do(rx.Observer(on_next=lambda u: logger.debug(
+                "Plan[id={}]: Distinct source user: {}", self.id, u))),
+            # prevent repeat querying client to unnecessarily consuming additional API resource
+            # https://stackoverflow.com/a/68482112/11397457
+            op.share(),
+        )
+        filter_results = users.pipe(
+            # execute filter rules on users
+            op.map(self.filters),
+            # flat_map() is needed because calling UserFilterRuleAnyOfSet will return Observable[RuleResult]
+            op.flat_map(lambda x: x),
+            op.share(),
+        )
         return rx.zip(users, filter_results)

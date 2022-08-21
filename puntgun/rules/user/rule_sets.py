@@ -9,6 +9,7 @@ It's the composite pattern I guess.
 from typing import List
 
 import reactivex as rx
+from loguru import logger
 from pydantic import BaseModel
 from reactivex import operators as op, Observable
 
@@ -34,9 +35,12 @@ class UserSourceRuleResultMergingSet(UserSourceRule):
         return cls(rules=[ConfigParser.parse(c, UserSourceRule) for c in conf['any_of']])
 
     def __call__(self) -> Observable[User]:
-        return rx.merge(*[rx.start(r) for r in self.rules]).pipe(
+        users_observables = [rx.start(r) for r in self.rules]
+        return rx.merge(*users_observables).pipe(
             # extract user source rules' results
             op.flat_map(lambda x: x),
+            # log for debug
+            op.do(rx.Observer(on_next=lambda u: logger.debug("Source user before distinct: {}", u))),
             # remove repeating elements
             op.distinct()
         )
@@ -88,7 +92,8 @@ class UserFilterRuleAllOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
             if not result:
                 return rx.just(result)
 
-        return rx.merge(*[rx.start(execution_wrapper(user, r)) for r in self.slow_rules]).pipe(
+        rule_result_observables = [rx.start(execution_wrapper(user, r)) for r in self.slow_rules]
+        return rx.merge(*rule_result_observables).pipe(
             # each slow rule returns an observable that contains only one boolean value.
             op.flat_map(lambda x: x),
             # expect first False result or return True finally.
@@ -115,7 +120,8 @@ class UserFilterRuleAnyOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
             if result:
                 return rx.just(result)
 
-        return rx.merge(*[rx.start(execution_wrapper(user, r)) for r in self.slow_rules]).pipe(
+        rule_result_observables = [rx.start(execution_wrapper(user, r)) for r in self.slow_rules]
+        return rx.merge(*rule_result_observables).pipe(
             op.flat_map(lambda x: x),
             op.first_or_default(lambda e: bool(e) is True, RuleResult.false(self))
         )
@@ -135,7 +141,8 @@ class UserActionRuleResultCollectingSet(UserActionRule):
         return cls(rules=[ConfigParser.parse(c, UserActionRule) for c in conf['all_of']])
 
     def __call__(self, user: User) -> Observable[List[RuleResult]]:
-        return rx.merge(*[rx.start(execution_wrapper(user, r)) for r in self.rules]).pipe(
+        action_results = [rx.start(execution_wrapper(user, r)) for r in self.rules]
+        return rx.merge(*action_results).pipe(
             # collect them into one list
             op.buffer_with_count(len(self.rules))
         )

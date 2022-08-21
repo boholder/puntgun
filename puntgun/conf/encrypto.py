@@ -51,7 +51,7 @@ def load_or_generate_private_key():
             if err_count > 2:
                 print('Maybe you want to reset the password as described above.')
             try:
-                private_key = load_private_key(util.get_input_from_terminal('Password'), config.pri_key_file)
+                private_key = load_private_key(util.get_secret_from_terminal('Password'), config.pri_key_file)
                 logger.info("Private key file loaded with correct password")
                 return private_key
             except ValueError:
@@ -62,7 +62,7 @@ def load_or_generate_private_key():
         return load_private_key("".join(sys.stdin.readlines()), config.pri_key_file)
 
     def generate_and_save():
-        pwd = util.get_input_from_terminal('Password')
+        pwd = util.get_secret_from_terminal('Password')
         pri_key = generate_private_key()
         dump_private_key(pri_key, pwd, config.pri_key_file)
         logger.bind(o=True).info(f"The private key has been saved into the file:\n{config.pri_key_file}")

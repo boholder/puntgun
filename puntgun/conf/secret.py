@@ -71,8 +71,8 @@ class TwitterAPISecrets(BaseModel):
     @staticmethod
     def from_input():
         print(GET_API_SECRETS_FROM_INPUT)
-        return TwitterAPISecrets(key=util.get_input_from_terminal('Api key'),
-                                 secret=util.get_input_from_terminal('Api key secret'))
+        return TwitterAPISecrets(key=util.get_secret_from_terminal('Api key'),
+                                 secret=util.get_secret_from_terminal('Api key secret'))
 
 
 AUTH_URL = """We have gotten a pair of API secrets. Cool. But we still need to do one last thing:

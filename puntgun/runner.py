@@ -89,29 +89,31 @@ pool_scheduler = ThreadPoolScheduler(optimal_thread_count)
 
 
 def execute_plans(plans: List[Plan]):
-    # Temporal coupling for compose a correct json format output.
-    Recorder.write_report_header(plans)
-
     def on_error(e):
         logger.error("Error occurred when executing plan", e)
         raise e
 
-    for plan in plans:
-        logger.info('Plan[id={}] start', plan.id)
-        try:
-            # Explicitly blocking execute plans one by one.
-            # for avoiding competition among plans on limited API invocation resources.
-            plan().pipe(
-                op.subscribe_on(pool_scheduler),
-                op.do(rx.Observer(on_next=process_plan_result, on_error=on_error))
-            ).run()
-        except rx.internal.SequenceContainsNoElementsError:
-            # If there is no element in the pipeline, the reactivex library will raise an error,
-            # catch this error as an expected case.
-            logger.warning("Plan[id={}] has no valid target (no candidate triggered filter rules)", plan.id)
+    def run_plans():
+        for plan in plans:
+            logger.info('Plan[id={}] start', plan.id)
 
-        logger.info('Plan[id={}] finished', plan.id)
+            try:
+                # Explicitly blocking execute plans one by one.
+                # for avoiding competition among plans on limited API invocation resources.
+                plan().pipe(
+                    op.subscribe_on(pool_scheduler),
+                    op.do(rx.Observer(on_next=process_plan_result, on_error=on_error))
+                ).run()
+            except rx.internal.SequenceContainsNoElementsError:
+                # If there is no element in the pipeline, the reactivex library will raise an error,
+                # catch this error as an expected case.
+                logger.warning("Plan[id={}] has no valid target (no candidate triggered filter rules)", plan.id)
 
+            logger.info('Plan[id={}] finished', plan.id)
+
+    # Temporal coupling for compose a correct json format report.
+    Recorder.write_report_header(plans)
+    run_plans()
     Recorder.write_report_tail()
 
 
