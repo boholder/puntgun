@@ -80,9 +80,9 @@ class TwitterApiErrors(Exception, Recordable):
         self.errors = [TwitterApiError.from_response(e) for e in resp_errors]
 
         super().__init__(f"Twitter Server returned partial errors when querying API: "
-                         f"function called: [{query_func_name}], "
-                         f"params: [{query_params}], "
-                         f"errors: [{self.errors}]")
+                         f"function called: {query_func_name}, "
+                         f"params: {query_params}, "
+                         f"errors: {self.errors}")
 
     def __bool__(self):
         return bool(self.errors)
@@ -117,14 +117,14 @@ def record_twitter_api_errors(client_func):
     """
 
     def record_api_errors(request_params, resp_errors):
-        api_errors = TwitterApiErrors(str(client_func), request_params, resp_errors)
+        api_errors = TwitterApiErrors(client_func.__name__, request_params, resp_errors)
         logger.bind(o=True).info(api_errors)
         Recorder.record(api_errors)
 
     def decorator(*args, **kwargs):
         try:
             resp = client_func(*args, **kwargs)
-            if hasattr(resp, 'errors'):
+            if hasattr(resp, 'errors') and len(resp.errors) > 0:
                 record_api_errors(kwargs, resp.errors)
             return resp
         except tweepy.errors.TweepyException as e:
@@ -264,8 +264,8 @@ class Client(object):
         **rate limit: 50 / 15 min**
         https://help.twitter.com/en/using-twitter/advanced-twitter-block-options
         https://developer.twitter.com/en/docs/twitter-api/users/blocks/api-reference/post-users-user_id-blocking
+        TODO block following? follower?
         """
-        # TODO block following? follower?
         return self.clt.block(target_user_id=target_user_id).data['blocking']
 
     @property
@@ -275,8 +275,8 @@ class Client(object):
         Call getting method, cache them, and return the cache on latter calls.
         Since the tool may be constantly modifying the block list,
         this method just takes a snapshot of the list, it's sufficient for use.
+        TODO not finish
         """
-        # TODO
         pass
 
 

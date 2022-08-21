@@ -66,6 +66,8 @@ def mock_tweepy_client():
 def mock_user_getting_tweepy_client(mock_tweepy_client):
     def set_response(test_response_data):
         mock_tweepy_client.get_users = MagicMock(return_value=test_response_data)
+        # the logic will get function's __name__ attribute when recording api errors
+        mock_tweepy_client.get_users.__name__ = 'mock_get_users_func'
         return mock_tweepy_client
 
     return set_response

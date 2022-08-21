@@ -49,6 +49,7 @@ class NameUserSourceRule(UserSourceRule, NeedClient):
             # in a single request up to 100 like this one.
             # At least we needn't query one by one.
             op.buffer_with_count(100),
+            # TODO 两个人怎么调用了7次？
             op.map(self.client.get_users_by_usernames),
             op.flat_map(lambda x: x),
         )

@@ -91,12 +91,16 @@ def execute_plans(plans: List[Plan]):
     # Temporal coupling for compose a correct json format output.
     Recorder.write_report_header(plans)
 
+    def on_error(e):
+        logger.error("Error occurred when executing plan", e)
+        raise e
+
     for plan in plans:
         logger.info('Begin to execute plan: {}', plan)
         # Explicitly blocking execute plans one by one.
         # for avoiding competition among plans on limited API invocation resources.
         plan().pipe(op.subscribe_on(pool_scheduler),
-                    op.do(rx.Observer(on_next=process_plan_result))
+                    op.do(rx.Observer(on_next=process_plan_result, on_error=on_error))
                     ).run()
         logger.info('Finished plan: {}', plan)
 

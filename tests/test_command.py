@@ -29,7 +29,7 @@ def test_fire(monkeypatch):
         assert input_args[key] == expect
 
 
-def test_gen_secrets_and_backup_original_file(monkeypatch, tmp_path):
+def test_gen_plaintext_secrets_and_backup_original_file(monkeypatch, tmp_path):
     monkeypatch.setattr('puntgun.conf.encrypto.load_or_generate_private_key', lambda: 'whatever a value')
     monkeypatch.setattr('puntgun.conf.secret.load_or_request_all_secrets', lambda _: {'a': '1', 'b': '2'})
 
