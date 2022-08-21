@@ -41,10 +41,19 @@ class TestUserSourceRuleResultMergingSet:
             assert isinstance(r, self.TUserSourceRule)
 
         # two test rules result merge into [User(id=0), User(id=1), User(id=2)]
-        rule_set().pipe(
-            op.do(rx.Observer(on_next=user_id_sequence_checker))
-        ).run()
+        rule_set().pipe(op.do(rx.Observer(on_next=user_id_sequence_checker))).run()
         assert user_id_sequence_checker.call_count == 3
+
+    def test_merge_on_single_source_rule(self, user_id_sequence_checker):
+        rule_set = ConfigParser.parse({'any_of': [{'sr': {'num': 2}}]}, UserSourceRule)
+
+        # check type
+        assert isinstance(rule_set, UserSourceRuleResultMergingSet)
+        for r in rule_set.rules:
+            assert isinstance(r, self.TUserSourceRule)
+        # two elements in pipeline: [User(id=0), User(id=1)]
+        rule_set().pipe(op.do(rx.Observer(on_next=user_id_sequence_checker))).run()
+        assert user_id_sequence_checker.call_count == 2
 
 
 class TImmediateFilterRule(UserFilterRule):

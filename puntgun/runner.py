@@ -9,6 +9,7 @@ from typing import List
 import reactivex as rx
 from loguru import logger
 from reactivex import operators as op
+from reactivex.internal import SequenceContainsNoElementsError
 from reactivex.scheduler import ThreadPoolScheduler
 
 from puntgun.conf import config
@@ -96,13 +97,20 @@ def execute_plans(plans: List[Plan]):
         raise e
 
     for plan in plans:
-        logger.info('Begin to execute plan: {}', plan)
-        # Explicitly blocking execute plans one by one.
-        # for avoiding competition among plans on limited API invocation resources.
-        plan().pipe(op.subscribe_on(pool_scheduler),
-                    op.do(rx.Observer(on_next=process_plan_result, on_error=on_error))
-                    ).run()
-        logger.info('Finished plan: {}', plan)
+        logger.info('Plan[id={}] start', plan.id)
+        try:
+            # Explicitly blocking execute plans one by one.
+            # for avoiding competition among plans on limited API invocation resources.
+            plan().pipe(
+                op.subscribe_on(pool_scheduler),
+                op.do(rx.Observer(on_next=process_plan_result, on_error=on_error))
+            ).run()
+        except rx.internal.SequenceContainsNoElementsError:
+            # If there is no element in the pipeline, the reactivex library will raise an error,
+            # catch this error as an expected case.
+            logger.warning("Plan[id={}] has no valid target (no candidate triggered filter rules)", plan.id)
+
+        logger.info('Plan[id={}] finished', plan.id)
 
     Recorder.write_report_tail()
 

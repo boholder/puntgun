@@ -47,14 +47,28 @@ class TestCommonBehavior:
 
     def test_when_not_all_calls_to_client_return_empty_list(self, mock_client, user_id_sequence_checker):
         # as long as not all calls to the client returns empty lists, it's ok
-        mock_get_users_by_usernames = MagicMock(side_effect=[[], [User(id=0)]])
+        mock_get_users_by_usernames = MagicMock(side_effect=[[User(id=i) for i in range(100)], [User(id=100)]])
         mock_client.get_users_by_usernames = mock_get_users_by_usernames
         rule = NameUserSourceRule.parse_obj({'names': ['first_request'] * 100 + ['second_request']})
 
         rule().pipe(op.do(rx.Observer(on_next=user_id_sequence_checker))).run()
+        # called client function twice
         assert mock_get_users_by_usernames.call_count == 2
-        assert user_id_sequence_checker.call_count == 1
+        assert mock_get_users_by_usernames.call_args_list[0] == call(['first_request'] * 100)
         assert mock_get_users_by_usernames.call_args_list[1] == call(['second_request'])
+        # called subscriber function with User(id=0)...User(id=100)
+        assert user_id_sequence_checker.call_count == 101
+
+    def test_execute_with_less_than_100_names(self, mock_client, user_id_sequence_checker):
+        # as long as not all calls to the client returns empty lists, it's ok
+        mock_get_users_by_usernames = MagicMock(side_effect=[[User(id=0), User(id=1)]])
+        mock_client.get_users_by_usernames = mock_get_users_by_usernames
+        rule = NameUserSourceRule.parse_obj({'names': ['first_request', 'second_request']})
+
+        rule().pipe(op.do(rx.Observer(on_next=user_id_sequence_checker))).run()
+        assert mock_get_users_by_usernames.call_count == 1
+        assert user_id_sequence_checker.call_count == 2
+        assert mock_get_users_by_usernames.call_args_list[0] == call(['first_request', 'second_request'])
 
 
 def test_name_user_source_rule(mock_client, user_id_sequence_checker):

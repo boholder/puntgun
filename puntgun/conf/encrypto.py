@@ -70,15 +70,15 @@ def load_or_generate_private_key():
 
     # == start logic ==
     if config.pri_key_file.exists():
-        print(ENTER_PWD.format(pri_key_file=config.pri_key_file, secrets_file=config.secrets_file))
         logger.info("Found the existing private key, trying to load with password")
+        print(ENTER_PWD.format(pri_key_file=config.pri_key_file, secrets_file=config.secrets_file))
         if config.settings.get('read_password_from_stdin', False):
             return load_with_password_from_stdin()
         else:
             return load_with_password_from_prompt()
     else:
-        print(GENERATE_PRI_KEY.format(pri_key_file=config.pri_key_file, secrets_file=config.secrets_file))
         logger.info("Generated a new private key")
+        print(GENERATE_PRI_KEY.format(pri_key_file=config.pri_key_file, secrets_file=config.secrets_file))
         return generate_and_save()
 
 

@@ -105,7 +105,7 @@ class UserPlan(Plan):
         )
 
         users_need_to_be_performed_with_filtering_result.subscribe(
-            lambda z: logger.debug('Plan id[{}]: User triggered filter rules: {}', self.id, z[0]))
+            lambda z: logger.debug('Plan[id={}]: User triggered filter rules: {}', self.id, z[0]))
 
         action_results = users_need_to_be_performed_with_filtering_result.pipe(
             # extract user instance from tuple
@@ -132,7 +132,7 @@ class UserPlan(Plan):
         """
         users = self.sources()
 
-        users.subscribe(lambda u: logger.debug('Plan id[{}]: User from source: {}', self.id, u))
+        users.subscribe(lambda u: logger.debug('Plan[id={}]: User from source: {}', self.id, u))
 
         # flat_map() is needed because calling UserFilterRuleAnyOfSet will return Observable[RuleResult]
         filter_results = users.pipe(op.map(self.filters), op.flat_map(lambda x: x))
