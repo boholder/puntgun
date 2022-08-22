@@ -61,12 +61,6 @@ requires_python = ">=3.7"
 summary = "The dynamic configurator for your Python Project"
 
 [[package]]
-name = "from-root"
-version = "1.0.2"
-requires_python = ">=3.6"
-summary = "Forget about working directory errors"
-
-[[package]]
 name = "idna"
 version = "3.3"
 requires_python = ">=3.5"
@@ -231,7 +225,7 @@ summary = "A small Python utility to set file creation time on Windows"
 
 [metadata]
 lock_version = "4.0"
-content_hash = "sha256:24f4f23f0f63eebc77c59991158392e22b31fce5abf8f00a54e0c7de8b339af8"
+content_hash = "sha256:c8830b9198dc21d0169b174bb66f3fb3020c08ad0b48b4324212cfcaa76170ac"
 
 [metadata.files]
 "atomicwrites 1.4.1" = [
@@ -350,10 +344,6 @@ content_hash = "sha256:24f4f23f0f63eebc77c59991158392e22b31fce5abf8f00a54e0c7de8
 "dynaconf 3.1.9" = [
     {url = "https://files.pythonhosted.org/packages/48/7b/50059a4b56354801c34929a831130893faf838fd10d28c38d4dba8276568/dynaconf-3.1.9-py2.py3-none-any.whl", hash = "sha256:9eaaa6e64a4a64225f80cdad14379a37656b8f2dc607ab0fd949b75d479674cc"},
     {url = "https://files.pythonhosted.org/packages/f0/0e/3c102db167de3e2bb3a36a680a89c27b9b08d9f856b2164cc1a03db96f1c/dynaconf-3.1.9.tar.gz", hash = "sha256:f435c9e5b0b4b1dddf5e17e60a1e4c91ae0e6275aa51522456e671a7be3380eb"},
-]
-"from-root 1.0.2" = [
-    {url = "https://files.pythonhosted.org/packages/57/3b/968e817bf9924da28b079dcd296bf23e868809d830ec63c4fdde837399b0/from_root-1.0.2-py3-none-any.whl", hash = "sha256:b72b862f9d45a64dc4b04ac4177af630fee593f726ba6ffdf2d22e685070c159"},
-    {url = "https://files.pythonhosted.org/packages/83/25/8a2d0fb77958a128634a0265f8ff7fbd4d05d4d541dcd38c9921bb33e526/from-root-1.0.2.tar.gz", hash = "sha256:17f9f9bdd18bbc91ff0343633c2d744dde88ceaa0353e15ea7c9158f23d80abb"},
 ]
 "idna 3.3" = [
     {url = "https://files.pythonhosted.org/packages/04/a2/d918dcd22354d8958fe113e1a3630137e0fc8b44859ade3063982eacd2a4/idna-3.3-py3-none-any.whl", hash = "sha256:84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff"},
