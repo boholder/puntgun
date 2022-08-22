@@ -49,5 +49,13 @@ includes = []
 [tool.pytest.ini_options]
 pythonpath = ["puntgun", "tests"]
 
+# Coveralls job in github action needs this config
 [tool.coverage.run]
 relative_files = true
+
+# The key config for building executable wheel
+# https://github.com/pypa/pipx#where-does-pipx-install-apps-from
+# https://python-packaging.readthedocs.io/en/latest/command-line-scripts.html#the-console-scripts-entry-point
+# https://pdm.fming.dev/latest/pyproject/pep621/#console-scripts
+[project.scripts]
+puntgun = "puntgun.__main__:cli"
