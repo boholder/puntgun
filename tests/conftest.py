@@ -1,5 +1,5 @@
 import re
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 import pytest
 
@@ -105,3 +105,14 @@ def mock_record_logger(monkeypatch):
     logger = MockLogger()
     monkeypatch.setattr('puntgun.record.logger', logger)
     return logger
+
+
+@pytest.fixture
+def mock_input(monkeypatch):
+    def wrapper(*side_effect):
+        # return values in sequence when is called multiple times
+        mock_func = Mock(side_effect=side_effect)
+        monkeypatch.setattr('builtins.input', mock_func)
+        monkeypatch.setattr('getpass.getpass', mock_func)
+
+    return wrapper

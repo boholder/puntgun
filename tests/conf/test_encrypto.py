@@ -1,5 +1,4 @@
 from io import StringIO
-from unittest.mock import Mock
 
 import pytest
 
@@ -18,9 +17,9 @@ def test_load_private_key_file_with_wrong_password(generated_key_file):
         encrypto.load_private_key('wrong_pwd', generated_key_file[0])
 
 
-def test_load_private_key_file_with_correct_password_interactively(mock_private_key_file, monkeypatch):
+def test_load_private_key_file_with_correct_password_interactively(mock_private_key_file, monkeypatch, mock_input):
     # enter password to load private key
-    monkeypatch.setattr('builtins.input', Mock(side_effect=['wrong', 'y', 'wrong again', 'y', 'pwd', 'y']))
+    mock_input('wrong', 'y', 'wrong again', 'y', 'pwd', 'y')
     expect = mock_private_key_file[1]
     actual = encrypto.load_or_generate_private_key()
     assert 'text' == encrypto.decrypt(actual, encrypto.encrypt(expect.public_key(), 'text'))

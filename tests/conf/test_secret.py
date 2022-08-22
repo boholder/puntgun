@@ -1,10 +1,8 @@
-from unittest.mock import Mock
-
 import pytest
 import tweepy
 from dynaconf import Dynaconf
 
-from conf.secret import TwitterAPISecrets
+from puntgun.conf.secret import TwitterAPISecrets
 from puntgun.conf import encrypto, secret
 
 
@@ -40,10 +38,10 @@ def test_secrets_config_file_exists_check(monkeypatch, tmp_path):
 
 
 @pytest.fixture
-def mock_secrets_config_file(mock_private_key_file, monkeypatch, tmp_path):
+def mock_secrets_config_file(mock_private_key_file, monkeypatch, tmp_path, mock_input):
     secrets_setting_file = tmp_path.joinpath('s.yml')
     # load the private key for decrypt secrets
-    monkeypatch.setattr('builtins.input', Mock(side_effect=['pwd', 'y']))
+    mock_input('pwd', 'y')
     # change the settings to load test configuration file
     monkeypatch.setattr('puntgun.conf.config.secrets_file', secrets_setting_file)
     monkeypatch.setattr('puntgun.conf.config.settings', Dynaconf(settings_files=secrets_setting_file))
@@ -68,11 +66,11 @@ class TestLoadApiSecretsInteractively:
         mock_secrets_config_file(ak='key', aks='secret')
         self.assert_result()
 
-    def test_load_from_input(self, monkeypatch, mock_secrets_config_file):
+    def test_load_from_input(self, monkeypatch, mock_secrets_config_file, mock_input):
         # mock_secrets_config_file for letting program believes there is no valid secrets config file,
         # so it won't try to load private key for decrypting secrets config file --
         # which leads to requiring password input and fail the test.
-        monkeypatch.setattr('builtins.input', Mock(side_effect=['key', 'y', 'secret', 'y']))
+        mock_input('key', 'y', 'secret', 'y')
         self.assert_result()
 
     @staticmethod
@@ -96,9 +94,9 @@ class TestLoadAccessTokenSecretsInteractively:
         mock_secrets_config_file(at='key', ats='secret')
         self.assert_result()
 
-    def test_load_from_input(self, monkeypatch, mock_private_key_file):
+    def test_load_from_input(self, monkeypatch, mock_private_key_file, mock_input):
         # load the private key, then enter the pin
-        monkeypatch.setattr('builtins.input', Mock(side_effect=['pwd', 'y', 'PIN-PIN-PIN', 'y']))
+        mock_input('pwd', 'y', 'PIN-PIN-PIN', 'y')
         monkeypatch.setattr(tweepy.auth.OAuth1UserHandler, 'get_authorization_url', lambda _: 'url-here')
         monkeypatch.setattr(tweepy.auth.OAuth1UserHandler, 'get_access_token', lambda _, __: ('key', 'secret'))
         self.assert_result()

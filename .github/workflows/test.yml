@@ -27,8 +27,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install pipx
-          pipx install pdm
+          python -m pip install pdm
           pdm install
           pdm add setuptools pip wheel "coverage[toml]"
 
