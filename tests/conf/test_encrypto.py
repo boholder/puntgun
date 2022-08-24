@@ -6,30 +6,31 @@ from puntgun.conf import encrypto
 
 
 def test_all_cryptographic_methods(generated_key_file):
+    # load private key with wrong password
+    with pytest.raises(ValueError):
+        encrypto.load_private_key('wrong_pwd', generated_key_file[0])
+
+    # load with correct password
     loaded_key = encrypto.load_private_key('pwd', generated_key_file[0])
+
     c = encrypto.encrypt(loaded_key.public_key(), 'text')
     p = encrypto.decrypt(generated_key_file[1], c)
     assert 'text' == p
 
 
-def test_load_private_key_file_with_wrong_password(generated_key_file):
-    with pytest.raises(ValueError):
-        encrypto.load_private_key('wrong_pwd', generated_key_file[0])
-
-
-def test_load_private_key_file_with_correct_password_interactively(mock_private_key_file, monkeypatch, mock_input):
+def test_load_private_key_file(mock_private_key_file, mock_configuration, monkeypatch, mock_input):
+    # load private key file with correct password interactively
     # enter password to load private key
-    mock_input('wrong', 'y', 'wrong again', 'y', 'pwd', 'y')
-    expect = mock_private_key_file[1]
-    actual = encrypto.load_or_generate_private_key()
-    assert 'text' == encrypto.decrypt(actual, encrypto.encrypt(expect.public_key(), 'text'))
+    mock_input('wrong password', 'y', 'wrong again', 'y', 'pwd', 'y')
+    actual_key_input = encrypto.load_or_generate_private_key()
 
-
-def test_load_private_key_file_from_stdin(mock_private_key_file, monkeypatch, mock_configuration):
+    # load private key file with password from stdin
     # let the tool read password from stdin
     mock_configuration({'read_password_from_stdin': True})
-    # mock stdin to input password
+    # mock input password from stdin
     monkeypatch.setattr('sys.stdin', StringIO('pwd'))
+    actual_key_stdin = encrypto.load_or_generate_private_key()
+
     expect = mock_private_key_file[1]
-    actual = encrypto.load_or_generate_private_key()
-    assert 'text' == encrypto.decrypt(actual, encrypto.encrypt(expect.public_key(), 'text'))
+    assert 'text' == encrypto.decrypt(actual_key_input, encrypto.encrypt(expect.public_key(), 'text')) \
+           == encrypto.decrypt(actual_key_stdin, encrypto.encrypt(expect.public_key(), 'text'))

@@ -2,8 +2,18 @@ import pytest
 import tweepy
 from dynaconf import Dynaconf
 
-from puntgun.conf.secret import TwitterAPISecrets
 from puntgun.conf import encrypto, secret
+from puntgun.conf.secret import TwitterAPISecrets
+
+
+@pytest.fixture(autouse=True)
+def clean_config_env(monkeypatch, tmp_path):
+    """
+    Make the unit test cases not affected by host's configuration environment.
+    (Make configuration files not exist from view of the test cases.)
+    """
+    monkeypatch.setattr('puntgun.conf.config.pri_key_file', tmp_path.joinpath('1'))
+    monkeypatch.setattr('puntgun.conf.config.secrets_file', tmp_path.joinpath('2'))
 
 
 def test_secrets_save_and_load_via_settings_file(tmp_path):
@@ -66,7 +76,7 @@ class TestLoadApiSecretsInteractively:
         mock_secrets_config_file(ak='key', aks='secret')
         self.assert_result()
 
-    def test_load_from_input(self, monkeypatch, mock_secrets_config_file, mock_input):
+    def test_load_from_input(self, monkeypatch, mock_input):
         # mock_secrets_config_file for letting program believes there is no valid secrets config file,
         # so it won't try to load private key for decrypting secrets config file --
         # which leads to requiring password input and fail the test.
@@ -94,7 +104,7 @@ class TestLoadAccessTokenSecretsInteractively:
         mock_secrets_config_file(at='key', ats='secret')
         self.assert_result()
 
-    def test_load_from_input(self, monkeypatch, mock_private_key_file, mock_input):
+    def test_load_from_input(self, monkeypatch, mock_input):
         # load the private key, then enter the pin
         mock_input('pwd', 'y', 'PIN-PIN-PIN', 'y')
         monkeypatch.setattr(tweepy.auth.OAuth1UserHandler, 'get_authorization_url', lambda _: 'url-here')
