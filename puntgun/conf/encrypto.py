@@ -114,4 +114,7 @@ def load_private_key(pwd: str, file_path):
 
 def generate_private_key():
     # https://crypto.stackexchange.com/questions/19458/what-is-the-difference-between-secp-and-sect
+    #
+    # IMPROVE: If we can change the encryption algorithm to something in elliptic curve class,
+    # we can speed up processes related to encryption (and improve security level?)
     return rsa.generate_private_key(public_exponent=65537, key_size=4096)

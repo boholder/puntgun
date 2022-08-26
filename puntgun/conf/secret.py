@@ -45,7 +45,7 @@ class TwitterAPISecrets(BaseModel):
     secret: str
 
     class Config:
-        # Checking the length is a trick:
+        # IMPROVE: Checking the length is a trick:
         #
         # Both loading secrets from environment variables and from setting file
         # are involved using dynaconf library, and secrets keys in two ways are same after dynaconf loading.

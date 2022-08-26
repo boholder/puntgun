@@ -114,6 +114,9 @@ def record_twitter_api_errors(client_func):
     """
     Decorator for recording Twitter API errors returned by tweepy or Twitter server
     while invoking :class:`tweepy.Client`.
+
+    IMPROVE: It would be better if this function can act as a decorator on tweepy's client methods,
+    or simplify this api-error-recording implement in another way.
     """
 
     def record_api_errors(request_params, resp_errors):
@@ -164,8 +167,6 @@ class Client(object):
 
     def __init__(self, tweepy_client: tweepy.Client):
         # Add a decorator to record Twitter API errors in response on every call to the tweepy client.
-        # can't call '__name__' on mocked functions (MagicMock) even use mock.configure_mock(__name__='...')
-        # so manually set the function names rather than using fn.__name__
         for name, fn in [('get_users', tweepy_client.get_users), ('block', tweepy_client.block)]:
             setattr(tweepy_client, name, record_twitter_api_errors(fn))
 

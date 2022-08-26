@@ -15,6 +15,8 @@ def import_rule_classes():
     but it requires that all the rule classes need to be preloaded
     or the config parser can't get all valid candidates.
     This function will do this job.
+
+    IMPROVE: Less hacky way to achieve: import classes in modules on fly.
     """
 
     for rule_module_name in ['puntgun.rules.user']:

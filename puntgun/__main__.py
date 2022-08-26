@@ -6,16 +6,6 @@ from puntgun.conf import config
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
-BANNER = r"""
-     ____              _      ____
-,___|____\____________|_|____/____|____________________
-|___|_|_)_|_|_|_|_'__\|___|_|_|___|_|_|_|_'__\__[____]  ""-,___..--=====
-    |  __/| |_| | | | | |_  | |_| | |_| | | | |   \\_____/   ""        |
-    |_|    \__,_|_| |_|\__|  \____|\__,_|_| |_|      [ ))"---------..__|
-
-puntgun - a configurable automation command line tool for Twitter
-> https://github.com/boholder/puntgun/"""
-
 
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.version_option(version=config.tool_version)

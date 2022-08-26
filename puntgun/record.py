@@ -14,6 +14,8 @@ in which answers point out that yaml parsing (loading) in python is pretty slow.
 
 Ok, speed is important. I changed the output format to json -
 I've heard about the effort different json parsing libraries have made.
+
+IMPROVE: More elegant way to generating a json format report file.
 """
 import datetime
 from typing import List

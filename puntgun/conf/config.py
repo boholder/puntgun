@@ -1,5 +1,8 @@
 """
 All the loaded settings and global variables for many modules to use.
+
+IMPROVE: Any proper way to unit test this module?
+I feel it is too implement-coupling to be valuable enough writing test cases.
 """
 import os
 import sys
@@ -68,7 +71,7 @@ def reload_important_files(**kwargs):
     and reload configuration from new files.
     """
 
-    # Ugly. But don't know how to improve it.
+    # IMPROVE: Ugly. But don't know how to improve it.
     global config_path
     global plan_file
     global settings_file
