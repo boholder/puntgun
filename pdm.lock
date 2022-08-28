@@ -196,7 +196,7 @@ summary = "A lil' TOML parser"
 
 [[package]]
 name = "tweepy"
-version = "4.10.0"
+version = "4.10.1"
 requires_python = ">=3.7"
 summary = "Twitter library for Python"
 dependencies = [
@@ -486,9 +486,9 @@ content_hash = "sha256:c8830b9198dc21d0169b174bb66f3fb3020c08ad0b48b4324212cfcaa
     {url = "https://files.pythonhosted.org/packages/97/75/10a9ebee3fd790d20926a90a2547f0bf78f371b2f13aa822c759680ca7b9/tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
     {url = "https://files.pythonhosted.org/packages/c0/3f/d7af728f075fb08564c5949a9c95e44352e23dee646869fa104a3b2060a3/tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
 ]
-"tweepy 4.10.0" = [
-    {url = "https://files.pythonhosted.org/packages/20/29/d07ca458ed84fa173f3bff5e67697066b8ebb0c31957d4fa8aaed14a891f/tweepy-4.10.0-py3-none-any.whl", hash = "sha256:f0abbd234a588e572f880f99a094ac321217ff3eade6c0eca118ed6db8e2cf0a"},
-    {url = "https://files.pythonhosted.org/packages/bd/29/66479b2259f456cec0b7006cbf1430e3e2a30dbc2b9fc9056eb1ef4e5fc0/tweepy-4.10.0.tar.gz", hash = "sha256:7f92574920c2f233663fff154745fc2bb0d10aedc23617379a912d8e4fefa399"},
+"tweepy 4.10.1" = [
+    {url = "https://files.pythonhosted.org/packages/81/19/a2c39fa8aaca4ca3623780e41298ba4826cade6b69ce485348fb96ab9526/tweepy-4.10.1-py3-none-any.whl", hash = "sha256:0a21396b646af4fcee69762d2908c104e1fe2e2c4e1dfd6e6078a41b38771382"},
+    {url = "https://files.pythonhosted.org/packages/f3/7c/64cb5169d76ae1ad030d9b7ec088bd77f00496d6db0bc8675073e61c13ed/tweepy-4.10.1.tar.gz", hash = "sha256:310193775d7fc381abd6f37021a9af27f7e9edfcce5ec51bd73ea5f30c21fa61"},
 ]
 "typing-extensions 4.3.0" = [
     {url = "https://files.pythonhosted.org/packages/9e/1d/d128169ff58c501059330f1ad96ed62b79114a2eb30b8238af63a2e27f70/typing_extensions-4.3.0.tar.gz", hash = "sha256:e6d2677a32f47fc7eb2795db1dd15c1f34eff616bcaf2cfb5e997f854fa1c4a6"},
