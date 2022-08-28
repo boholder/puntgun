@@ -24,14 +24,6 @@ def fire(plan, report, settings, config_path, secrets, private_key):
     config.config_logging_options()
 
     try:
-        # Warm up? Initialization?
-        # Load secrets and create singleton client instance before parsing and executing plans.
-        #
-        # I found that after the reactivex pipeline (plan execution) is started,
-        # user can't exit the program by pressing "Ctrl+C" easily.
-        # And there is no "os._exit()" in os module if I want to exit in sub-thread:
-        # https://stackoverflow.com/questions/1489669/how-to-exit-the-entire-application-from-a-python-thread
-        Client.singleton()
         runner.start()
     except KeyboardInterrupt:
         logger.bind(o=True).info("The tool is stopped by the keyboard.")

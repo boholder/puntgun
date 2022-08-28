@@ -167,9 +167,10 @@ class Client(object):
     """
 
     def __init__(self, tweepy_client: tweepy.Client):
-        # Add a decorator to record Twitter API errors in response on every call to the tweepy client.
-        for name, fn in [('get_users', tweepy_client.get_users), ('block', tweepy_client.block)]:
-            setattr(tweepy_client, name, record_twitter_api_errors(fn))
+        # Add a decorator to record Twitter API errors in response
+        # on every method of the tweepy client.
+        for func_name in [method for method in dir(tweepy.Client) if not method.startswith('_')]:
+            setattr(tweepy_client, func_name, record_twitter_api_errors(getattr(tweepy_client, func_name)))
 
         self.clt = tweepy_client
         # tweepy 4.10.0 changed return structure of tweepy.Client.get_me()

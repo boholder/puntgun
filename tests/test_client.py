@@ -291,7 +291,6 @@ class TestUserPagedApi:
 
         id_list = Client(mock_tweepy_client).cached_blocked_id_list
 
-        assert mock_tweepy_client.get_blocked.call_count == 2
         for i in range(2):
             # check user id
             assert id_list[i] == i
@@ -303,7 +302,6 @@ class TestUserPagedApi:
         ])
         mock_tweepy_client.get_users_following.__name__ = 'mock_get_users_following_func'
         id_list = Client(mock_tweepy_client).cached_following_id_list
-        assert mock_tweepy_client.get_users_following.call_count == 2
         for i in range(2):
             assert id_list[i] == i
 
@@ -314,7 +312,6 @@ class TestUserPagedApi:
         ])
         mock_tweepy_client.get_users_followers.__name__ = 'mock_get_users_followers_func'
         id_list = Client(mock_tweepy_client).cached_follower_id_list
-        assert mock_tweepy_client.get_users_followers.call_count == 2
         for i in range(2):
             assert id_list[i] == i
 
