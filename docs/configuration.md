@@ -64,14 +64,14 @@ There are some "one-off" configurations
 The tool will use `--secrets_file` and `--private_key_file` to manage secrets in a safe way,
 [here](#let-the-tool-manages-secrets) is more detailed introduction.
 
-| Argument             | Default                                                                     | Description                                                                            |
-|----------------------|-----------------------------------------------------------------------------|----------------------------------------------------------------------------------------|
-| `--config_path`      | [`<home directory>`](https://en.wikipedia.org/wiki/Home_directory)/.puntgun | Path of various configuration files the tool needs                                     |
-| `--plan_file`        | `<config path>`/plan.yml                                                    | [Plan configuration file]() you'd like to execute                                      |
-| `--settings_file`    | `<config path>`/settings.yml                                                | Global tool settings that will apply to every execution                                |
-| `--private_key_file` | `<config path>`/.puntgun_rsa4096                                            | Tool generated password protected private key                                          |
+| Argument             | Default                                                                     | Description                                                                           |
+|----------------------|-----------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
+| `--config_path`      | [`<home directory>`](https://en.wikipedia.org/wiki/Home_directory)/.puntgun | Path of various configuration files the tool needs                                    |
+| `--plan_file`        | `<config path>`/plan.yml                                                    | [Plan configuration file]() you'd like to execute                                     |
+| `--settings_file`    | `<config path>`/settings.yml                                                | Global tool settings that will apply to every execution                               |
+| `--private_key_file` | `<config path>`/.puntgun_rsa4096                                            | Tool generated password protected private key                                         |
 | `--secrets_file`     | `<config path>`/.secrets.yml                                                | Tool generated ciphertext or user writen plain text file contains [secrets](#secrets) |
-| `--report_file`      | `<config path>`/reports/`<plan_file>`_`<time>`_report.json                  | Expect path of the tool generated execution report                                     |
+| `--report_file`      | `<config path>`/reports/`<plan_file>`_`<time>`_report.json                  | Expect path of the tool generated execution report                                    |
 
 ## Secrets
 

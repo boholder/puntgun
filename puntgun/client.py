@@ -5,7 +5,7 @@ import tweepy
 from loguru import logger
 from tweepy import Response
 
-from puntgun.conf import encrypto, secret
+from puntgun.conf import encrypto, secret, config
 from puntgun.record import Recorder, Recordable, Record
 from puntgun.rules.user import User
 
@@ -139,6 +139,15 @@ def record_twitter_api_errors(client_func):
     return decorator
 
 
+# Additional url params for querying Twitter user related api
+# for letting the API know which fields we want to get.
+USER_API_PARAMS = {'user_auth': True,
+                   'user_fields': ['id', 'name', 'username', 'pinned_tweet_id', 'profile_image_url',
+                                   'created_at', 'description', 'public_metrics', 'protected', 'verified'],
+                   'expansions': 'pinned_tweet_id',
+                   'tweet_fields': ['text']}
+
+
 class Client(object):
     """
     Adapter of :class:`tweepy.Client` for handling requests and responses to the Twitter API.
@@ -156,14 +165,6 @@ class Client(object):
       * It's so sweet that tweepy has inner retry logic for resumable 429 Too Many Request status code.
         https://github.com/tweepy/tweepy/blob/master/tweepy/client.py#L102-L114
     """
-
-    # additional url params for querying Twitter user state api,
-    # for letting the API know which fields we want to get.
-    __user_api_params = {'user_auth': True,
-                         'user_fields': ['id', 'name', 'username', 'pinned_tweet_id', 'profile_image_url',
-                                         'created_at', 'description', 'public_metrics', 'protected', 'verified'],
-                         'expansions': 'pinned_tweet_id',
-                         'tweet_fields': ['text']}
 
     def __init__(self, tweepy_client: tweepy.Client):
         # Add a decorator to record Twitter API errors in response on every call to the tweepy client.
@@ -196,7 +197,7 @@ class Client(object):
         if len(names) > 100:
             raise ValueError('at most 100 usernames per request')
 
-        return self._user_resp_to_user_instances(self.clt.get_users(usernames=names, **self.__user_api_params))
+        return self._user_resp_to_user_instances(self.clt.get_users(usernames=names, **USER_API_PARAMS))
 
     def get_users_by_ids(self, ids: List[int | str]):
         """
@@ -207,32 +208,7 @@ class Client(object):
         if len(ids) > 100:
             raise ValueError('at most 100 user ids per request')
 
-        return self._user_resp_to_user_instances(self.clt.get_users(ids=ids, **self.__user_api_params))
-
-    def get_blocked_users(self):
-        """Get all the users blocked **by this account**."""
-        # TODO untested
-        responses = list(self.get_paged_responses(self.clt.get_blocked))
-        return functools.reduce(lambda a, b: a + b, [self._user_resp_to_user_instances(r) for r in responses], [])
-
-    @staticmethod
-    def get_paged_responses(clt_func: Callable[..., Response]):
-        pagination_token = None
-
-        def next_page():
-            nonlocal pagination_token
-
-            response = clt_func(max_results=1000,
-                                pagination_token=pagination_token if pagination_token else None,
-                                **Client.__user_api_params)
-
-            if response.meta and response.meta.next_token:
-                pagination_token = response.meta.next_token
-                yield response
-            else:
-                return
-
-        return next_page()
+        return self._user_resp_to_user_instances(self.clt.get_users(ids=ids, **USER_API_PARAMS))
 
     @staticmethod
     def _user_resp_to_user_instances(resp: tweepy.Response):
@@ -256,6 +232,83 @@ class Client(object):
 
         return [resp_to_user(d) for d in resp.data]
 
+    def get_blocked(self):
+        """Get the latest blocking list of the current account."""
+        return self._get_paged_user_api_response_list(self.clt.get_blocked)
+
+    @property
+    @functools.lru_cache(maxsize=1)
+    def cached_blocked(self):
+        """
+        Call query method, cache them, and return the cache on latter calls.
+        Since the tool may be constantly modifying the block list,
+        this method just takes a snapshot of the list at the beginning,
+        and it's sufficient for use.
+        """
+        return self.get_blocked()
+
+    @property
+    @functools.lru_cache(maxsize=1)
+    def cached_blocked_id_list(self):
+        return [u.id for u in self.cached_blocked]
+
+    def get_following(self, user_id):
+        """Get the latest following list of a user."""
+        return self._get_paged_user_api_response_list(self.clt.get_users_following, id=user_id)
+
+    @property
+    @functools.lru_cache(maxsize=1)
+    def cached_following(self):
+        return self.get_following(self.id)
+
+    @property
+    @functools.lru_cache(maxsize=1)
+    def cached_following_id_list(self):
+        return [u.id for u in self.cached_following]
+
+    def get_follower(self, user_id):
+        """Get the latest follower list of a user."""
+        return self._get_paged_user_api_response_list(self.clt.get_users_followers, id=user_id)
+
+    @property
+    @functools.lru_cache(maxsize=1)
+    def cached_follower(self):
+        return self.get_follower(self.id)
+
+    @property
+    @functools.lru_cache(maxsize=1)
+    def cached_follower_id_list(self):
+        return [u.id for u in self.cached_follower]
+
+    def _get_paged_user_api_response_list(self, clt_func: Callable[..., Response], **kwargs):
+        # mix two part of params into one dict
+        params = {}
+        for k, v in USER_API_PARAMS.items():
+            params[k] = v
+        if kwargs:
+            for k, v in kwargs.items():
+                params[k] = v
+
+        # use list() to query all pages
+        responses = list(self._paged_api_querier(clt_func, params))
+        # and return all users in responses as one list
+        return functools.reduce(lambda a, b: a + b, [self._user_resp_to_user_instances(r) for r in responses], [])
+
+    @staticmethod
+    def _paged_api_querier(clt_func: Callable[..., Response], params: dict, pagination_token=None):
+        """
+        A recursion style generator that continue querying next page until hit the end.
+        https://stackoverflow.com/questions/8991840/recursion-using-yield
+        """
+        response = clt_func(max_results=1000,
+                            pagination_token=pagination_token,
+                            **params)
+        yield response
+
+        # if is called again, query next page
+        if hasattr(response, 'meta') and 'next_token' in response.meta:
+            yield from Client._paged_api_querier(clt_func, params, response.meta['next_token'])
+
     def block_user_by_id(self, target_user_id: int | str) -> bool:
         """
         Calling :meth:`tweepy.Client.block`.
@@ -265,20 +318,27 @@ class Client(object):
         **rate limit: 50 / 15 min**
         https://help.twitter.com/en/using-twitter/advanced-twitter-block-options
         https://developer.twitter.com/en/docs/twitter-api/users/blocks/api-reference/post-users-user_id-blocking
-        TODO block following? follower?
         """
-        return self.clt.block(target_user_id=target_user_id).data['blocking']
 
-    @property
-    @functools.lru_cache(maxsize=1)
-    def cached_blocked_users(self):
-        """
-        Call getting method, cache them, and return the cache on latter calls.
-        Since the tool may be constantly modifying the block list,
-        this method just takes a snapshot of the list, it's sufficient for use.
-        TODO not finish
-        """
-        pass
+        # this user has already been blocked
+        if target_user_id in self.cached_blocked_id_list:
+            logger.info(f"User[id={target_user_id}] has already been blocked.")
+            return True
+
+        # not block your follower
+        if (not config.settings.get('block_follower', True)) \
+                and target_user_id in self.cached_follower_id_list:
+            logger.info(f"User[id={target_user_id}] is follower, not block base on config.")
+            return False
+
+        # not block your following
+        if (not config.settings.get('block_following', False)) \
+                and target_user_id in self.cached_following_id_list:
+            logger.info(f"User[id={target_user_id}] is following, not block base on config.")
+            return False
+
+        # call the block api
+        return self.clt.block(target_user_id=target_user_id).data['blocking']
 
 
 class NeedClient(object):

@@ -34,3 +34,20 @@ def block_user():
     # "@TwitterTV"
     response = Client.singleton().block_user_by_id(586198217)
     print(response)
+
+
+def get_blocking_list():
+    users = Client.singleton().get_blocked()
+    print(users)
+
+
+def get_following_list():
+    c = Client.singleton()
+    users = c.get_following(c.id)
+    print(users)
+
+
+def get_follower_list():
+    c = Client.singleton()
+    users = c.get_follower(c.id)
+    print(users)

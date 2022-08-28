@@ -58,7 +58,7 @@ class User(BaseModel):
             return User()
 
         # has this field and is not none
-        public_metrics = resp_data['public_metrics'] if resp_data['public_metrics'] else {}
+        public_metrics = resp_data['public_metrics'] if ('public_metrics' in resp_data) else {}
 
         return User(**resp_data,
                     followers_count=public_metrics.get('followers_count', 0),
