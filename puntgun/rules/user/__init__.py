@@ -34,18 +34,33 @@ class User(BaseModel):
     tweet_count: Optional[int] = 0
     pinned_tweet_id: Optional[int] = 0
     pinned_tweet_text: Optional[str] = ''
+    entities: Optional[dict] = {}
+    url: Optional[str] = ''
+    withheld: Optional[dict] = {}
 
     class Config:
         validate_assignment = True
 
     @validator('location')
-    def set_name(cls, loc):
+    def set_location(cls, loc):
         # When 'location' is provided but the value is None, set it to default value.
         return loc or ''
 
     @validator('pinned_tweet_id')
     def set_pinned_tweet_id(cls, tid):
         return tid or 0
+
+    @validator('entities')
+    def set_entities(cls, ent):
+        return ent or {}
+
+    @validator('url')
+    def set_url(cls, url):
+        return url or {}
+
+    @validator('withheld')
+    def set_withheld(cls, wh):
+        return wh or {}
 
     @staticmethod
     def from_response(resp_data: dict, pinned_tweet_text: str):

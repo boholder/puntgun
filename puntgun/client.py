@@ -143,7 +143,8 @@ def record_twitter_api_errors(client_func):
 # for letting the API know which fields we want to get.
 USER_API_PARAMS = {'user_auth': True,
                    'user_fields': ['id', 'name', 'username', 'pinned_tweet_id', 'profile_image_url',
-                                   'created_at', 'description', 'public_metrics', 'protected', 'verified'],
+                                   'created_at', 'description', 'public_metrics', 'protected', 'verified',
+                                   'entities', 'location', 'url', 'withheld'],
                    'expansions': 'pinned_tweet_id',
                    'tweet_fields': ['text']}
 

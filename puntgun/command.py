@@ -5,7 +5,6 @@ from loguru import logger
 
 from puntgun import runner
 from puntgun import util
-from puntgun.client import Client
 from puntgun.conf import config, example
 from puntgun.conf import encrypto, secret
 

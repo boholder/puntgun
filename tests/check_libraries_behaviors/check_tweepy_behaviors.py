@@ -1,7 +1,7 @@
 """
 Mainly testing Twitter APIs' response and tweepy's return values for development.
 """
-from client import Client
+from puntgun.client import Client
 
 
 def get_user_not_exist():
@@ -12,7 +12,7 @@ def get_user_not_exist():
 
 def get_users():
     # includes.tweets: [] len 2
-    response = Client.singleton().get_users_by_name(['TwitterDev', 'TwitterAPI'])
+    response = Client.singleton().get_users_by_usernames(['TwitterDev', 'TwitterAPI'])
     print(response)
 
 
