@@ -51,3 +51,12 @@ def get_follower_list():
     c = Client.singleton()
     users = c.get_follower(c.id)
     print(users)
+
+
+def get_tweet():
+    c = Client.singleton()
+    # TwitterDev's tweet
+    tweets = c.get_tweets_by_ids(['1561805413103853570', '1542891693044912128'])
+    print(tweets)
+
+get_tweet()

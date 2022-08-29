@@ -7,6 +7,7 @@ from tweepy import Response
 
 from puntgun.conf import encrypto, secret, config
 from puntgun.record import Recorder, Recordable, Record
+from puntgun.rules.tweet import Tweet
 from puntgun.rules.user import User
 
 
@@ -139,14 +140,35 @@ def record_twitter_api_errors(client_func):
     return decorator
 
 
+USER_API_FIELDS = ['id', 'name', 'username', 'pinned_tweet_id', 'profile_image_url',
+                   'created_at', 'description', 'public_metrics', 'protected', 'verified',
+                   'entities', 'location', 'url', 'withheld']
+
+# Not authorized to access 'non_public_metrics', 'organic_metrics', 'promoted_metrics'
+# with free-registered Essential class token
+TWEET_API_FIELDS = ['attachments', 'author_id', 'context_annotations', 'conversation_id',
+                    'created_at', 'entities', 'geo', 'id', 'in_reply_to_user_id', 'lang',
+                    'public_metrics', 'possibly_sensitive', 'referenced_tweets',
+                    'reply_settings', 'source', 'text', 'withheld']
+
 # Additional url params for querying Twitter user related api
 # for letting the API know which fields we want to get.
 USER_API_PARAMS = {'user_auth': True,
-                   'user_fields': ['id', 'name', 'username', 'pinned_tweet_id', 'profile_image_url',
-                                   'created_at', 'description', 'public_metrics', 'protected', 'verified',
-                                   'entities', 'location', 'url', 'withheld'],
-                   'expansions': 'pinned_tweet_id',
-                   'tweet_fields': ['text']}
+                   'user_fields': USER_API_FIELDS,
+                   'tweet_fields': TWEET_API_FIELDS,
+                   'expansions': 'pinned_tweet_id', }
+
+TWEET_API_PARAMS = {'user_auth': True,
+                    'user_fields': USER_API_FIELDS,
+                    'tweet_fields': TWEET_API_FIELDS,
+                    'expansions': ['attachments.poll_ids', 'attachments.media_keys', 'author_id',
+                                   'entities.mentions.username', 'geo.place_id', 'in_reply_to_user_id',
+                                   'referenced_tweets.id', 'referenced_tweets.id.author_id'],
+                    'media_fields': ['duration_ms', 'height', 'media_key', 'preview_image_url',
+                                     'type', 'url', 'width', 'public_metrics', 'alt_text', 'variants'],
+                    'place_fields': ['contained_within', 'country', 'country_code', 'full_name',
+                                     'geo', 'id', 'name', 'place_type'],
+                    'poll_fields': ['duration_minutes', 'end_datetime', 'id', 'options', 'voting_status']}
 
 
 class Client(object):
@@ -192,28 +214,28 @@ class Client(object):
 
     def get_users_by_usernames(self, names: List[str]):
         """
-        Calling :meth:`tweepy.Client.get_users`.
+        Query users information.
         **rate limit: 900 / 15 min**
         https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-by
         """
         if len(names) > 100:
             raise ValueError('at most 100 usernames per request')
 
-        return self._user_resp_to_user_instances(self.clt.get_users(usernames=names, **USER_API_PARAMS))
+        return self._resp_to_user(self.clt.get_users(usernames=names, **USER_API_PARAMS))
 
     def get_users_by_ids(self, ids: List[int | str]):
         """
-        Calling :meth:`tweepy.Client.get_users`.
+        Query users information.
         **rate limit: 900 / 15 min**
         https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users
         """
         if len(ids) > 100:
             raise ValueError('at most 100 user ids per request')
 
-        return self._user_resp_to_user_instances(self.clt.get_users(ids=ids, **USER_API_PARAMS))
+        return self._resp_to_user(self.clt.get_users(ids=ids, **USER_API_PARAMS))
 
     @staticmethod
-    def _user_resp_to_user_instances(resp: tweepy.Response):
+    def _resp_to_user(resp: tweepy.Response):
         """Build a list of :class:`User` instances from one response."""
         if not resp.data:
             return []
@@ -235,7 +257,11 @@ class Client(object):
         return [resp_to_user(d) for d in resp.data]
 
     def get_blocked(self):
-        """Get the latest blocking list of the current account."""
+        """
+        Get the latest blocking list of the current account.
+        **rate limit: 15 / 15 min**
+        https://developer.twitter.com/en/docs/twitter-api/users/blocks/api-reference/get-users-blocking
+        """
         return self._get_paged_user_api_response_list(self.clt.get_blocked)
 
     @property
@@ -255,7 +281,11 @@ class Client(object):
         return [u.id for u in self.cached_blocked]
 
     def get_following(self, user_id):
-        """Get the latest following list of a user."""
+        """
+        Get the latest following list of a user.
+        **rate limit: 15 / 15 min**
+        https://developer.twitter.com/en/docs/twitter-api/users/follows/api-reference/get-users-id-following
+        """
         return self._get_paged_user_api_response_list(self.clt.get_users_following, id=user_id)
 
     @property
@@ -269,7 +299,11 @@ class Client(object):
         return [u.id for u in self.cached_following]
 
     def get_follower(self, user_id):
-        """Get the latest follower list of a user."""
+        """
+        Get the latest follower list of a user.
+        **rate limit: 15 / 15 min**
+        https://developer.twitter.com/en/docs/twitter-api/users/follows/api-reference/get-users-id-followers
+        """
         return self._get_paged_user_api_response_list(self.clt.get_users_followers, id=user_id)
 
     @property
@@ -294,7 +328,7 @@ class Client(object):
         # use list() to query all pages
         responses = list(self._paged_api_querier(clt_func, params))
         # and return all users in responses as one list
-        return functools.reduce(lambda a, b: a + b, [self._user_resp_to_user_instances(r) for r in responses], [])
+        return functools.reduce(lambda a, b: a + b, [self._resp_to_user(r) for r in responses], [])
 
     @staticmethod
     def _paged_api_querier(clt_func: Callable[..., Response], params: dict, pagination_token=None):
@@ -313,10 +347,12 @@ class Client(object):
 
     def block_user_by_id(self, target_user_id: int | str) -> bool:
         """
-        Calling :meth:`tweepy.Client.block`.
-        The rate limit is pretty slow, and somehow I think this is the bottleneck of whole pipeline
-        if you don't use complex rules.
+        Block given user on current account.
+
+        The rate limit is pretty slow,
+        and I think this is the bottleneck of whole pipeline if you don't use complex rules.
         Sadly, the former block list CSV import method is no longer available.
+
         **rate limit: 50 / 15 min**
         https://help.twitter.com/en/using-twitter/advanced-twitter-block-options
         https://developer.twitter.com/en/docs/twitter-api/users/blocks/api-reference/post-users-user_id-blocking
@@ -341,6 +377,30 @@ class Client(object):
 
         # call the block api
         return self.clt.block(target_user_id=target_user_id).data['blocking']
+
+    def get_tweets_by_ids(self, ids: List[int | str]):
+        """
+        Query tweets information.
+        **rate limit: 900 / 15 min**
+        https://developer.twitter.com/en/docs/twitter-api/tweets/lookup/api-reference/get-tweets
+        """
+        if len(ids) > 100:
+            raise ValueError('at most 100 tweet ids per request')
+
+        return self._resp_to_tweet(self.clt.get_tweets(ids=ids, **TWEET_API_PARAMS))
+
+    @staticmethod
+    def _resp_to_tweet(resp: tweepy.Response):
+        """Build a list of :class:`Tweet` instances from one response."""
+        # TODO unfinished
+        if not resp.data:
+            return []
+
+        def resp_to_tweet(data: dict) -> Tweet:
+            """Build one tweet instance"""
+            return Tweet(data)
+
+        return [resp_to_tweet(d) for d in resp.data]
 
 
 class NeedClient(object):

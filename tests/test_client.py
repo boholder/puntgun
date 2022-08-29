@@ -188,7 +188,7 @@ class TestUserQuerying:
     """
 
     def test_response_translating(self, normal_user_response):
-        assert_normal_user(Client._user_resp_to_user_instances(normal_user_response)[0])
+        assert_normal_user(Client._resp_to_user(normal_user_response)[0])
 
     def test_tweepy_exception_handling(self, mock_tweepy_client):
         mock_tweepy_client.get_users = MagicMock(side_effect=tweepy.errors.TweepyException('inner'))
