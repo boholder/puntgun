@@ -15,14 +15,19 @@ def import_rule_classes():
     but it requires that all the rule classes need to be preloaded
     or the config parser can't get all valid candidates.
     This function will do this job.
-
-    IMPROVE: Less hacky way to achieve: import classes in modules on fly.
     """
 
-    for rule_module_name in ['puntgun.rules.user']:
-        rule_module = importlib.import_module(rule_module_name)
-        for _, name, _ in list(pkgutil.iter_modules(rule_module.__path__)):
-            importlib.import_module(f'{rule_module_name}.{name}')
+    rules_module = importlib.import_module('puntgun.rules')
+    for _, base_module_name, is_pkg in list(pkgutil.iter_modules(rules_module.__path__)):
+        base_module_name = f'puntgun.rules.{base_module_name}'
+        # only import these modules which have submodules that contains rule classes.
+        # for example, config_parser.py (this module) is not a package so do not import it.
+        if is_pkg:
+            # user, tweet...
+            base_module = importlib.import_module(base_module_name)
+            for _, module_name, _ in list(pkgutil.iter_modules(base_module.__path__)):
+                # import these submodules
+                importlib.import_module(f'{base_module_name}.{module_name}')
 
 
 class ConfigParser(object):
