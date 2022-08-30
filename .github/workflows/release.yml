@@ -6,7 +6,7 @@
 # 2. Upload files generated in step 1 to pypi.
 # 3. Create a release with information from CHANGELOG.md.
 #
-# Take example by:
+# Drawing on:
 # https://github.com/pypa/cibuildwheel/blob/main/examples/github-deploy.yml
 # https://github.com/pdm-project/pdm/blob/main/.github/workflows/release.yml
 # https://github.com/softprops/action-gh-release

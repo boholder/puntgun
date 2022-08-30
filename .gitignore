@@ -168,6 +168,3 @@ conf/.puntgun_rsa4096
 # Ignore unit test generated files
 tests/**/test_*_file
 tests/**/test_*_file.*
-
-# batch scripts for running the tool
-*.bat

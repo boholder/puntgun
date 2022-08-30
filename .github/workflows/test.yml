@@ -1,5 +1,5 @@
 # Action to run unit tests and update coverage info to https://coveralls.io
-# Take example by:
+# Drawing on:
 # https://github.com/pypa/pipx/blob/main/.github/workflows/tests.yml
 
 
