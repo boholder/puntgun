@@ -35,22 +35,67 @@ build-backend = "pdm.pep517.api"
 "Bug Tracker" = "https://github.com/boholder/puntgun/issues"
 "Discussions" = "https://github.com/boholder/puntgun/discussions"
 
-[tool.pdm]
 [tool.pdm.dev-dependencies]
-dev = [
+test = [
     "pytest<8.0.0,>=7.1.2",
     "PyHamcrest<3.0.0,>=2.0.4",
 ]
+doc = [
+    "mkdocs>=1.1",
+    "mkdocs-material>=7.3",
+    "mkdocstrings[python]>=0.18",
+    "markdown-include>=0.5.1",
+    "mike>=1.1.2",
+    "setuptools>=62.3.3",
+    "markdown-exec>=0.7.0",
+]
 
 [tool.pdm.build]
-includes = []
+excludes = ["./**/.git"]
+source-includes = ["tests", "CHANGELOG.md", "LICENSE", "README.md", "CONTRIBUTING.md"]
+
+# Scripts for development
+[tool.pdm.scripts]
+doc = { shell = "cd docs && mkdocs serve", help = "Start the dev server for doc preview" }
+test = "pytest"
+lint = "pre-commit run --all-files"
 
 [tool.pytest.ini_options]
 pythonpath = ["puntgun", "tests"]
+testpaths = [
+    "tests/",
+]
 
 # Coveralls job in github action needs this config
 [tool.coverage.run]
 relative_files = true
+
+# Drawing on:
+# https://github.com/psf/black/blob/main/pyproject.toml
+[tool.black]
+line-length = 120
+exclude = '''
+/(
+  | \.git
+  | \.pytest_cache
+  | tests/\.pytest_cache
+  | \.coverage
+  | \.venv
+  | venv
+  | build
+  | dist
+)/
+'''
+
+# https://pycqa.github.io/isort/docs/configuration/options.html
+[tool.isort]
+profile = "black"
+atomic = true
+filter_files = true
+known_first_party = ["puntgun"]
+known_third_party = [
+    "pytest",
+]
 
 # The key config for building executable wheel
 # https://github.com/pypa/pipx#where-does-pipx-install-apps-from

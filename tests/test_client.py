@@ -172,12 +172,12 @@ def assert_user_not_exist_error(mock_recorder):
 
 class TestUserQuerying:
     """
-    For now, I figure out there are three kinds of rules datas in response (responded by Twitter(tweepy.Client)):
+    For now, I figure out there are three kinds of rules data in response (responded by Twitter(tweepy.Client)):
         1. rules who has pinned tweet, rules data in "data" field, pinned tweet in "includes.tweets" field
         2. rules who don't have pinned tweet, only rules data in "data" field
         3. rules do not exist (returned in "errors" field)
 
-    The test cases are simulating these situations, test datas are from real responses.
+    The test cases are simulating these situations, test data are from real responses.
     There are some cases also test the constructing and default value replacing logic of :class:`User`.
 
     We'll test both `get_by_username` and `get_by_id` methods, they are too similar.

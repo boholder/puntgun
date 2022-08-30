@@ -1,0 +1,56 @@
+# Drawing on:
+# https://pre-commit.ci/
+# https://pre-commit.com/#usage
+# https://github.com/pdm-project/pdm/blob/main/.pre-commit-config.yaml
+# https://github.com/nonebot/nonebot2/blob/master/.pre-commit-config.yaml
+
+ci:
+  autoupdate_schedule: monthly
+  autofix_commit_msg: "Auto fix by pre-commit hooks"
+  autoupdate_commit_msg: "Auto update by pre-commit hooks"
+
+repos:
+#  # see pyproject.toml for config
+#  - repo: https://github.com/psf/black
+#    rev: 22.6.0
+#    hooks:
+#      - id: black
+#
+  # see setup.cfg for config
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.1.0
+    hooks:
+      - id: codespell
+#
+#  # see setup.cfg for config
+#  - repo: https://github.com/PyCQA/flake8
+#    rev: 5.0.2
+#    hooks:
+#      - id: flake8
+#        additional_dependencies:
+#          - flake8-bugbear
+#
+#  # see pyproject.toml for config
+#  - repo: https://github.com/pycqa/isort
+#    rev: 5.10.1
+#    hooks:
+#      - id: isort
+#
+#  # see setup.cfg for config
+#  - repo: https://github.com/pre-commit/mirrors-mypy
+#    rev: v0.971
+#    hooks:
+#      - id: mypy
+#        args: [ src ]
+#        pass_filenames: false
+#        additional_dependencies:
+#          - types-requests
+#          - types-certifi
+#
+#  # https://pdm.fming.dev/latest/usage/advanced/#hooks-for-pre-commit
+#  - repo: https://github.com/pdm-project/pdm
+#    rev: 2.1.2
+#    hooks:
+#      - id: pdm-export
+#        args: [ "-o", "requirements.txt", "--without-hashes" ]
+#        files: ^pdm.lock$

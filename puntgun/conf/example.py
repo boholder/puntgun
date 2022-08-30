@@ -45,7 +45,7 @@ plans:
       # who has less than ten followers
       - follower:
             less_than: 10
-      # or has more than one hundred million followings 
+      # or has more than one hundred million following
       # why so big? just for prevent making it really works.
       - following:
             more_than: 100000000

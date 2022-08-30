@@ -122,7 +122,7 @@ class Recorder(object):
     def write_report_tail():
         """
         After all records are written, at the end of the program running,
-        append this part to remain a corrct json format.
+        append this part to remain a correct json format.
         """
         Recorder._write(REPORT_TAIL)
 
