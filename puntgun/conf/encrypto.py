@@ -23,21 +23,21 @@ ENTER_PWD = """Found the previous saved private key file.
 ({pri_key_file})
 Now please enter the password.
 
-If you have forgotten the password, 
+If you have forgotten the password,
 just delete the private key file and the secrets file
 ({secrets_file})
 and rerun this tool for initializing things again."""
 
 GENERATE_PRI_KEY = """It seems that you have not generated a private key for encrypting secrets before.
-Let's generate one for you, 
+Let's generate one for you,
 but we need you to set a password for protecting that private key.
 The strength of this password should be the same as your Twitter account password.
-It would be better if you set a different password from the Twitter password.  
+It would be better if you set a different password from the Twitter password.
 And you should remember this password for using this tool in the future.
 
-If you can not remember it, 
+If you can not remember it,
 just delete the private key file and the secrets file and run it again.
-{pri_key_file} 
+{pri_key_file}
 {secrets_file}"""
 
 

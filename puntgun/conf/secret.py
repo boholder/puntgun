@@ -20,21 +20,21 @@ With this, we can request the developer APIs provided by Twitter.
 You can get one by signing up on link below for free if you have a Twitter account.
 
 https://developer.twitter.com/en
-    
+
 And it requires you to bind a phone number with that account.
 You can do unbind after get the credential, and the credential will remain valid.
 
 And do not forget to turn on OAuth 1.0a in your App settings:
 
   1. Set the App permissions to "Read and write".
-  
+
   2. Set the callback, website URL to "https://twitter.com" for passing
      the website's validation check.
      (We'll use the pin based auth method, so we need not really deploy a server for
      receiving Twitter's callback.)
-     
+
      https://developer.twitter.com/en/docs/authentication/oauth-1-0a/pin-based-oauth
-     
+
 Feel free to terminate this tool if you do not want to register right now.
 (Do not forget to clean the clipboard after copying and pasting secrets to here.)"""
 
@@ -80,7 +80,7 @@ class TwitterAPISecrets(BaseModel):
 
 
 AUTH_URL = """We have gotten a pair of API secrets. Cool. But we still need to do one last thing:
-tell Twitter you allowed this API secrets pair to operate your account 
+tell Twitter you allowed this API secrets pair to operate your account
 (which is indispensable for executing block operation etc.). How?
 We just used the API secrets to request Twitter and Twitter returned a link.
 

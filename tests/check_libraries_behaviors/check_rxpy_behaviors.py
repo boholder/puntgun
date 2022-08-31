@@ -65,7 +65,7 @@ def my_concurrency_test():
 
     name = rx.from_iterable(["Alpha", "Beta", "Gamma", "Delta", "Epsilon"]).pipe(op.map(name_map))
 
-    zipped = rx.zip(num, name)
+    # zipped = rx.zip(num, name)
     merged = rx.merge(num, name)
 
     merged.pipe(op.subscribe_on(pool_scheduler)).subscribe(

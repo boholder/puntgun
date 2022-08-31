@@ -1,7 +1,6 @@
 """
 I'm using this file as util module for rule stuff.
 """
-import abc
 import datetime
 import itertools
 import sys
@@ -11,7 +10,7 @@ from pydantic import BaseModel, Field, root_validator
 from reactivex import Observable
 
 
-class FromConfig(BaseModel, abc.ABC):
+class FromConfig(BaseModel):
     """
     A base class for rule parsing, representing a rule that can be parsed from configuration.
     """

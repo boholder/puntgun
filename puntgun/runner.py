@@ -9,7 +9,6 @@ from typing import List
 import reactivex as rx
 from loguru import logger
 from reactivex import operators as op
-from reactivex.internal import SequenceContainsNoElementsError
 from reactivex.scheduler import ThreadPoolScheduler
 
 from puntgun.client import Client
@@ -71,7 +70,7 @@ def get_and_validate_plan_config():
 # copy the format from Prometheus's promtool
 CHECK_PLAN_FAIL = """Checking {plan_file} FAIL,
 Please fix these errors in plan configuration file with reference document.
-Reference documentation: 
+Reference documentation:
 fake-doc
 Errors:
 {errors}"""

@@ -15,7 +15,7 @@ class TwitterClientError(Exception):
     """Class for wrapping all Twitter client library custom errors."""
 
     def __init__(self):
-        super().__init__(f"Twitter client raises unrecoverable error while querying Twitter API")
+        super().__init__("Twitter client raises unrecoverable error while querying Twitter API")
 
 
 class TwitterApiError(Exception):
