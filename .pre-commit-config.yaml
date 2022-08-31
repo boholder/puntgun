@@ -30,11 +30,11 @@ repos:
 #        additional_dependencies:
 #          - flake8-bugbear
 #
-#  # see pyproject.toml for config
-#  - repo: https://github.com/pycqa/isort
-#    rev: 5.10.1
-#    hooks:
-#      - id: isort
+  # see pyproject.toml for config
+  - repo: https://github.com/pycqa/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
 #
 #  # see setup.cfg for config
 #  - repo: https://github.com/pre-commit/mirrors-mypy

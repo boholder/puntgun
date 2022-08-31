@@ -1,8 +1,7 @@
 from typing import IO, Union
 
-import yaml
-
 import util
+import yaml
 
 
 class HuntingPlan(object):

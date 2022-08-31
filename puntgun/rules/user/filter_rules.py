@@ -4,7 +4,12 @@ from typing import ClassVar
 
 from reactivex import Observable
 
-from puntgun.rules import NumericRangeFilterRule, FromConfig, RuleResult, TemporalRangeFilterRule
+from puntgun.rules import (
+    FromConfig,
+    NumericRangeFilterRule,
+    RuleResult,
+    TemporalRangeFilterRule,
+)
 from puntgun.rules.user import User
 
 

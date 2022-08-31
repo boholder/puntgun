@@ -1,16 +1,16 @@
 import functools
 import os
-from typing import List, Callable, Any, Tuple, Union, TypeVar
+from typing import Any, Callable, List, Tuple, TypeVar, Union
 
 import reactivex as rx
 import tweepy
+import util
+from model.errors import TwitterApiErrors, TwitterClientError
 from reactivex import operators as op
+from rules.user import User
 from tweepy import Client, OAuth1UserHandler
 
-import util
 from old.test.client.hunter import Hunter, MixedResultProcessingWrapper
-from model.errors import TwitterApiErrors, TwitterClientError
-from rules.user import User
 
 NO_VALUE_PROVIDED = "No value provided."
 

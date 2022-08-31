@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, call
 import pytest
 import reactivex as rx
 import reactivex.operators as op
-from hamcrest import contains_string, assert_that
+from hamcrest import assert_that, contains_string
 from reactivex.internal import SequenceContainsNoElementsError
 
 from puntgun import client

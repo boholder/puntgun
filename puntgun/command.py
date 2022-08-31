@@ -3,10 +3,8 @@ from pathlib import Path
 
 from loguru import logger
 
-from puntgun import runner
-from puntgun import util
-from puntgun.conf import config, example
-from puntgun.conf import encrypto, secret
+from puntgun import runner, util
+from puntgun.conf import config, encrypto, example, secret
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 

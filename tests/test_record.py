@@ -5,7 +5,7 @@ import orjson
 import pytest
 from reactivex import Observable
 
-from puntgun.record import Record, Recorder, Recordable, load_report
+from puntgun.record import Record, Recordable, Recorder, load_report
 from puntgun.rules import Plan
 
 

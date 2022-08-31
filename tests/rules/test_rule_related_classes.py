@@ -3,10 +3,16 @@ import itertools
 
 import pydantic
 import pytest
-from hamcrest import assert_that, contains_string, all_of
+from hamcrest import all_of, assert_that, contains_string
 
 from puntgun import rules
-from puntgun.rules import FromConfig, RuleResult, Plan, NumericRangeFilterRule, TemporalRangeFilterRule
+from puntgun.rules import (
+    FromConfig,
+    NumericRangeFilterRule,
+    Plan,
+    RuleResult,
+    TemporalRangeFilterRule,
+)
 from puntgun.rules.config_parser import ConfigParser
 
 

@@ -1,8 +1,8 @@
 from unittest import TestCase
 
-from hamcrest import assert_that, equal_to, calling, raises
+from hamcrest import assert_that, calling, equal_to, raises
 
-from old.test import Field, MapOption, ListOption
+from old.test import Field, ListOption, MapOption
 
 
 class TestAbstractField(TestCase):

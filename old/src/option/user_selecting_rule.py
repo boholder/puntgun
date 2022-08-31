@@ -1,13 +1,13 @@
-from typing import List, Dict, Any, Tuple
+from typing import Any, Dict, List, Tuple
 
 import reactivex as rx
-
 import util
+from model.errors import TwitterApiError
+from rules.user import User
+
 from old.test.base.options import Field, MapOption
 from old.test.client.hunter import Hunter
 from old.test.model.decision import Decision
-from model.errors import TwitterApiError
-from rules.user import User
 from old.test.option.let_me_check_rule import LetMeCheckRule
 from old.test.option.rule_set import RuleSet
 

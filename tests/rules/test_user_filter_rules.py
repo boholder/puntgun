@@ -12,7 +12,7 @@ from dynaconf import Dynaconf
 
 from puntgun.rules.config_parser import ConfigParser
 from puntgun.rules.user import User
-from puntgun.rules.user.filter_rules import UserFilterRule, TextMatchUserFilterRule
+from puntgun.rules.user.filter_rules import TextMatchUserFilterRule, UserFilterRule
 
 
 def test_follower_user_filter_rule():

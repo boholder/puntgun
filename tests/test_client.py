@@ -4,9 +4,14 @@ from unittest.mock import MagicMock
 
 import pytest
 import tweepy
-from hamcrest import assert_that, is_, contains_string
+from hamcrest import assert_that, contains_string, is_
 
-from puntgun.client import Client, ResourceNotFoundError, TwitterApiErrors, TwitterClientError
+from puntgun.client import (
+    Client,
+    ResourceNotFoundError,
+    TwitterApiErrors,
+    TwitterClientError,
+)
 from puntgun.record import Record
 from puntgun.rules.user import User
 

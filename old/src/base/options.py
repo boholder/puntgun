@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import List, Dict, Any, Type
+from typing import Any, Dict, List, Type
 
 import util
 

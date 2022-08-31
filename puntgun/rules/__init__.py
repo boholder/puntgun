@@ -7,7 +7,7 @@ import itertools
 import sys
 from typing import ClassVar, List
 
-from pydantic import BaseModel, root_validator, Field
+from pydantic import BaseModel, Field, root_validator
 from reactivex import Observable
 
 

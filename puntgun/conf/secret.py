@@ -7,8 +7,7 @@ from pydantic import BaseModel
 from tweepy import OAuth1UserHandler
 
 from puntgun import util
-from puntgun.conf import config
-from puntgun.conf import encrypto
+from puntgun.conf import config, encrypto
 
 # names of secrets in the secret settings file
 twitter_api_key_name = "AK"

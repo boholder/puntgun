@@ -1,8 +1,9 @@
-from typing import List, ClassVar
+from typing import ClassVar, List
 
 import reactivex as rx
 from loguru import logger
-from reactivex import operators as op, Observable
+from reactivex import Observable
+from reactivex import operators as op
 
 from puntgun.client import NeedClient
 from puntgun.rules import FromConfig

@@ -1,7 +1,6 @@
 import click
 
-from puntgun import command
-from puntgun import conf
+from puntgun import command, conf
 from puntgun.conf import config
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])

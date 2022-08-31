@@ -1,9 +1,8 @@
 from unittest import TestCase
 
-from hamcrest import assert_that, calling, raises, equal_to, instance_of
+from hamcrest import assert_that, calling, equal_to, instance_of, raises
 
-from old.test import SearchFilterRule
-from old.test import WightOfRuleSet
+from old.test import SearchFilterRule, WightOfRuleSet
 
 
 class TestWightOfRuleSet(TestCase):

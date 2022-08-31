@@ -1,11 +1,11 @@
-from typing import List, Tuple, Callable, Any
+from typing import Any, Callable, List, Tuple
 
 import reactivex as rx
-from reactivex import operators as op
-
 from model.errors import TwitterApiError
-from old.test.model.tweet import Tweet
+from reactivex import operators as op
 from rules.user import User
+
+from old.test.model.tweet import Tweet
 
 
 class MixedResultProcessingWrapper(object):

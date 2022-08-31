@@ -1,15 +1,13 @@
 from datetime import datetime
 from typing import Union
 from unittest import TestCase
-from unittest.mock import Mock, MagicMock
+from unittest.mock import MagicMock, Mock
 
 import reactivex as rx
 import tweepy
 from hamcrest import assert_that, is_
 
-from old.test import TweepyHunter
-from old.test import ResourceNotFoundError
-from old.test import User
+from old.test import ResourceNotFoundError, TweepyHunter, User
 
 
 class TestTweepyHunterUserQuerying(TestCase):

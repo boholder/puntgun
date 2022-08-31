@@ -3,13 +3,13 @@ import re
 import sys
 from abc import ABC
 from datetime import datetime as dt
-from typing import Any, Tuple, Dict
+from typing import Any, Dict, Tuple
 
 import reactivex as rx
-
-from old.test.base.options import MapOption, Field, Option
-from old.test.model.context import Context
 from model.errors import TwitterApiError
+
+from old.test.base.options import Field, MapOption, Option
+from old.test.model.context import Context
 
 
 class FilterRule(Option, ABC):

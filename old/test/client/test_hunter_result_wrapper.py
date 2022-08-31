@@ -4,8 +4,7 @@ import reactivex as rx
 from hamcrest import assert_that, is_
 from reactivex import operators as op
 
-from old.test import MixedResultProcessingWrapper
-from old.test import TwitterApiError
+from old.test import MixedResultProcessingWrapper, TwitterApiError
 
 
 class TestHunterResultWrapper(TestCase):

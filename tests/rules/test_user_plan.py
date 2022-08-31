@@ -1,6 +1,6 @@
 import pytest
 import reactivex as rx
-from hamcrest import assert_that, contains_string, all_of
+from hamcrest import all_of, assert_that, contains_string
 from reactivex import operators as op
 
 from puntgun.record import Record
@@ -10,7 +10,10 @@ from puntgun.rules.user import User
 from puntgun.rules.user.action_rules import UserActionRule
 from puntgun.rules.user.filter_rules import UserFilterRule
 from puntgun.rules.user.plan import UserPlanResult
-from puntgun.rules.user.rule_sets import UserSourceRuleResultMergingSet, UserFilterRuleAnyOfSet
+from puntgun.rules.user.rule_sets import (
+    UserFilterRuleAnyOfSet,
+    UserSourceRuleResultMergingSet,
+)
 from puntgun.rules.user.source_rules import UserSourceRule
 
 

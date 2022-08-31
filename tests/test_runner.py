@@ -1,14 +1,14 @@
-from typing import List, ClassVar
+from typing import ClassVar, List
 
 import pytest
 import reactivex as rx
-from hamcrest import assert_that, contains_string, contains_inanyorder
+from hamcrest import assert_that, contains_inanyorder, contains_string
 from reactivex import Observable
 from reactivex import operators as op
 
 from puntgun import runner
-from puntgun.record import Recordable, Record, load_report
-from puntgun.rules import Plan, FromConfig
+from puntgun.record import Record, Recordable, load_report
+from puntgun.rules import FromConfig, Plan
 from puntgun.rules.config_parser import ConfigParser
 
 

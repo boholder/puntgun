@@ -1,5 +1,5 @@
 import time
-from typing import Optional, List
+from typing import List, Optional
 
 import pytest
 import reactivex as rx
@@ -12,9 +12,9 @@ from puntgun.rules.user import User
 from puntgun.rules.user.action_rules import UserActionRule
 from puntgun.rules.user.filter_rules import UserFilterRule
 from puntgun.rules.user.rule_sets import (
-    UserSourceRuleResultMergingSet,
     UserFilterRuleAllOfSet,
     UserFilterRuleAnyOfSet,
+    UserSourceRuleResultMergingSet,
     execution_wrapper,
 )
 from puntgun.rules.user.source_rules import UserSourceRule

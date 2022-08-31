@@ -3,21 +3,21 @@ from datetime import datetime as dt
 from typing import List
 from unittest import TestCase
 
-from hamcrest import assert_that, calling, raises, is_
+from hamcrest import assert_that, calling, is_, raises
 
-from old.test import Context
-from old.test import User
 from old.test import (
-    UserCreatedFilterRule,
-    UserTextsMatchFilterRule,
-    UserCreatedAfterFilterRule,
-    UserCreatedWithinDaysFilterRule,
+    Context,
+    FloatComparingFilterRule,
     IntComparingFilterRule,
+    User,
+    UserCreatedAfterFilterRule,
+    UserCreatedFilterRule,
+    UserCreatedWithinDaysFilterRule,
     UserFollowerFilterRule,
     UserFollowerLessThanFilterRule,
-    UserFollowingMoreThanFilterRule,
     UserFollowingFilterRule,
-    FloatComparingFilterRule,
+    UserFollowingMoreThanFilterRule,
+    UserTextsMatchFilterRule,
 )
 
 
