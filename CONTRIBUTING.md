@@ -63,8 +63,8 @@ please [download a new one](https://www.python.org/downloads/) or upgrade your e
 (Sorry to be abrupt, but... [pipx](https://github.com/pypa/pipx) is an excellent tool for managing executable python libraries,
 you may want to use it instead of `pip` for installing pypi-based executable tools.
 Almost all tools used in the project can be happily installed in this convenient way,
-though they will be well cared by other managing tools so you need not manually install them
-while you using scripts.)
+though they will be well cared by other managing tools, so you need not manually install them while you using scripts.
+If you install them with `pipx` outside of venv and PDM, you can use them anywhere, that is convenient.)
 
 This project uses the [PDM](https://pdm.fming.dev/latest/) as package managing tool,
 if you are not skilled enough to use other package management tools to
