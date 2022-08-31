@@ -11,10 +11,10 @@ from puntgun.conf import config
 from puntgun.conf import encrypto
 
 # names of secrets in the secret settings file
-twitter_api_key_name = 'AK'
-twitter_api_key_secret_name = 'AKS'
-twitter_access_token_name = 'AT'
-twitter_access_token_secret_name = 'ATS'
+twitter_api_key_name = "AK"
+twitter_api_key_secret_name = "AKS"
+twitter_access_token_name = "AT"
+twitter_access_token_secret_name = "ATS"
 
 GET_API_SECRETS_FROM_INPUT = """Now we need a "Twitter Dev OAuth App API" to continue.
 With this, we can request the developer APIs provided by Twitter.
@@ -60,19 +60,24 @@ class TwitterAPISecrets(BaseModel):
 
     @staticmethod
     def from_environment():
-        return TwitterAPISecrets(key=load_settings_from_environment_variables(twitter_api_key_name),
-                                 secret=load_settings_from_environment_variables(twitter_api_key_secret_name))
+        return TwitterAPISecrets(
+            key=load_settings_from_environment_variables(twitter_api_key_name),
+            secret=load_settings_from_environment_variables(twitter_api_key_secret_name),
+        )
 
     @staticmethod
     def from_settings(pri_key: RSAPrivateKey):
-        return TwitterAPISecrets(key=load_and_decrypt_secret_from_settings(pri_key, twitter_api_key_name),
-                                 secret=load_and_decrypt_secret_from_settings(pri_key, twitter_api_key_secret_name))
+        return TwitterAPISecrets(
+            key=load_and_decrypt_secret_from_settings(pri_key, twitter_api_key_name),
+            secret=load_and_decrypt_secret_from_settings(pri_key, twitter_api_key_secret_name),
+        )
 
     @staticmethod
     def from_input():
         print(GET_API_SECRETS_FROM_INPUT)
-        return TwitterAPISecrets(key=util.get_secret_from_terminal('Api key'),
-                                 secret=util.get_secret_from_terminal('Api key secret'))
+        return TwitterAPISecrets(
+            key=util.get_secret_from_terminal("Api key"), secret=util.get_secret_from_terminal("Api key secret")
+        )
 
 
 AUTH_URL = """We have gotten a pair of API secrets. Cool. But we still need to do one last thing:
@@ -97,21 +102,23 @@ class TwitterAccessTokenSecrets(BaseModel):
 
     @staticmethod
     def from_environment():
-        return TwitterAccessTokenSecrets(token=load_settings_from_environment_variables(twitter_access_token_name),
-                                         secret=load_settings_from_environment_variables(
-                                             twitter_access_token_secret_name))
+        return TwitterAccessTokenSecrets(
+            token=load_settings_from_environment_variables(twitter_access_token_name),
+            secret=load_settings_from_environment_variables(twitter_access_token_secret_name),
+        )
 
     @staticmethod
     def from_settings(pri_key: RSAPrivateKey):
         return TwitterAccessTokenSecrets(
             token=load_and_decrypt_secret_from_settings(pri_key, twitter_access_token_name),
-            secret=load_and_decrypt_secret_from_settings(pri_key, twitter_access_token_secret_name))
+            secret=load_and_decrypt_secret_from_settings(pri_key, twitter_access_token_secret_name),
+        )
 
     @staticmethod
     def from_input(api_secrets: TwitterAPISecrets):
-        oauth1_user_handler = OAuth1UserHandler(api_secrets.key, api_secrets.secret, callback='oob')
+        oauth1_user_handler = OAuth1UserHandler(api_secrets.key, api_secrets.secret, callback="oob")
         print(AUTH_URL.format(auth_url=oauth1_user_handler.get_authorization_url()))
-        pin = util.get_input_from_terminal('PIN')
+        pin = util.get_input_from_terminal("PIN")
         token_pair = oauth1_user_handler.get_access_token(pin)
         return TwitterAccessTokenSecrets(token=token_pair[0], secret=token_pair[1])
 
@@ -124,10 +131,12 @@ And we'll encrypt them before saving, it's time to load your private key."""
 def load_or_request_all_secrets(pri_key: RSAPrivateKey):
     api_secrets = load_or_request_api_secrets(pri_key)
     access_token_secrets = load_or_request_access_token_secrets(api_secrets, pri_key)
-    secrets = {'ak': api_secrets.key,
-               'aks': api_secrets.secret,
-               'at': access_token_secrets.token,
-               'ats': access_token_secrets.secret}
+    secrets = {
+        "ak": api_secrets.key,
+        "aks": api_secrets.secret,
+        "at": access_token_secrets.token,
+        "ats": access_token_secrets.secret,
+    }
 
     # Save the secrets into file if they are not saved yet.
     # Must save them at once because saving method will override the existing file.
@@ -179,14 +188,16 @@ def load_or_request_access_token_secrets(api_secrets: TwitterAPISecrets, pri_key
                 pri_key = encrypto.load_or_generate_private_key()
             return TwitterAccessTokenSecrets.from_settings(pri_key)
         except (ValueError, TypeError):
-            logger.info("Failed to load access token secrets from settings, "
-                        "trying to get access token secrets from input")
+            logger.info(
+                "Failed to load access token secrets from settings, " "trying to get access token secrets from input"
+            )
 
     # here we need the api secrets to generate new access token.
     return TwitterAccessTokenSecrets.from_input(api_secrets)
 
 
 # == low level ==
+
 
 def load_settings_from_environment_variables(name: str, dynaconf_settings=None):
     """
@@ -204,25 +215,23 @@ def load_and_decrypt_secret_from_settings(private_key: RSAPrivateKey, name: str,
     return encrypto.decrypt(private_key, binascii.unhexlify(dynaconf_settings.get(name)))
 
 
-def encrypt_and_save_secrets_into_file(public_key: RSAPublicKey,
-                                       file_path: Path = config.secrets_file,
-                                       **kwargs):
+def encrypt_and_save_secrets_into_file(public_key: RSAPublicKey, file_path: Path = config.secrets_file, **kwargs):
     """
     Will overwrite the file if already exists.
     Save the encrypted bytes as hex format into a file.
     """
 
     def transform(msg):
-        return binascii.hexlify(encrypto.encrypt(public_key, msg)).decode('utf-8')
+        return binascii.hexlify(encrypto.encrypt(public_key, msg)).decode("utf-8")
 
-    with open(file_path, 'w', encoding='utf-8') as f:
+    with open(file_path, "w", encoding="utf-8") as f:
         # if we do not add '\n' at the tail, all items are printed into one line
-        f.writelines(f'{key}: {transform(value)}\n' for key, value in kwargs.items())
+        f.writelines(f"{key}: {transform(value)}\n" for key, value in kwargs.items())
 
 
 def secrets_config_file_valid():
     def not_empty_or_has_only_blank_characters():
-        with open(config.secrets_file, 'r', encoding='utf-8') as f:
+        with open(config.secrets_file, "r", encoding="utf-8") as f:
             return bool(f.read().strip())
 
     return config.secrets_file.exists() and not_empty_or_has_only_blank_characters()

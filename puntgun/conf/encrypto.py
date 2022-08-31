@@ -49,20 +49,20 @@ def load_or_generate_private_key():
         err_count = 0
         while True:
             if err_count > 2:
-                print('Maybe you want to reset the password as described above.')
+                print("Maybe you want to reset the password as described above.")
             try:
-                private_key = load_private_key(util.get_secret_from_terminal('Password'), config.pri_key_file)
+                private_key = load_private_key(util.get_secret_from_terminal("Password"), config.pri_key_file)
                 logger.info("Private key file loaded with correct password")
                 return private_key
             except ValueError:
                 err_count += 1
-                print('Incorrect password.')
+                print("Incorrect password.")
 
     def load_with_password_from_stdin():
         return load_private_key("".join(sys.stdin.readlines()), config.pri_key_file)
 
     def generate_and_save():
-        pwd = util.get_secret_from_terminal('Password')
+        pwd = util.get_secret_from_terminal("Password")
         pri_key = generate_private_key()
         dump_private_key(pri_key, pwd, config.pri_key_file)
         logger.bind(o=True).info(f"The private key has been saved into the file:\n{config.pri_key_file}")
@@ -72,7 +72,7 @@ def load_or_generate_private_key():
     if config.pri_key_file.exists():
         logger.info("Found the existing private key, trying to load with password")
         print(ENTER_PWD.format(pri_key_file=config.pri_key_file, secrets_file=config.secrets_file))
-        if config.settings.get('read_password_from_stdin', False):
+        if config.settings.get("read_password_from_stdin", False):
             return load_with_password_from_stdin()
         else:
             return load_with_password_from_prompt()
@@ -84,32 +84,35 @@ def load_or_generate_private_key():
 
 # == low level ==
 
+
 def encrypt(pub_key: RSAPublicKey, plaintext: str):
-    return pub_key.encrypt(bytes(plaintext, 'utf-8'), encrypt_padding)
+    return pub_key.encrypt(bytes(plaintext, "utf-8"), encrypt_padding)
 
 
 def decrypt(pri_key: RSAPrivateKey, ciphertext: bytes):
-    return pri_key.decrypt(ciphertext, encrypt_padding).decode('utf-8')
+    return pri_key.decrypt(ciphertext, encrypt_padding).decode("utf-8")
 
 
 def dump_private_key(pri_key: RSAPrivateKey, pwd: str, file_path):
     """will overwrite the file if it already exists"""
     util.backup_if_exists(file_path)
-    with open(file_path, 'wb') as f:
-        f.write(pri_key.private_bytes(
-            # just some human-recognizable formats
-            # https://stackoverflow.com/questions/1011572/convert-pem-key-to-ssh-rsa-format
-            encoding=serialization.Encoding.PEM,
-            # https://stackoverflow.com/questions/48958304/pkcs1-and-pkcs8-format-for-rsa-private-key
-            # https://en.wikipedia.org/wiki/PKCS_8
-            format=serialization.PrivateFormat.PKCS8,
-            encryption_algorithm=serialization.BestAvailableEncryption(bytes(pwd, 'utf-8'))
-        ))
+    with open(file_path, "wb") as f:
+        f.write(
+            pri_key.private_bytes(
+                # just some human-recognizable formats
+                # https://stackoverflow.com/questions/1011572/convert-pem-key-to-ssh-rsa-format
+                encoding=serialization.Encoding.PEM,
+                # https://stackoverflow.com/questions/48958304/pkcs1-and-pkcs8-format-for-rsa-private-key
+                # https://en.wikipedia.org/wiki/PKCS_8
+                format=serialization.PrivateFormat.PKCS8,
+                encryption_algorithm=serialization.BestAvailableEncryption(bytes(pwd, "utf-8")),
+            )
+        )
 
 
 def load_private_key(pwd: str, file_path):
-    with open(file_path, 'rb') as f:
-        return serialization.load_pem_private_key(f.read(), password=bytes(pwd, 'utf-8'))
+    with open(file_path, "rb") as f:
+        return serialization.load_pem_private_key(f.read(), password=bytes(pwd, "utf-8"))
 
 
 def generate_private_key():

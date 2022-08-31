@@ -21,44 +21,44 @@ class User(BaseModel):
 
     # Any field can be None for avoiding validation error raising
     id: Optional[int] = 0
-    name: Optional[str] = ''
-    username: Optional[str] = ''
-    profile_image_url: Optional[str] = ''
+    name: Optional[str] = ""
+    username: Optional[str] = ""
+    profile_image_url: Optional[str] = ""
     created_at: Optional[datetime] = default_time
     protected: Optional[bool] = False
     verified: Optional[bool] = False
-    location: Optional[str] = ''
-    description: Optional[str] = ''
+    location: Optional[str] = ""
+    description: Optional[str] = ""
     followers_count: Optional[int] = 0
     following_count: Optional[int] = 0
     tweet_count: Optional[int] = 0
     pinned_tweet_id: Optional[int] = 0
-    pinned_tweet_text: Optional[str] = ''
+    pinned_tweet_text: Optional[str] = ""
     entities: Optional[dict] = {}
-    url: Optional[str] = ''
+    url: Optional[str] = ""
     withheld: Optional[dict] = {}
 
     class Config:
         validate_assignment = True
 
-    @validator('location')
+    @validator("location")
     def set_location(cls, loc):
         # When 'location' is provided but the value is None, set it to default value.
-        return loc or ''
+        return loc or ""
 
-    @validator('pinned_tweet_id')
+    @validator("pinned_tweet_id")
     def set_pinned_tweet_id(cls, tid):
         return tid or 0
 
-    @validator('entities')
+    @validator("entities")
     def set_entities(cls, ent):
         return ent or {}
 
-    @validator('url')
+    @validator("url")
     def set_url(cls, url):
         return url or {}
 
-    @validator('withheld')
+    @validator("withheld")
     def set_withheld(cls, wh):
         return wh or {}
 
@@ -73,13 +73,15 @@ class User(BaseModel):
             return User()
 
         # has this field and is not none
-        public_metrics = resp_data['public_metrics'] if ('public_metrics' in resp_data) else {}
+        public_metrics = resp_data["public_metrics"] if ("public_metrics" in resp_data) else {}
 
-        return User(**resp_data,
-                    followers_count=public_metrics.get('followers_count', 0),
-                    following_count=public_metrics.get('following_count', 0),
-                    tweet_count=public_metrics.get('tweet_count', 0),
-                    pinned_tweet_text=pinned_tweet_text)
+        return User(
+            **resp_data,
+            followers_count=public_metrics.get("followers_count", 0),
+            following_count=public_metrics.get("following_count", 0),
+            tweet_count=public_metrics.get("tweet_count", 0),
+            pinned_tweet_text=pinned_tweet_text
+        )
 
     def __eq__(self, other):
         if isinstance(other, type(self)):

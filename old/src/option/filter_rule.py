@@ -48,10 +48,12 @@ class SearchFilterRule(MapOption, DelayedFilterRule, FilterRule):
     Triggered if search result of potential user isn't empty.
     """
 
-    config_keyword = 'search'
-    valid_options = [Field.of('name', str),
-                     Field.of('count', int, default_value=100),
-                     Field.of('query', str, required=True)]
+    config_keyword = "search"
+    valid_options = [
+        Field.of("name", str),
+        Field.of("count", int, default_value=100),
+        Field.of("query", str, required=True),
+    ]
 
     def judge(self, context: Context) -> Tuple[bool, TwitterApiError]:
         """"""
@@ -68,7 +70,7 @@ class SearchQueryFilterRule(Field, DelayedFilterRule, FilterRule):
         """"""
         raise NotImplementedError
 
-    config_keyword = 'search_query'
+    config_keyword = "search_query"
     expect_type = str
 
     @classmethod
@@ -77,30 +79,33 @@ class SearchQueryFilterRule(Field, DelayedFilterRule, FilterRule):
         # it will be filled as 100 when SearchFilterRule building itself.
         # And after initializing, it will be treated as SearchFilterRule,
         # because we return a SearchFilterRule instance here.
-        return SearchFilterRule.build({'query': config_value, 'count': 100})
+        return SearchFilterRule.build({"query": config_value, "count": 100})
 
 
 class TimeComparingFilterRule(MapOption):
     """Reusable for time-related filter rules."""
 
-    valid_options = [Field.of('before', str, default_value=dt.utcnow().strftime('%Y-%m-%d')),
-                     Field.of('after', str, default_value='2000-01-01'),
-                     Field.of('within_days', int, conflict_with=['before', 'after'])]
+    valid_options = [
+        Field.of("before", str, default_value=dt.utcnow().strftime("%Y-%m-%d")),
+        Field.of("after", str, default_value="2000-01-01"),
+        Field.of("within_days", int, conflict_with=["before", "after"]),
+    ]
 
     def __init__(self, config_value: Dict[str, Any]):
         super().__init__(config_value)
 
         # if no 'within_days' field,
         # convert input time string to datetime format
-        if not hasattr(self, 'within_days'):
+        if not hasattr(self, "within_days"):
             self.before = dt.fromisoformat(self.before)
             self.after = dt.fromisoformat(self.after)
 
-            assert self.before >= self.after, \
-                f'Option [{self}]: "before" ({self.before}) should be after "after" ({self.after})'
+            assert (
+                self.before >= self.after
+            ), f'Option [{self}]: "before" ({self.before}) should be after "after" ({self.after})'
 
     def judge_time(self, target_time: datetime) -> bool:
-        if hasattr(self, 'within_days'):
+        if hasattr(self, "within_days"):
             return dt.utcnow() - datetime.timedelta(days=self.within_days) <= target_time
         else:
             return self.after <= target_time <= self.before
@@ -110,7 +115,8 @@ class UserCreatedFilterRule(TimeComparingFilterRule, ImmediateFilterRule, Filter
     """
     The rule for judging user's creation time.
     """
-    config_keyword = 'user_created'
+
+    config_keyword = "user_created"
 
     def judge(self, context: Context) -> bool:
         return self.judge_time(context.user.created_at)
@@ -119,7 +125,7 @@ class UserCreatedFilterRule(TimeComparingFilterRule, ImmediateFilterRule, Filter
 class UserCreatedAfterFilterRule(Field, ImmediateFilterRule, FilterRule):
     """Shorten version of UserCreatedFilterRule"""
 
-    config_keyword = 'user_created_after'
+    config_keyword = "user_created_after"
     expect_type = str
 
     def judge(self, context: Context) -> bool:
@@ -127,13 +133,13 @@ class UserCreatedAfterFilterRule(Field, ImmediateFilterRule, FilterRule):
 
     @classmethod
     def build(cls, config_value: Any):
-        return UserCreatedFilterRule.build({'after': config_value})
+        return UserCreatedFilterRule.build({"after": config_value})
 
 
 class UserCreatedWithinDaysFilterRule(Field, ImmediateFilterRule, FilterRule):
     """Shorten version of UserCreatedFilterRule"""
 
-    config_keyword = 'user_created_within_days'
+    config_keyword = "user_created_within_days"
     expect_type = int
 
     def judge(self, context: Context) -> bool:
@@ -141,14 +147,15 @@ class UserCreatedWithinDaysFilterRule(Field, ImmediateFilterRule, FilterRule):
 
     @classmethod
     def build(cls, config_value: Any):
-        return UserCreatedFilterRule.build({'within_days': config_value})
+        return UserCreatedFilterRule.build({"within_days": config_value})
 
 
 class UserTextsMatchFilterRule(Field, ImmediateFilterRule, FilterRule):
     """
     The rule for judging user's text match.
     """
-    config_keyword = 'user_texts_match'
+
+    config_keyword = "user_texts_match"
     expect_type = str
 
     def __init__(self, config_value: str):
@@ -161,35 +168,40 @@ class UserTextsMatchFilterRule(Field, ImmediateFilterRule, FilterRule):
         return cls(super().build(config_value))
 
     def judge(self, context: Context) -> bool:
-        return any(self.regex.search(text) for text in
-                   [context.user.name, context.user.description, context.user.pinned_tweet_text])
+        return any(
+            self.regex.search(text)
+            for text in [context.user.name, context.user.description, context.user.pinned_tweet_text]
+        )
 
 
 class IntComparingFilterRule(MapOption):
     """Reusable for number-related filter rules."""
 
-    valid_options = [Field.of('less_than', int, default_value=sys.maxsize),
-                     Field.of('more_than', int, default_value=-sys.maxsize - 1)]
+    valid_options = [
+        Field.of("less_than", int, default_value=sys.maxsize),
+        Field.of("more_than", int, default_value=-sys.maxsize - 1),
+    ]
 
     def __init__(self, config_value: Dict[str, Any]):
         super().__init__(config_value)
 
-        assert self.less_than >= self.more_than, \
-            f'Option [{self}]: "more_than" ({self.more_than}) should be bigger than "less_than" ({self.less_than})'
+        assert (
+            self.less_than >= self.more_than
+        ), f'Option [{self}]: "more_than" ({self.more_than}) should be bigger than "less_than" ({self.less_than})'
 
     def judge_number(self, num: int) -> bool:
         return self.more_than < num < self.less_than
 
 
 class UserFollowerFilterRule(IntComparingFilterRule, ImmediateFilterRule, FilterRule):
-    config_keyword = 'user_follower'
+    config_keyword = "user_follower"
 
     def judge(self, context: Context) -> bool:
         return self.judge_number(context.user.followers_count)
 
 
 class UserFollowerLessThanFilterRule(Field, ImmediateFilterRule, FilterRule):
-    config_keyword = 'user_follower_less_than'
+    config_keyword = "user_follower_less_than"
     expect_type = int
 
     def judge(self, context: Context) -> bool:
@@ -197,18 +209,18 @@ class UserFollowerLessThanFilterRule(Field, ImmediateFilterRule, FilterRule):
 
     @classmethod
     def build(cls, config_value: Any):
-        return UserFollowerFilterRule.build({'less_than': config_value})
+        return UserFollowerFilterRule.build({"less_than": config_value})
 
 
 class UserFollowingFilterRule(IntComparingFilterRule, ImmediateFilterRule, FilterRule):
-    config_keyword = 'user_following'
+    config_keyword = "user_following"
 
     def judge(self, context: Context) -> bool:
         return self.judge_number(context.user.following_count)
 
 
 class UserFollowingMoreThanFilterRule(Field, ImmediateFilterRule, FilterRule):
-    config_keyword = 'user_following_more_than'
+    config_keyword = "user_following_more_than"
     expect_type = int
 
     def judge(self, context: Context) -> bool:
@@ -216,20 +228,23 @@ class UserFollowingMoreThanFilterRule(Field, ImmediateFilterRule, FilterRule):
 
     @classmethod
     def build(cls, config_value: Any):
-        return UserFollowingFilterRule.build({'more_than': config_value})
+        return UserFollowingFilterRule.build({"more_than": config_value})
 
 
 class FloatComparingFilterRule(MapOption):
     """Reusable for number-related filter rules."""
 
-    valid_options = [Field.of('less_than', float, default_value=float(sys.maxsize)),
-                     Field.of('more_than', float, default_value=float(-sys.maxsize))]
+    valid_options = [
+        Field.of("less_than", float, default_value=float(sys.maxsize)),
+        Field.of("more_than", float, default_value=float(-sys.maxsize)),
+    ]
 
     def __init__(self, config_value: Dict[str, Any]):
         super().__init__(config_value)
 
-        assert self.less_than >= self.more_than, \
-            f'Option [{self}]: "more_than" ({self.more_than}) should be bigger than "less_than" ({self.less_than})'
+        assert (
+            self.less_than >= self.more_than
+        ), f'Option [{self}]: "more_than" ({self.more_than}) should be bigger than "less_than" ({self.less_than})'
 
     def judge_number(self, num: float) -> bool:
         return self.more_than < num < self.less_than

@@ -14,7 +14,7 @@ class Option(object):
     """
 
     # --- required setting attributes for overriding ---
-    config_keyword: str = 'generic_option'
+    config_keyword: str = "generic_option"
 
     # --- optional setting attributes for overriding ---
 
@@ -54,16 +54,16 @@ class Option(object):
         raise NotImplementedError
 
     @staticmethod
-    def self_and_immediate_subclasses_list(parent_options: List[Type['Option']]) -> List[Type['Option']]:
+    def self_and_immediate_subclasses_list(parent_options: List[Type["Option"]]) -> List[Type["Option"]]:
         subclasses = [Option.self_and_immediate_subclasses_of(o) for o in parent_options]
         return [o for lst in subclasses for o in lst]
 
     @staticmethod
-    def self_and_immediate_subclasses_of(cls: Type['Option']) -> List[Type['Option']]:
+    def self_and_immediate_subclasses_of(cls: Type["Option"]) -> List[Type["Option"]]:
         return [cls] + Option.immediate_subclasses_of(cls)
 
     @staticmethod
-    def immediate_subclasses_of(cls: Type['Option']) -> List[Type['Option']]:
+    def immediate_subclasses_of(cls: Type["Option"]) -> List[Type["Option"]]:
         return cls.__subclasses__() if hasattr(cls, "__subclasses__") else []
 
 
@@ -91,14 +91,16 @@ class Field(Option):
     default_value: object = None
 
     @classmethod
-    def of(cls,
-           config_keyword: str,
-           expect_type: type,
-           default_value: object = None,
-           conflict_with: List[str] = None,
-           require_with: List[str] = None,
-           required: bool = False,
-           singleton: bool = False) -> 'Field':
+    def of(
+        cls,
+        config_keyword: str,
+        expect_type: type,
+        default_value: object = None,
+        conflict_with: List[str] = None,
+        require_with: List[str] = None,
+        required: bool = False,
+        singleton: bool = False,
+    ) -> "Field":
         """
         Define a field type directly by class method.
 
@@ -132,23 +134,26 @@ class Field(Option):
     def __check_setting_constraints(self):
         """Assertions for checking constraints set by class attributes."""
 
-        assert self.config_keyword, "Field's \"config_keyword\" must be set"
-        assert self.expect_type, "Field's \"expect_type\" must be set"
+        assert self.config_keyword, 'Field\'s "config_keyword" must be set'
+        assert self.expect_type, 'Field\'s "expect_type" must be set'
 
         for keyword in self.require_with:
-            assert keyword not in self.conflict_with, \
-                f"Field [{self}]: keyword [{keyword}] shows in both require_with and conflict_with"
+            assert (
+                keyword not in self.conflict_with
+            ), f"Field [{self}]: keyword [{keyword}] shows in both require_with and conflict_with"
 
         if self.default_value:
-            assert isinstance(self.default_value, self.expect_type), \
-                f"Field [{self}]: default value [{self.default_value}] is not of expect type [{self.expect_type}]"
+            assert isinstance(
+                self.default_value, self.expect_type
+            ), f"Field [{self}]: default value [{self.default_value}] is not of expect type [{self.expect_type}]"
 
     @classmethod
     @util.log_error_with(logger)
     def build(cls, config_value: Any):
         # check input's type
-        assert isinstance(config_value, cls.expect_type), \
-            f"Field [{cls}]: given value [{config_value}] is not of expect type [{cls.expect_type}]"
+        assert isinstance(
+            config_value, cls.expect_type
+        ), f"Field [{cls}]: given value [{config_value}] is not of expect type [{cls.expect_type}]"
 
         # then directly return the input
         return config_value
@@ -201,8 +206,7 @@ class MapOption(NestableOption):
     @util.log_error_with(logger)
     def __find_options_exist_in_configuration(self) -> list[Type[Option]]:
 
-        assert len(self.raw_config) > 0, \
-            f"Option [{self}] must have at least one field."
+        assert len(self.raw_config) > 0, f"Option [{self}] must have at least one field."
 
         # must also consider the valid option's subclass is valid too
         valid_option_types = Option.self_and_immediate_subclasses_list(self.valid_options)
@@ -211,12 +215,10 @@ class MapOption(NestableOption):
         exist_keywords = self.raw_config.keys()
 
         for k in exist_keywords:
-            assert k in valid_keywords, \
-                f"Option [{self}]: [{k}] is not a valid field."
+            assert k in valid_keywords, f"Option [{self}]: [{k}] is not a valid field."
 
         # return these exist options' type
-        return [t for t in valid_option_types
-                if t.config_keyword in exist_keywords]
+        return [t for t in valid_option_types if t.config_keyword in exist_keywords]
 
     @util.log_error_with(logger)
     def __check_constraints_of(self, exist_types: List[Type[Option]]):
@@ -227,25 +229,25 @@ class MapOption(NestableOption):
 
         # check option required fields
         for required_field in [field for field in self.valid_options if field.required]:
-            assert [f for f in exist_types
-                    if f in Option.self_and_immediate_subclasses_of(required_field)], \
-                f"Option [{self}]: field [{required_field}] is required," \
-                f" but absent in configuration."
+            assert [f for f in exist_types if f in Option.self_and_immediate_subclasses_of(required_field)], (
+                f"Option [{self}]: field [{required_field}] is required," f" but absent in configuration."
+            )
 
         exist_keywords = [field.config_keyword for field in exist_types]
 
         for field in exist_types:
             # check exist fields required fields constraints
             for required_kwd in field.require_with:
-                assert required_kwd in exist_keywords, \
-                    f"Option [{self}]: field [{field}] requires another field [{required_kwd}]," \
+                assert required_kwd in exist_keywords, (
+                    f"Option [{self}]: field [{field}] requires another field [{required_kwd}],"
                     f" but absent in configuration."
+                )
 
             # check exist fields conflict constraints
             for conflict_kwd in field.conflict_with:
-                assert conflict_kwd not in exist_keywords, \
-                    f"Option [{self}]: " \
-                    f"field [{field}] is conflict with another existing field [{conflict_kwd}]."
+                assert conflict_kwd not in exist_keywords, (
+                    f"Option [{self}]: " f"field [{field}] is conflict with another existing field [{conflict_kwd}]."
+                )
 
     def __add_non_conflict_default_options(self, exist_option_settings: List[Type[Option]]) -> List[Type[Option]]:
         """
@@ -255,19 +257,16 @@ class MapOption(NestableOption):
         """
 
         all_exist_keywords = [f.config_keyword for f in exist_option_settings]
-        all_exist_fields_conflict_keywords = [k for f in exist_option_settings
-                                              for k in f.conflict_with]
+        all_exist_fields_conflict_keywords = [k for f in exist_option_settings for k in f.conflict_with]
 
         # for all valid field types which have default value
-        for field in [f for f in self.valid_options
-                      if isinstance(f, Field) and (f.default_value is not None)]:
+        for field in [f for f in self.valid_options if isinstance(f, Field) and (f.default_value is not None)]:
 
             keyword = field.config_keyword
 
             # if the field is not conflict with any of existing fields,
             # and not exist in existing fields, add it
-            if (keyword not in all_exist_fields_conflict_keywords) \
-                    and (keyword not in all_exist_keywords):
+            if (keyword not in all_exist_fields_conflict_keywords) and (keyword not in all_exist_keywords):
                 exist_option_settings.append(field)
 
         return exist_option_settings
@@ -341,19 +340,20 @@ class ListOption(NestableOption):
         """
 
         for field in self.valid_options:
-            assert not field.conflict_with, \
-                f"Option [{self}]: field [{field}] has set \"conflict_with\" constraint, " \
+            assert not field.conflict_with, (
+                f'Option [{self}]: field [{field}] has set "conflict_with" constraint, '
                 f"which is not allowed in list-like option."
+            )
 
-            assert not field.require_with, \
-                f"Option [{self}]: field [{field}] has set \"require_with\" constraint, " \
+            assert not field.require_with, (
+                f'Option [{self}]: field [{field}] has set "require_with" constraint, '
                 f"which is not allowed in list-like option."
+            )
 
     @util.log_error_with(logger)
     def __find_options_exist_in_configuration(self) -> List[Type[Option]]:
 
-        assert len(self.raw_config) > 0, \
-            f"Option [{self}] must have at least one field."
+        assert len(self.raw_config) > 0, f"Option [{self}] must have at least one field."
 
         # collect items' key in raw_config into a flatted list
         # for example:
@@ -368,12 +368,10 @@ class ListOption(NestableOption):
         valid_config_keywords = [o.config_keyword for o in valid_option_types]
 
         for exist_field in exist_item_keywords:
-            assert exist_field in valid_config_keywords, \
-                f"Option [{self}]: [{exist_field}] is not a valid field."
+            assert exist_field in valid_config_keywords, f"Option [{self}]: [{exist_field}] is not a valid field."
 
         # return these exist options' type
-        return [field for field in valid_option_types
-                if field.config_keyword in exist_item_keywords]
+        return [field for field in valid_option_types if field.config_keyword in exist_item_keywords]
 
     @util.log_error_with(logger)
     def __extract_exist_options(self, exist_option_settings: List[Type[Option]]) -> Dict[str, List[Any]]:
@@ -398,17 +396,17 @@ class ListOption(NestableOption):
         # check option required fields
         for required_field in [field for field in self.valid_options if field.required]:
             # assert any required field or its subclass is exists in exist_option_settings
-            assert [f for f in exist_option_settings
-                    if f in Option.self_and_immediate_subclasses_of(required_field)], \
-                f"Option [{self}]: field [{required_field}] is required," \
-                f" but absent in configuration."
+            assert [f for f in exist_option_settings if f in Option.self_and_immediate_subclasses_of(required_field)], (
+                f"Option [{self}]: field [{required_field}] is required," f" but absent in configuration."
+            )
 
         # check "singleton" constraint
         for settings in [o for o in exist_option_settings if o.singleton]:
             value_number_of_this_type = len(self.exist_options[settings.config_keyword])
-            assert value_number_of_this_type <= 1, \
-                f"Option [{self}]: can only have at most one [{settings}] item," \
+            assert value_number_of_this_type <= 1, (
+                f"Option [{self}]: can only have at most one [{settings}] item,"
                 f" but found {value_number_of_this_type}."
+            )
 
     @classmethod
     def build(cls, config_value: List[Dict[str, Any]]):

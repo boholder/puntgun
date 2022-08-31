@@ -69,9 +69,7 @@ class MixedResultProcessingWrapper(object):
             after = src.pipe(*ops) if ops else src
             [after.subscribe(o) for o in obs]
 
-        self.observable \
-            .pipe(op.group_by(lambda x: isinstance(x, TwitterApiError))) \
-            .subscribe(sub)
+        self.observable.pipe(op.group_by(lambda x: isinstance(x, TwitterApiError))).subscribe(sub)
 
     def clean(self):
         self.__error_observers = []
@@ -102,16 +100,13 @@ class Hunter(object):
     # returning normal result stream along with error stream.
 
     @staticmethod
-    def singleton() -> 'Hunter':
+    def singleton() -> "Hunter":
         """Get singleton instance of Client."""
         raise NotImplementedError
 
-    def observe(self,
-                user_id: int = None,
-                username: str = None,
-                user_ids: List[int] = None,
-                usernames: List[str] = None) \
-            -> MixedResultProcessingWrapper:
+    def observe(
+        self, user_id: int = None, username: str = None, user_ids: List[int] = None, usernames: List[str] = None
+    ) -> MixedResultProcessingWrapper:
         """Given user id(s) or username(s), get user(s) information.
 
         :returns: two streams:

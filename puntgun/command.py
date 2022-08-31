@@ -8,17 +8,19 @@ from puntgun import util
 from puntgun.conf import config, example
 from puntgun.conf import encrypto, secret
 
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
 def fire(plan, report, settings, config_path, secrets, private_key):
     logger.info("Run command [fire]")
-    config.reload_important_files(config_path=config_path,
-                                  plan_file=plan,
-                                  settings_file=settings,
-                                  pri_key_file=private_key,
-                                  secrets_file=secrets,
-                                  report_file=report)
+    config.reload_important_files(
+        config_path=config_path,
+        plan_file=plan,
+        settings_file=settings,
+        pri_key_file=private_key,
+        secrets_file=secrets,
+        report_file=report,
+    )
     # only config log files, stderr logs... in this command.
     config.config_logging_options()
 
@@ -56,25 +58,26 @@ class Gen(object):
         # this path will only be used here, so we needn't add it to config module.
         output_file = Path(output_file)
         util.backup_if_exists(output_file)
-        with open(output_file, 'w', encoding='utf-8') as f:
-            f.writelines(f'{key}: {value}\n' for key, value in secrets.items())
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.writelines(f"{key}: {value}\n" for key, value in secrets.items())
 
         print(f"Secrets are dumped: {output_file}")
 
     @staticmethod
     def config(output_path):
-        example_settings_file = Path(output_path).joinpath('example-settings.yml')
+        example_settings_file = Path(output_path).joinpath("example-settings.yml")
         util.backup_if_exists(example_settings_file)
-        with open(example_settings_file, 'w', encoding='utf-8') as f:
+        with open(example_settings_file, "w", encoding="utf-8") as f:
             f.write(example.tool_settings)
 
-        example_plan_file = Path(output_path).joinpath('example-plan.yml')
+        example_plan_file = Path(output_path).joinpath("example-plan.yml")
         util.backup_if_exists(example_plan_file)
-        with open(example_plan_file, 'w', encoding='utf-8') as f:
+        with open(example_plan_file, "w", encoding="utf-8") as f:
             f.write(example.plan_config)
 
-        print(EXAMPLE_GENERATED.format(example_settings_file=example_settings_file,
-                                       example_plan_file=example_plan_file))
+        print(
+            EXAMPLE_GENERATED.format(example_settings_file=example_settings_file, example_plan_file=example_plan_file)
+        )
 
 
 class Check(object):

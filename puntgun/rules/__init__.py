@@ -18,7 +18,7 @@ class FromConfig(BaseModel, abc.ABC):
 
     # Works like index of rule classes,
     # help the :class:`ConfigParser` to recognize which class it should pick according to the configuration.
-    _keyword: ClassVar[str] = 'corresponding_rule_name_in_config_of_this_rule'
+    _keyword: ClassVar[str] = "corresponding_rule_name_in_config_of_this_rule"
 
     @classmethod
     def parse_from_config(cls, conf: dict | str):
@@ -42,6 +42,7 @@ class FromConfig(BaseModel, abc.ABC):
 
     class Config:
         """https://pydantic-docs.helpmanual.io/usage/models/#private-model-attributes"""
+
         underscore_attrs_are_private = True
 
 
@@ -54,10 +55,11 @@ def generate_id():
 
 class Plan(FromConfig):
     """This class exists only for :class:`ConfigParser` to recognize plan classes."""
+
     # User will give each plan a human-readable name in plan configuration,
     # set it when parsing instance.
     # Default value for not letting pydantic raise validation error.
-    name: str = ''
+    name: str = ""
 
     # We need this incremental id field to abbreviate plan information to
     # a "database foreign key purpose" plan_id,
@@ -125,8 +127,7 @@ def validate_required_fields_exist(rule_keyword, conf: dict, required_field_name
 
     # point out all errors at once
     if missing:
-        raise ValueError(f"Missing required field(s) {missing} "
-                         f"in configuration [{rule_keyword}]: {conf}")
+        raise ValueError(f"Missing required field(s) {missing} " f"in configuration [{rule_keyword}]: {conf}")
 
 
 def validate_fields_conflict(values, field_groups: List[List[str]]):
@@ -149,8 +150,10 @@ def validate_fields_conflict(values, field_groups: List[List[str]]):
         field_groups = field_groups[1:]
 
     if len(conflicts) > 0:
-        raise ValueError(f"Configured fields have conflicts, you should chose one group of fields "
-                         f"to configurate in each conflict: {conflicts}")
+        raise ValueError(
+            f"Configured fields have conflicts, you should chose one group of fields "
+            f"to configurate in each conflict: {conflicts}"
+        )
 
     return values
 
@@ -159,7 +162,7 @@ class FieldsRequired(BaseModel):
     @root_validator(pre=True)
     def there_should_be_fields(cls, values):
         if len(values) == 0:
-            raise ValueError('At least one field should be configured.')
+            raise ValueError("At least one field should be configured.")
         return values
 
 
@@ -169,15 +172,15 @@ class NumericRangeFilterRule(FromConfig, FieldsRequired):
     checks if-within-a-range (min < v < max) of a numeric value.
     Equal-to-edge cases are regard as falsy.
     """
+
     less_than = float(sys.maxsize)
     more_than = float(-sys.maxsize - 1)
 
     @root_validator
     def validate_config(cls, values):
-        lt, mt = values.get('less_than'), values.get('more_than')
+        lt, mt = values.get("less_than"), values.get("more_than")
         if lt <= mt:
-            raise ValueError(f"Invalid range, right 'less_than'({lt}) "
-                             f"should be bigger than left 'more_than'({mt})")
+            raise ValueError(f"Invalid range, right 'less_than'({lt}) " f"should be bigger than left 'more_than'({mt})")
         return values
 
     def compare(self, num):
@@ -188,15 +191,15 @@ class TemporalRangeFilterRule(FromConfig, FieldsRequired):
     """
     Temporal value version of within-range checking agent.
     """
+
     before = datetime.datetime.max
     after = datetime.datetime.min
 
     @root_validator
     def validate_config(cls, values):
-        b, a = values.get('before'), values.get('after')
+        b, a = values.get("before"), values.get("after")
         if b <= a:
-            raise ValueError(f"Invalid range, right time 'before'({b}) "
-                             f"should be after left time 'after'({a})")
+            raise ValueError(f"Invalid range, right time 'before'({b}) " f"should be after left time 'after'({a})")
         return values
 
     def compare(self, time):

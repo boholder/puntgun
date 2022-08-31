@@ -10,12 +10,12 @@ ci:
   autoupdate_commit_msg: "Auto update by pre-commit hooks"
 
 repos:
-#  # see pyproject.toml for config
-#  - repo: https://github.com/psf/black
-#    rev: 22.6.0
-#    hooks:
-#      - id: black
-#
+  # see pyproject.toml for config
+  - repo: https://github.com/psf/black
+    rev: 22.6.0
+    hooks:
+      - id: black
+
   # see setup.cfg for config
   - repo: https://github.com/codespell-project/codespell
     rev: v2.1.0

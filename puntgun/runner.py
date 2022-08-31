@@ -25,6 +25,7 @@ class InvalidConfigurationError(ValueError):
     without be caught by loguru and print a lot of meaningless dialog stack trace to stderr
     (it will make the user confused).
     """
+
     pass
 
 
@@ -42,7 +43,7 @@ def start():
     # the "exclude" option of @logger.catch won't stop outputting stack trace
     try:
         plans = parse_plans_config(get_and_validate_plan_config())
-        logger.info('Parsed plans: {}', plans)
+        logger.info("Parsed plans: {}", plans)
         execute_plans(plans)
     except InvalidConfigurationError:
         exit(1)
@@ -59,10 +60,10 @@ fake-doc """
 
 
 def get_and_validate_plan_config():
-    plans_config = config.settings.get('plans')
+    plans_config = config.settings.get("plans")
     if plans_config is None:
         print(NO_PLAN_LOAD.format(plan_file=config.plan_file))
-        raise InvalidConfigurationError('No plan is loaded')
+        raise InvalidConfigurationError("No plan is loaded")
     return plans_config
 
 
@@ -85,7 +86,7 @@ def parse_plans_config(_plans_config):
 
     # Can't continue without a zero-error plan configuration
     if ConfigParser.errors():
-        errors = '\n'.join([str(e) for e in ConfigParser.errors()])
+        errors = "\n".join([str(e) for e in ConfigParser.errors()])
         print(CHECK_PLAN_FAIL.format(plan_file=config.plan_file, errors=errors))
         raise InvalidConfigurationError("Found errors in plan configuration")
 
@@ -105,21 +106,20 @@ def execute_plans(plans: List[Plan]):
 
     def run_plans():
         for plan in plans:
-            logger.info('Plan[id={}] start', plan.id)
+            logger.info("Plan[id={}] start", plan.id)
 
             try:
                 # Explicitly blocking execute plans one by one.
                 # for avoiding competition among plans on limited API invocation resources.
                 plan().pipe(
-                    op.subscribe_on(pool_scheduler),
-                    op.do(rx.Observer(on_next=process_plan_result, on_error=on_error))
+                    op.subscribe_on(pool_scheduler), op.do(rx.Observer(on_next=process_plan_result, on_error=on_error))
                 ).run()
             except rx.internal.SequenceContainsNoElementsError:
                 # If there is no element in the pipeline, the reactivex library will raise an error,
                 # catch this error as an expected case.
                 logger.warning("Plan[id={}] has no valid target (no candidate triggered filter rules)", plan.id)
 
-            logger.info('Plan[id={}] finished', plan.id)
+            logger.info("Plan[id={}] finished", plan.id)
 
     # Temporal coupling for compose a correct json format report.
     Recorder.write_report_header(plans)
@@ -128,5 +128,5 @@ def execute_plans(plans: List[Plan]):
 
 
 def process_plan_result(result: Recordable):
-    logger.bind(o=True).info('Finished actions on one target: {}', result.to_record())
+    logger.bind(o=True).info("Finished actions on one target: {}", result.to_record())
     Recorder.record(result)

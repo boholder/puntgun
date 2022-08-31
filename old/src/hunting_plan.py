@@ -9,6 +9,7 @@ class HuntingPlan(object):
     """
     Parse configuration file content into rules, and hold them.
     """
+
     logger = util.get_logger(__qualname__)
 
     def __init__(self):
@@ -29,7 +30,7 @@ class HuntingPlan(object):
             file_name = "option.yml"
 
         try:
-            return open(file_name, encoding='utf-8')
+            return open(file_name, encoding="utf-8")
         except FileNotFoundError as e:
             HuntingPlan.logger.error("Config file not found, exiting...\n{}".format(e))
             exit(1)

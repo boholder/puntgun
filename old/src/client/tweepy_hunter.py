@@ -12,13 +12,13 @@ from old.test.client.hunter import Hunter, MixedResultProcessingWrapper
 from model.errors import TwitterApiErrors, TwitterClientError
 from rules.user import User
 
-NO_VALUE_PROVIDED = 'No value provided.'
+NO_VALUE_PROVIDED = "No value provided."
 
 # keys for getting twitter auth api secrets from environment variables
-API_KEY = 'TWI_API_KEY'
-API_KEY_SECRET = 'TWI_API_KEY_SECRET'
-ACCESS_TOKEN = 'TWI_ACCESS_TOKEN'
-ACCESS_TOKEN_SECRET = 'TWI_ACCESS_TOKEN_SECRET'
+API_KEY = "TWI_API_KEY"
+API_KEY_SECRET = "TWI_API_KEY_SECRET"
+ACCESS_TOKEN = "TWI_ACCESS_TOKEN"
+ACCESS_TOKEN_SECRET = "TWI_ACCESS_TOKEN_SECRET"
 
 
 class TweepyHunter(Hunter):
@@ -29,18 +29,31 @@ class TweepyHunter(Hunter):
     Initializing instance via interact with user through console,
     it requires user to provide secrets like Twitter API key and secret, etc.
     """
+
     logger = util.get_logger(__qualname__)
 
     # additional url params for querying Twitter user state api
-    user_api_params = {'user_auth': True,
-                       'user_fields': ['id', 'name', 'username', 'pinned_tweet_id', 'profile_image_url',
-                                       'created_at', 'description', 'public_metrics', 'protected', 'verified'],
-                       'expansions': 'pinned_tweet_id',
-                       'tweet_fields': ['text']}
+    user_api_params = {
+        "user_auth": True,
+        "user_fields": [
+            "id",
+            "name",
+            "username",
+            "pinned_tweet_id",
+            "profile_image_url",
+            "created_at",
+            "description",
+            "public_metrics",
+            "protected",
+            "verified",
+        ],
+        "expansions": "pinned_tweet_id",
+        "tweet_fields": ["text"],
+    }
 
     @staticmethod
     @functools.lru_cache(maxsize=1)
-    def singleton() -> 'TweepyHunter':
+    def singleton() -> "TweepyHunter":
         """Get singleton instance of Hunter"""
         return TweepyHunter(init_tweepy_client())
 
@@ -48,39 +61,36 @@ class TweepyHunter(Hunter):
         """You should only get instance of this class via ``instance`` static method."""
         self.client = client
 
-        self.me = User.from_response(self.client.get_me().data[0], '')
+        self.me = User.from_response(self.client.get_me().data[0], "")
         self.id = self.me.id
         self.name = self.me.name
 
-        self.logger.info('[{}] the hunter dressed up.\n'.format(self.name))
+        self.logger.info("[{}] the hunter dressed up.\n".format(self.name))
 
-    def observe(self,
-                user_id: int = None,
-                username: str = None,
-                user_ids: List[int] = None,
-                usernames: List[str] = None) \
-            -> MixedResultProcessingWrapper:
+    def observe(
+        self, user_id: int = None, username: str = None, user_ids: List[int] = None, usernames: List[str] = None
+    ) -> MixedResultProcessingWrapper:
         """Query user information."""
 
         def transform(resp: tweepy.Response) -> User:
             data = resp.data[0]
-            pinned_tweet_id = data['pinned_tweet_id']
+            pinned_tweet_id = data["pinned_tweet_id"]
             # every user can have at most one pinned tweet,
             # don't know why Twitter API returns a list type
             # if one user doesn't have pinned tweet, the "includes" field isn't have "tweets" field
-            pinned_tweet_text: str = [t['text'] for t in resp.includes['tweets']][0] if pinned_tweet_id else ''
+            pinned_tweet_text: str = [t["text"] for t in resp.includes["tweets"]][0] if pinned_tweet_id else ""
 
             return User.from_response(data, pinned_tweet_text)
 
         def multi_transform(resp: tweepy.Response) -> List[User]:
             def data_to_user(_data: dict) -> User:
                 # find this user's pinned tweet
-                pinned_tweet = [t for t in pinned_tweets if t['id'] == _data['pinned_tweet_id']]
-                pinned_tweet_text = pinned_tweet[0]['text'] if pinned_tweet else ''
+                pinned_tweet = [t for t in pinned_tweets if t["id"] == _data["pinned_tweet_id"]]
+                pinned_tweet_text = pinned_tweet[0]["text"] if pinned_tweet else ""
 
                 return User.from_response(_data, pinned_tweet_text)
 
-            pinned_tweets = resp.includes['tweets'] if 'tweets' in resp.includes else []
+            pinned_tweets = resp.includes["tweets"] if "tweets" in resp.includes else []
 
             return [data_to_user(d) for d in resp.data]
 
@@ -90,11 +100,13 @@ class TweepyHunter(Hunter):
             return query_then_transform(rx.of(username), self.get_user_by_name, transform)
         elif user_ids:
             # API allows querying up to 100 users at once, so we need to split the list into 100 size chunks
-            return query_then_transform(rx.from_iterable(user_ids).pipe(op.buffer_with_count(100)),
-                                        self.get_users_by_id, multi_transform)
+            return query_then_transform(
+                rx.from_iterable(user_ids).pipe(op.buffer_with_count(100)), self.get_users_by_id, multi_transform
+            )
         elif usernames:
-            return query_then_transform(rx.from_iterable(usernames).pipe(op.buffer_with_count(100)),
-                                        self.get_users_by_name, multi_transform)
+            return query_then_transform(
+                rx.from_iterable(usernames).pipe(op.buffer_with_count(100)), self.get_users_by_name, multi_transform
+            )
         else:
             raise ValueError(NO_VALUE_PROVIDED)
 
@@ -111,14 +123,15 @@ class TweepyHunter(Hunter):
         return self.client.get_users(usernames=names, **self.user_api_params)
 
 
-T = TypeVar('T')
-R = TypeVar('R')
+T = TypeVar("T")
+R = TypeVar("R")
 
 
-def query_then_transform(source: rx.Observable[T],
-                         query_func: Callable[[T], tweepy.Response],
-                         transform_func: Callable[[tweepy.Response], Any]) \
-        -> MixedResultProcessingWrapper:
+def query_then_transform(
+    source: rx.Observable[T],
+    query_func: Callable[[T], tweepy.Response],
+    transform_func: Callable[[tweepy.Response], Any],
+) -> MixedResultProcessingWrapper:
     """
     Query Twitter Dev API and transform response into two observables.
 
@@ -131,8 +144,9 @@ def query_then_transform(source: rx.Observable[T],
     return MixedResultProcessingWrapper(source.pipe(query_api_operator(query_func, transform_func)))
 
 
-def query_api_operator(query_func: Callable[[T], tweepy.Response],
-                       transform_func: Callable[[tweepy.Response], Union[R, List[R]]]):
+def query_api_operator(
+    query_func: Callable[[T], tweepy.Response], transform_func: Callable[[tweepy.Response], Union[R, List[R]]]
+):
     """
     A custom rx operator that:
 
@@ -149,14 +163,12 @@ def query_api_operator(query_func: Callable[[T], tweepy.Response],
                 except tweepy.errors.TweepyException as e:
                     # For now, we have no idea how to handle the error tweepy throws out.
                     # just wrap it in a custom exception and let it fails the stream.
-                    TweepyHunter.logger.error('Client throws error when querying Twitter API', e)
+                    TweepyHunter.logger.error("Client throws error when querying Twitter API", e)
                     observer.on_error(TwitterClientError(e))
 
             return source.subscribe(
-                on_next=on_next,
-                on_error=observer.on_error,
-                on_completed=observer.on_completed,
-                scheduler=scheduler)
+                on_next=on_next, on_error=observer.on_error, on_completed=observer.on_completed, scheduler=scheduler
+            )
 
         return rx.create(subscribe)
 
@@ -208,19 +220,22 @@ def init_tweepy_client() -> tweepy.Client:
     def get_access_token_and_secret(_api_key, _api_secret):
         _access_token, _access_token_secret = get_access_token_pair_from_env()
         if _access_token and _access_token_secret:
-            print('Got the access token and secret from environment variables.')
+            print("Got the access token and secret from environment variables.")
             return _access_token, _access_token_secret
         else:
             return get_access_token_pair_via_authorization_pin(_api_key, _api_secret)
 
     def get_access_token_pair_via_authorization_pin(_api_key, _api_secret):
-        oauth1_user_handler = OAuth1UserHandler(_api_key, _api_secret, callback='oob')
+        oauth1_user_handler = OAuth1UserHandler(_api_key, _api_secret, callback="oob")
 
-        print('Now you need to authorize your app to access your Twitter account\n'
-              'by entering the PIN code you get from newly opened browser window:\n'
-              + oauth1_user_handler.get_authorization_url() + '\n')
+        print(
+            "Now you need to authorize your app to access your Twitter account\n"
+            "by entering the PIN code you get from newly opened browser window:\n"
+            + oauth1_user_handler.get_authorization_url()
+            + "\n"
+        )
 
-        pin = util.get_input_from_terminal('PIN')
+        pin = util.get_input_from_terminal("PIN")
         return oauth1_user_handler.get_access_token(pin)
 
     def get_access_token_pair_from_env():
@@ -229,7 +244,7 @@ def init_tweepy_client() -> tweepy.Client:
     def get_consumer_key_and_secret():
         _api_key, _api_secret = get_consumer_key_pair_from_env()
         if _api_key and _api_secret:
-            print('Got the Dev API key and secret from environment variables.')
+            print("Got the Dev API key and secret from environment variables.")
             return _api_key, _api_secret
         else:
             return get_consumer_key_pair_from_input()
@@ -238,17 +253,19 @@ def init_tweepy_client() -> tweepy.Client:
         return os.environ.get(API_KEY), os.environ.get(API_KEY_SECRET)
 
     def get_consumer_key_pair_from_input():
-        print('We need a "Twitter Dev OAuth App API" to start.\n'
-              'You can get one by signing up on [ https://developer.twitter.com/en ] for free,\n'
-              'but first you need to bind a phone number with your Twitter account.\n'
-              '(Can unbind the phone after signed up Dev API)\n\n'
-              'And don\'t forget to turn on OAuth 1.0a in your App settings:\n'
-              '  1. Set the App permissions to "Read and write".\n'
-              '  2. Set the callback, website URL to "https://twitter.com" for passing setting check.\n\n'
-              'We\'ll use the pin based auth method, so we don\'t really need to deploy a server for callback.\n'
-              '-> https://developer.twitter.com/en/docs/authentication/oauth-1-0a/pin-based-oauth\n\n')
+        print(
+            'We need a "Twitter Dev OAuth App API" to start.\n'
+            "You can get one by signing up on [ https://developer.twitter.com/en ] for free,\n"
+            "but first you need to bind a phone number with your Twitter account.\n"
+            "(Can unbind the phone after signed up Dev API)\n\n"
+            "And don't forget to turn on OAuth 1.0a in your App settings:\n"
+            '  1. Set the App permissions to "Read and write".\n'
+            '  2. Set the callback, website URL to "https://twitter.com" for passing setting check.\n\n'
+            "We'll use the pin based auth method, so we don't really need to deploy a server for callback.\n"
+            "-> https://developer.twitter.com/en/docs/authentication/oauth-1-0a/pin-based-oauth\n\n"
+        )
 
-        return util.get_input_from_terminal('Api key'), util.get_input_from_terminal('Api secret')
+        return util.get_input_from_terminal("Api key"), util.get_input_from_terminal("Api secret")
 
     # consumer key and secret represents the Twitter's authorization about calling its API
     api_key, api_secret = get_consumer_key_and_secret()
@@ -264,7 +281,9 @@ def init_tweepy_client() -> tweepy.Client:
     # We can use them somewhere else.
     save_secrets_to_env(api_key, api_secret, access_token, access_token_secret)
 
-    return Client(consumer_key=api_key,
-                  consumer_secret=api_secret,
-                  access_token=access_token,
-                  access_token_secret=access_token_secret)
+    return Client(
+        consumer_key=api_key,
+        consumer_secret=api_secret,
+        access_token=access_token,
+        access_token_secret=access_token_secret,
+    )

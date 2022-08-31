@@ -75,23 +75,9 @@ testpaths = [
 [tool.coverage.run]
 relative_files = true
 
-# Drawing on:
-# https://github.com/psf/black/blob/main/pyproject.toml
+# https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html?highlight=%5Btool.black%5D#configuration-format
 [tool.black]
 line-length = 120
-exclude = '''
-/(
-  | \.git
-  | \.pytest_cache
-  | tests/\.pytest_cache
-  | \.coverage
-  | \.venv
-  | venv
-  | build
-  | dist
-  | old
-)/
-'''
 
 # https://pycqa.github.io/isort/docs/configuration/options.html
 [tool.isort]

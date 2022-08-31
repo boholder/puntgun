@@ -6,27 +6,27 @@ from puntgun.client import Client
 
 def get_user_not_exist():
     # response.data = None
-    response = Client.singleton().get_users_by_usernames(['9821hd91'])
+    response = Client.singleton().get_users_by_usernames(["9821hd91"])
     print(response)
 
 
 def get_users():
     # includes.tweets: [] len 2
-    response = Client.singleton().get_users_by_usernames(['TwitterDev', 'TwitterAPI'])
+    response = Client.singleton().get_users_by_usernames(["TwitterDev", "TwitterAPI"])
     print(response)
 
 
 def get_user_without_pinned_tweet():
     # response includes: {} (no "tweets" field)
     # data.pinned_tweet_id: None
-    response = Client.singleton().get_users_by_usernames(['Twitter'])
+    response = Client.singleton().get_users_by_usernames(["Twitter"])
     print(response)
 
 
 def get_users_focus_on_pinned_tweet_result():
     # includes.tweets: [] len 2, but no "Twitter"'s pinned tweet,
     # and this information doesn't show in response
-    response = Client.singleton().get_users_by_usernames(['TwitterDev', 'Twitter', 'TwitterAPI'])
+    response = Client.singleton().get_users_by_usernames(["TwitterDev", "Twitter", "TwitterAPI"])
     print(response)
 
 
@@ -56,7 +56,8 @@ def get_follower_list():
 def get_tweet():
     c = Client.singleton()
     # TwitterDev's tweet
-    tweets = c.get_tweets_by_ids(['1561805413103853570', '1542891693044912128'])
+    tweets = c.get_tweets_by_ids(["1561805413103853570", "1542891693044912128"])
     print(tweets)
+
 
 get_tweet()

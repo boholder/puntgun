@@ -4,4 +4,5 @@ class Decision(object):
     describing {which user} triggered {what rule},
     and these decision instances are returned to Actions to be executed.
     """
+
     pass

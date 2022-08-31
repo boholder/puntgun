@@ -27,12 +27,13 @@ class UserSourceRuleResultMergingSet(UserSourceRule):
     * Only be used inside user plan.
     Simply merge user source rule results together into one :class:`Observable`.
     """
-    _keyword = 'any_of'
+
+    _keyword = "any_of"
     rules: List[UserSourceRule]
 
     @classmethod
     def parse_from_config(cls, conf: dict):
-        return cls(rules=[ConfigParser.parse(c, UserSourceRule) for c in conf['any_of']])
+        return cls(rules=[ConfigParser.parse(c, UserSourceRule) for c in conf["any_of"]])
 
     def __call__(self) -> Observable[User]:
         users_observables = [rx.start(r) for r in self.rules]
@@ -42,7 +43,7 @@ class UserSourceRuleResultMergingSet(UserSourceRule):
             # log for debug
             op.do(rx.Observer(on_next=lambda u: logger.debug("Source user before distinct: {}", u))),
             # remove repeating elements
-            op.distinct()
+            op.distinct(),
         )
 
 
@@ -52,8 +53,10 @@ class UserFilterRuleSet(BaseModel):
 
     @staticmethod
     def divide_and_construct(cls, rules: [UserFilterRule]):
-        return cls(slow_rules=[r for r in rules if isinstance(r, NeedClient)],
-                   immediate_rules=[r for r in rules if not isinstance(r, NeedClient)])
+        return cls(
+            slow_rules=[r for r in rules if isinstance(r, NeedClient)],
+            immediate_rules=[r for r in rules if not isinstance(r, NeedClient)],
+        )
 
 
 def execution_wrapper(u: User, rule: UserFilterRule | UserActionRule):
@@ -78,12 +81,13 @@ class UserFilterRuleAllOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
     and needed to be treated as a slow filter rule (marked with :class:`NeedClient`).
     """
 
-    _keyword = 'all_of'
+    _keyword = "all_of"
 
     @classmethod
     def parse_from_config(cls, conf: dict):
         return UserFilterRuleSet.divide_and_construct(
-            cls, [ConfigParser.parse(c, UserFilterRule) for c in conf['all_of']])
+            cls, [ConfigParser.parse(c, UserFilterRule) for c in conf["all_of"]]
+        )
 
     def __call__(self, user: User) -> Observable[RuleResult]:
         # In ideal case, we can find the result without consuming any API resource.
@@ -97,7 +101,7 @@ class UserFilterRuleAllOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
             # each slow rule returns an observable that contains only one boolean value.
             op.flat_map(lambda x: x),
             # expect first False result or return True finally.
-            op.first_or_default(lambda e: bool(e) is False, RuleResult.true(self))
+            op.first_or_default(lambda e: bool(e) is False, RuleResult.true(self)),
         )
 
 
@@ -106,12 +110,14 @@ class UserFilterRuleAnyOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
     Similar like :class:`UserFilterRuleAllOfSet`,
     but looking for the first True result for short-circuiting.
     """
-    _keyword = 'any_of'
+
+    _keyword = "any_of"
 
     @classmethod
     def parse_from_config(cls, conf: dict):
         return UserFilterRuleSet.divide_and_construct(
-            cls, [ConfigParser.parse(c, UserFilterRule) for c in conf['any_of']])
+            cls, [ConfigParser.parse(c, UserFilterRule) for c in conf["any_of"]]
+        )
 
     def __call__(self, user: User) -> Observable[RuleResult]:
         """I can endure repeating twice"""
@@ -122,8 +128,7 @@ class UserFilterRuleAnyOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
 
         rule_result_observables = [rx.start(execution_wrapper(user, r)) for r in self.slow_rules]
         return rx.merge(*rule_result_observables).pipe(
-            op.flat_map(lambda x: x),
-            op.first_or_default(lambda e: bool(e) is True, RuleResult.false(self))
+            op.flat_map(lambda x: x), op.first_or_default(lambda e: bool(e) is True, RuleResult.false(self))
         )
 
 
@@ -133,12 +138,13 @@ class UserActionRuleResultCollectingSet(UserActionRule):
     Run action rules and collect their results (whether succeeded)
     into one set for latter result aggregating and recording.
     """
-    _keyword = 'all_of'
+
+    _keyword = "all_of"
     rules: List[UserActionRule]
 
     @classmethod
     def parse_from_config(cls, conf: dict):
-        return cls(rules=[ConfigParser.parse(c, UserActionRule) for c in conf['all_of']])
+        return cls(rules=[ConfigParser.parse(c, UserActionRule) for c in conf["all_of"]])
 
     def __call__(self, user: User) -> Observable[List[RuleResult]]:
         action_results = [rx.start(execution_wrapper(user, r)) for r in self.rules]

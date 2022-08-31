@@ -30,9 +30,7 @@ def official_concurrency_example():
     )
 
     # Create Process 2
-    rx.range(1, 10).pipe(
-        op.map(lambda s: intense_calculation(s)), op.subscribe_on(pool_scheduler)
-    ).subscribe(
+    rx.range(1, 10).pipe(op.map(lambda s: intense_calculation(s)), op.subscribe_on(pool_scheduler)).subscribe(
         on_next=lambda i: print("PROCESS 2: {0} {1}".format(current_thread().name, i)),
         on_error=lambda e: print(e),
         on_completed=lambda: print("PROCESS 2 done!"),
@@ -56,13 +54,13 @@ def my_concurrency_test():
     pool_scheduler = ThreadPoolScheduler(2)
 
     def num_map(num: int):
-        print(f'[num] {current_thread().name} : {num}')
+        print(f"[num] {current_thread().name} : {num}")
         return num
 
     num = rx.range(1, 5).pipe(op.map(num_map))
 
     def name_map(name: str):
-        print(f'[name] {current_thread().name} : {name}')
+        print(f"[name] {current_thread().name} : {name}")
         return name
 
     name = rx.from_iterable(["Alpha", "Beta", "Gamma", "Delta", "Epsilon"]).pipe(op.map(name_map))
@@ -86,7 +84,7 @@ def is_recalculate_upstream_elements_for_every_subscriber():
     source_call_count = 0
 
     def on_next(i):
-        print(f'i:{i}, call count:{source_call_count}')
+        print(f"i:{i}, call count:{source_call_count}")
 
     def source():
         nonlocal source_call_count
@@ -95,9 +93,6 @@ def is_recalculate_upstream_elements_for_every_subscriber():
         return old
 
     s = rx.start(source)
-    s.pipe(
-        op.do(rx.Observer(on_next=on_next)),
-        op.do(rx.Observer(on_next=on_next))
-    ).run()
+    s.pipe(op.do(rx.Observer(on_next=on_next)), op.do(rx.Observer(on_next=on_next))).run()
     s.subscribe(on_next=on_next)
     s.subscribe(on_next=on_next)

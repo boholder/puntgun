@@ -15,48 +15,62 @@ from puntgun.rules.user.source_rules import UserSourceRule
 
 
 class TRule(UserActionRule, UserFilterRule):
-    _keyword = 'ptr'
+    _keyword = "ptr"
     field_a: str
 
 
 class TestUserPlanResult:
     def test_to_record(self):
-        actual = UserPlanResult(plan_id=123,
-                                user=User(id=1, username='uname'),
-                                filtering_result=RuleResult.true(TRule(field_a='a')),
-                                action_results=[RuleResult.true(TRule(field_a='b'))]).to_record()
-        expect = Record(type='user_plan_result',
-                        data={'plan_id': 123,
-                              'user': {'id': 1, 'username': 'uname'},
-                              'decisive_filter_rule': {'keyword': 'ptr', 'value': 'field_a=a'},
-                              'action_rule_results': [{'keyword': 'ptr', 'value': 'field_a=a', 'done': True}]})
+        actual = UserPlanResult(
+            plan_id=123,
+            user=User(id=1, username="uname"),
+            filtering_result=RuleResult.true(TRule(field_a="a")),
+            action_results=[RuleResult.true(TRule(field_a="b"))],
+        ).to_record()
+        expect = Record(
+            type="user_plan_result",
+            data={
+                "plan_id": 123,
+                "user": {"id": 1, "username": "uname"},
+                "decisive_filter_rule": {"keyword": "ptr", "value": "field_a=a"},
+                "action_rule_results": [{"keyword": "ptr", "value": "field_a=a", "done": True}],
+            },
+        )
 
         assert actual.__eq__(expect)
 
     def test_parse_from_record(self):
         actual = UserPlanResult.parse_from_record(
-            Record(type='user_plan_result',
-                   data={'plan_id': 123,
-                         'user': {'id': 1, 'username': 'uname'},
-                         'decisive_filter_rule': {'keyword': 'ptr', 'value': 'field_a=a'},
-                         'action_rule_results': [{'keyword': 'ptr', 'value': 'field_a=a', 'done': False}]}))
+            Record(
+                type="user_plan_result",
+                data={
+                    "plan_id": 123,
+                    "user": {"id": 1, "username": "uname"},
+                    "decisive_filter_rule": {"keyword": "ptr", "value": "field_a=a"},
+                    "action_rule_results": [{"keyword": "ptr", "value": "field_a=a", "done": False}],
+                },
+            )
+        )
 
-        expect = UserPlanResult(plan_id=123,
-                                user=User(id=1, username='uname'),
-                                filtering_result=RuleResult.true(None),
-                                action_results=[RuleResult.false(TRule(field_a='b'))])
+        expect = UserPlanResult(
+            plan_id=123,
+            user=User(id=1, username="uname"),
+            filtering_result=RuleResult.true(None),
+            action_results=[RuleResult.false(TRule(field_a="b"))],
+        )
 
         assert actual.__eq__(expect)
 
 
 # == things for testing user plan ==
 
+
 class TUserSourceRule(UserSourceRule):
     # DO NOT make the keyword same as any other test rules.
     # Or it may fail test cases that are checking instances type,
     # because the :class:`ConfigParser` may wrongly choose
     # not-in-this-file test rules with same keyword.
-    _keyword = 'psr'
+    _keyword = "psr"
     num: int
 
     def __call__(self):
@@ -109,7 +123,7 @@ def always_true_zipped_result_checker():
 
 
 class TUserActionRule(UserActionRule):
-    _keyword = 'ptuar'
+    _keyword = "ptuar"
 
     will_return: bool
 
@@ -142,21 +156,18 @@ def user_plan_result_checker():
 
 class TestUserPlan:
     def test_required_fields_validation(self, clean_config_parser_errors):
-        ConfigParser.parse({'user_plan': ''}, Plan)
+        ConfigParser.parse({"user_plan": ""}, Plan)
         error = ConfigParser.errors()[0]
         # the error message looks like:
-        assert_that(str(error), all_of(contains_string('required'),
-                                       contains_string('from'),
-                                       contains_string('do')))
+        assert_that(str(error), all_of(contains_string("required"), contains_string("from"), contains_string("do")))
 
     def test_filtering_with_filter_rule(self, even_true_zipped_result_checker):
-        plan = ConfigParser.parse({'user_plan': 'plan name',
-                                   'from': [{'psr': {'num': 3}}],
-                                   'that': [{'etf': {}}],
-                                   'do': []}, Plan)
+        plan = ConfigParser.parse(
+            {"user_plan": "plan name", "from": [{"psr": {"num": 3}}], "that": [{"etf": {}}], "do": []}, Plan
+        )
 
         # type check
-        assert plan.name == 'plan name'
+        assert plan.name == "plan name"
         assert isinstance(plan.sources, UserSourceRuleResultMergingSet)
         assert isinstance(plan.sources.rules[0], TUserSourceRule)
         assert isinstance(plan.filters, UserFilterRuleAnyOfSet)
@@ -166,20 +177,21 @@ class TestUserPlan:
         assert even_true_zipped_result_checker.call_count == 3
 
     def test_filtering_without_filter_rule(self, always_true_zipped_result_checker):
-        plan = ConfigParser.parse({'user_plan': 'plan name',
-                                   'from': [{'psr': {'num': 3}}],
-                                   'do': []}, Plan)
+        plan = ConfigParser.parse({"user_plan": "plan name", "from": [{"psr": {"num": 3}}], "do": []}, Plan)
 
         plan._filtering().pipe(op.do(rx.Observer(on_next=always_true_zipped_result_checker))).run()
         assert always_true_zipped_result_checker.call_count == 3
 
     def test_plan_running(self, user_plan_result_checker):
-        plan = ConfigParser.parse({'user_plan': 'plan name',
-                                   'from': [{'psr': {'num': 3}}],
-                                   'that': [{'etf': {}}],
-                                   'do': [{'ptuar': {'will_return': True}},
-                                          {'ptuar': {'will_return': False}}]},
-                                  Plan)
+        plan = ConfigParser.parse(
+            {
+                "user_plan": "plan name",
+                "from": [{"psr": {"num": 3}}],
+                "that": [{"etf": {}}],
+                "do": [{"ptuar": {"will_return": True}}, {"ptuar": {"will_return": False}}],
+            },
+            Plan,
+        )
 
         plan().pipe(op.do(rx.Observer(on_next=user_plan_result_checker))).run()
 

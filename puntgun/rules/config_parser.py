@@ -17,9 +17,9 @@ def import_rule_classes():
     This function will do this job.
     """
 
-    rules_module = importlib.import_module('puntgun.rules')
+    rules_module = importlib.import_module("puntgun.rules")
     for _, base_module_name, is_pkg in list(pkgutil.iter_modules(rules_module.__path__)):
-        base_module_name = f'puntgun.rules.{base_module_name}'
+        base_module_name = f"puntgun.rules.{base_module_name}"
         # only import these modules which have submodules that contains rule classes.
         # for example, config_parser.py (this module) is not a package so do not import it.
         if is_pkg:
@@ -27,7 +27,7 @@ def import_rule_classes():
             base_module = importlib.import_module(base_module_name)
             for _, module_name, _ in list(pkgutil.iter_modules(base_module.__path__)):
                 # import these submodules
-                importlib.import_module(f'{base_module_name}.{module_name}')
+                importlib.import_module(f"{base_module_name}.{module_name}")
 
 
 class ConfigParser(object):
@@ -37,7 +37,7 @@ class ConfigParser(object):
     # Sort of inconvenient when unit testing.
     _errors: List[Exception] = []
 
-    _T = TypeVar('_T', bound=FromConfig)
+    _T = TypeVar("_T", bound=FromConfig)
 
     @staticmethod
     def parse(conf: dict, expected_type: _T):
@@ -57,9 +57,9 @@ class ConfigParser(object):
             Return a placeholder instance which inherits from the given expected class.
             For letting caller continue parsing.
             """
-            return type('FakeSubclassOf' + expected_type.__name__, (expected_type,), {})()
+            return type("FakeSubclassOf" + expected_type.__name__, (expected_type,), {})()
 
-        logger.debug('[Config parser] expect type:{}, config:{}', expected_type.__name__, conf)
+        logger.debug("[Config parser] expect type:{}, config:{}", expected_type.__name__, conf)
 
         for subclass in expected_type.__subclasses__():
             if subclass.keyword() in conf:

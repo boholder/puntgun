@@ -9,15 +9,15 @@ from puntgun.rules.config_parser import ConfigParser
 
 @pytest.fixture
 def generated_key_file(tmp_path):
-    file = tmp_path.joinpath('pri_key_file')
+    file = tmp_path.joinpath("pri_key_file")
     origin_key = encrypto.generate_private_key()
-    encrypto.dump_private_key(origin_key, 'pwd', file)
+    encrypto.dump_private_key(origin_key, "pwd", file)
     return file, origin_key
 
 
 @pytest.fixture
 def mock_private_key_file(monkeypatch, generated_key_file):
-    monkeypatch.setattr('puntgun.conf.config.pri_key_file', generated_key_file[0])
+    monkeypatch.setattr("puntgun.conf.config.pri_key_file", generated_key_file[0])
     return generated_key_file
 
 
@@ -25,7 +25,7 @@ def mock_private_key_file(monkeypatch, generated_key_file):
 def mock_client(monkeypatch):
     c = MagicMock()
     # set client field for each rule to mock_client
-    monkeypatch.setattr('puntgun.client.Client.singleton', lambda: c)
+    monkeypatch.setattr("puntgun.client.Client.singleton", lambda: c)
     return c
 
 
@@ -77,7 +77,7 @@ def clean_config_parser_errors():
 @pytest.fixture
 def mock_configuration(monkeypatch):
     def set_config(new):
-        monkeypatch.setattr('puntgun.conf.config.settings', new)
+        monkeypatch.setattr("puntgun.conf.config.settings", new)
 
     return set_config
 
@@ -86,7 +86,7 @@ class MockLogger:
     """Simulate logger and save logs as one string."""
 
     def __init__(self):
-        self.content = ''
+        self.content = ""
 
     def bind(self, **kwargs):
         return self
@@ -96,14 +96,14 @@ class MockLogger:
 
     def get_content(self):
         # remove white characters
-        return re.sub(r'\s', '', self.content)
+        return re.sub(r"\s", "", self.content)
 
 
 @pytest.fixture
 def mock_record_logger(monkeypatch):
     """For getting json format output for assertion."""
     logger = MockLogger()
-    monkeypatch.setattr('puntgun.record.logger', logger)
+    monkeypatch.setattr("puntgun.record.logger", logger)
     return logger
 
 
@@ -112,7 +112,7 @@ def mock_input(monkeypatch):
     def wrapper(*side_effect):
         # return values in sequence when is called multiple times
         mock_func = Mock(side_effect=side_effect)
-        monkeypatch.setattr('builtins.input', mock_func)
-        monkeypatch.setattr('getpass.getpass', mock_func)
+        monkeypatch.setattr("builtins.input", mock_func)
+        monkeypatch.setattr("getpass.getpass", mock_func)
 
     return wrapper

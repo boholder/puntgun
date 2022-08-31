@@ -25,7 +25,7 @@ class BlockUserActionRule(UserActionRule, NeedClient):
     TODO untested, no field in manual?
     """
 
-    _keyword: ClassVar[str] = 'block'
+    _keyword: ClassVar[str] = "block"
 
     def __call__(self, user: User):
         return RuleResult(self, self.client.block_user_by_id(user.id))

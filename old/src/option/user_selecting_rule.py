@@ -17,18 +17,18 @@ class WhoField(Field):
     Abstract class that represents the "who" field under UserSelectingRule.
     Has logic to retrieve indicate user group from Twitter client.
     """
+
     logger = util.get_logger(__qualname__)
     config_keyword = "who"
     required = True
 
-    def query_users_from(self, client: Hunter) \
-            -> Tuple[rx.Observable[User], rx.Observable[TwitterApiError]]:
+    def query_users_from(self, client: Hunter) -> Tuple[rx.Observable[User], rx.Observable[TwitterApiError]]:
         """Let child classes implement their various logic to query user from client."""
         raise NotImplementedError
 
     @classmethod
     @util.log_error_with(logger)
-    def build(cls, config_value) -> 'WhoField':
+    def build(cls, config_value) -> "WhoField":
         """Override the build method to return a WhoField instance."""
         return util.get_instance_via_config(WhoField, config_value)
 
@@ -37,6 +37,7 @@ class IdAreWhoField(WhoField):
     """
     "id_are" user selecting option.
     """
+
     is_init_by_class_attr = True
     config_keyword = "id_are"
     expect_type = List[str]
@@ -52,7 +53,7 @@ class IdAreWhoField(WhoField):
 class UserSelectingRule(MapOption):
 
     logger = util.get_logger(__qualname__)
-    config_keyword = 'users'
+    config_keyword = "users"
     # WhoField is special, we indicate the base class is valid option,
     # because we need to extract the real value from one-more-layer structure.
     # {'who': {'id_are': [1, 2, 3]}}
@@ -64,12 +65,10 @@ class UserSelectingRule(MapOption):
     rules: RuleSet
     let_me_check_rule: LetMeCheckRule
 
-    def __init__(self,
-                 config_value: Dict[str, Any]):
+    def __init__(self, config_value: Dict[str, Any]):
         super().__init__(config_value)
 
-    def start(self, client: Hunter) \
-            -> Tuple[rx.Observable[Decision], rx.Observable[TwitterApiError]]:
+    def start(self, client: Hunter) -> Tuple[rx.Observable[Decision], rx.Observable[TwitterApiError]]:
         """
         Start user selecting rule.
         """

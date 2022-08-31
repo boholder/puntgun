@@ -15,15 +15,16 @@ class TwitterClientError(Exception):
     """Class for wrapping all Twitter client library custom errors."""
 
     def __init__(self):
-        super().__init__(f'Twitter client raises unrecoverable error while querying Twitter API')
+        super().__init__(f"Twitter client raises unrecoverable error while querying Twitter API")
 
 
 class TwitterApiError(Exception):
     """Corresponding to one https://developer.twitter.com/en/support/twitter-api/error-troubleshooting#partial-errors"""
-    title = 'generic twitter api error'
+
+    title = "generic twitter api error"
 
     def __init__(self, title, ref_url, detail, parameter, value):
-        super().__init__(f'{detail} Refer: {ref_url}')
+        super().__init__(f"{detail} Refer: {ref_url}")
         self.title = title
         self.ref_url = ref_url
         self.detail = detail
@@ -34,23 +35,25 @@ class TwitterApiError(Exception):
     def from_response(resp_error: dict):
         # build an accurate error type according to the response content
         for subclass in TwitterApiError.__subclasses__():
-            if subclass.title == resp_error.get('title'):
+            if subclass.title == resp_error.get("title"):
                 return subclass(
-                    title=resp_error.get('title', ''),
+                    title=resp_error.get("title", ""),
                     # when parsing from Twitter API response, key is 'type'
                     # when parsing from :class:`Record` instance, key is 'ref_url'
-                    ref_url=resp_error.get('type', resp_error.get('ref_url', '')),
-                    detail=resp_error.get('detail', ''),
-                    parameter=resp_error.get('parameter', ''),
-                    value=resp_error.get('value', ''))
+                    ref_url=resp_error.get("type", resp_error.get("ref_url", "")),
+                    detail=resp_error.get("detail", ""),
+                    parameter=resp_error.get("parameter", ""),
+                    value=resp_error.get("value", ""),
+                )
 
         # if we haven't written a subclass for given error, return generic error
         return TwitterApiError(
-            title=resp_error.get('title', ''),
-            ref_url=resp_error.get('type', resp_error.get('ref_url', '')),
-            detail=resp_error.get('detail', ''),
-            parameter=resp_error.get('parameter', ''),
-            value=resp_error.get('value', ''))
+            title=resp_error.get("title", ""),
+            ref_url=resp_error.get("type", resp_error.get("ref_url", "")),
+            detail=resp_error.get("detail", ""),
+            parameter=resp_error.get("parameter", ""),
+            value=resp_error.get("value", ""),
+        )
 
 
 class ResourceNotFoundError(TwitterApiError):
@@ -58,7 +61,8 @@ class ResourceNotFoundError(TwitterApiError):
     For example, if you try to query information about a not-exist user id,
     this error will be returned by Twitter server and raised by the tool.
     """
-    title = 'Not Found Error'
+
+    title = "Not Found Error"
 
 
 class TwitterApiErrors(Exception, Recordable):
@@ -80,10 +84,12 @@ class TwitterApiErrors(Exception, Recordable):
         self.query_params = query_params
         self.errors = [TwitterApiError.from_response(e) for e in resp_errors]
 
-        super().__init__(f"Twitter Server returned partial errors when querying API: "
-                         f"function called: {query_func_name}, "
-                         f"params: {query_params}, "
-                         f"errors: {self.errors}")
+        super().__init__(
+            f"Twitter Server returned partial errors when querying API: "
+            f"function called: {query_func_name}, "
+            f"params: {query_params}, "
+            f"errors: {self.errors}"
+        )
 
     def __bool__(self):
         return bool(self.errors)
@@ -98,17 +104,19 @@ class TwitterApiErrors(Exception, Recordable):
         return self.errors[index]
 
     def to_record(self):
-        return Record(type='twitter_api_errors',
-                      data={'query_func_name': self.query_func_name,
-                            'query_params': self.query_params,
-                            'errors': [e.__dict__ for e in self.errors]})
+        return Record(
+            type="twitter_api_errors",
+            data={
+                "query_func_name": self.query_func_name,
+                "query_params": self.query_params,
+                "errors": [e.__dict__ for e in self.errors],
+            },
+        )
 
     @staticmethod
     def parse_from_record(record: Record):
         data = record.data
-        return TwitterApiErrors(data.get('query_func_name', ''),
-                                data.get('query_params', ()),
-                                data.get('errors', []))
+        return TwitterApiErrors(data.get("query_func_name", ""), data.get("query_params", ()), data.get("errors", []))
 
 
 def record_twitter_api_errors(client_func):
@@ -128,47 +136,95 @@ def record_twitter_api_errors(client_func):
     def decorator(*args, **kwargs):
         try:
             resp = client_func(*args, **kwargs)
-            if hasattr(resp, 'errors') and len(resp.errors) > 0:
+            if hasattr(resp, "errors") and len(resp.errors) > 0:
                 record_api_errors(kwargs, resp.errors)
             return resp
         except tweepy.errors.TweepyException as e:
             # We have no idea how to handle the error tweepy throws out.
             # just wrap it in a custom exception and let it fails the entire process.
-            logger.exception('Client raises unrecoverable error while querying Twitter API')
+            logger.exception("Client raises unrecoverable error while querying Twitter API")
             raise TwitterClientError from e
 
     return decorator
 
 
-USER_API_FIELDS = ['id', 'name', 'username', 'pinned_tweet_id', 'profile_image_url',
-                   'created_at', 'description', 'public_metrics', 'protected', 'verified',
-                   'entities', 'location', 'url', 'withheld']
+USER_API_FIELDS = [
+    "id",
+    "name",
+    "username",
+    "pinned_tweet_id",
+    "profile_image_url",
+    "created_at",
+    "description",
+    "public_metrics",
+    "protected",
+    "verified",
+    "entities",
+    "location",
+    "url",
+    "withheld",
+]
 
 # Not authorized to access 'non_public_metrics', 'organic_metrics', 'promoted_metrics'
 # with free-registered Essential class token
-TWEET_API_FIELDS = ['attachments', 'author_id', 'context_annotations', 'conversation_id',
-                    'created_at', 'entities', 'geo', 'id', 'in_reply_to_user_id', 'lang',
-                    'public_metrics', 'possibly_sensitive', 'referenced_tweets',
-                    'reply_settings', 'source', 'text', 'withheld']
+TWEET_API_FIELDS = [
+    "attachments",
+    "author_id",
+    "context_annotations",
+    "conversation_id",
+    "created_at",
+    "entities",
+    "geo",
+    "id",
+    "in_reply_to_user_id",
+    "lang",
+    "public_metrics",
+    "possibly_sensitive",
+    "referenced_tweets",
+    "reply_settings",
+    "source",
+    "text",
+    "withheld",
+]
 
 # Additional url params for querying Twitter user related api
 # for letting the API know which fields we want to get.
-USER_API_PARAMS = {'user_auth': True,
-                   'user_fields': USER_API_FIELDS,
-                   'tweet_fields': TWEET_API_FIELDS,
-                   'expansions': 'pinned_tweet_id', }
+USER_API_PARAMS = {
+    "user_auth": True,
+    "user_fields": USER_API_FIELDS,
+    "tweet_fields": TWEET_API_FIELDS,
+    "expansions": "pinned_tweet_id",
+}
 
-TWEET_API_PARAMS = {'user_auth': True,
-                    'user_fields': USER_API_FIELDS,
-                    'tweet_fields': TWEET_API_FIELDS,
-                    'expansions': ['attachments.poll_ids', 'attachments.media_keys', 'author_id',
-                                   'entities.mentions.username', 'geo.place_id', 'in_reply_to_user_id',
-                                   'referenced_tweets.id', 'referenced_tweets.id.author_id'],
-                    'media_fields': ['duration_ms', 'height', 'media_key', 'preview_image_url',
-                                     'type', 'url', 'width', 'public_metrics', 'alt_text', 'variants'],
-                    'place_fields': ['contained_within', 'country', 'country_code', 'full_name',
-                                     'geo', 'id', 'name', 'place_type'],
-                    'poll_fields': ['duration_minutes', 'end_datetime', 'id', 'options', 'voting_status']}
+TWEET_API_PARAMS = {
+    "user_auth": True,
+    "user_fields": USER_API_FIELDS,
+    "tweet_fields": TWEET_API_FIELDS,
+    "expansions": [
+        "attachments.poll_ids",
+        "attachments.media_keys",
+        "author_id",
+        "entities.mentions.username",
+        "geo.place_id",
+        "in_reply_to_user_id",
+        "referenced_tweets.id",
+        "referenced_tweets.id.author_id",
+    ],
+    "media_fields": [
+        "duration_ms",
+        "height",
+        "media_key",
+        "preview_image_url",
+        "type",
+        "url",
+        "width",
+        "public_metrics",
+        "alt_text",
+        "variants",
+    ],
+    "place_fields": ["contained_within", "country", "country_code", "full_name", "geo", "id", "name", "place_type"],
+    "poll_fields": ["duration_minutes", "end_datetime", "id", "options", "voting_status"],
+}
 
 
 class Client(object):
@@ -192,14 +248,14 @@ class Client(object):
     def __init__(self, tweepy_client: tweepy.Client):
         # Add a decorator to record Twitter API errors in response
         # on every method of the tweepy client.
-        for func_name in [method for method in dir(tweepy.Client) if not method.startswith('_')]:
+        for func_name in [method for method in dir(tweepy.Client) if not method.startswith("_")]:
             setattr(tweepy_client, func_name, record_twitter_api_errors(getattr(tweepy_client, func_name)))
 
         self.clt = tweepy_client
         # tweepy 4.10.0 changed return structure of tweepy.Client.get_me()
         # it's different from tweepy.Client.get_user()'s return structure
         # it's not the "data: [my_data]", but "data: my_data"
-        self.me = User.from_response(self.clt.get_me().data, '')
+        self.me = User.from_response(self.clt.get_me().data, "")
         self.id = self.me.id
         self.name = self.me.name
 
@@ -207,10 +263,14 @@ class Client(object):
     @functools.lru_cache(maxsize=1)
     def singleton():
         secrets = secret.load_or_request_all_secrets(encrypto.load_or_generate_private_key())
-        return Client(tweepy.Client(consumer_key=secrets['ak'],
-                                    consumer_secret=secrets['aks'],
-                                    access_token=secrets['at'],
-                                    access_token_secret=secrets['ats']))
+        return Client(
+            tweepy.Client(
+                consumer_key=secrets["ak"],
+                consumer_secret=secrets["aks"],
+                access_token=secrets["at"],
+                access_token_secret=secrets["ats"],
+            )
+        )
 
     def get_users_by_usernames(self, names: List[str]):
         """
@@ -219,7 +279,7 @@ class Client(object):
         https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-by
         """
         if len(names) > 100:
-            raise ValueError('at most 100 usernames per request')
+            raise ValueError("at most 100 usernames per request")
 
         return self._resp_to_user(self.clt.get_users(usernames=names, **USER_API_PARAMS))
 
@@ -230,7 +290,7 @@ class Client(object):
         https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users
         """
         if len(ids) > 100:
-            raise ValueError('at most 100 user ids per request')
+            raise ValueError("at most 100 user ids per request")
 
         return self._resp_to_user(self.clt.get_users(ids=ids, **USER_API_PARAMS))
 
@@ -240,7 +300,7 @@ class Client(object):
         if not resp.data:
             return []
 
-        pinned_tweets = resp.includes.get('tweets', [])
+        pinned_tweets = resp.includes.get("tweets", [])
 
         def resp_to_user(data: dict) -> User:
             """Build one user instance"""
@@ -250,8 +310,8 @@ class Client(object):
             # because there are users who don't have pinned tweets:
             # resp.data: [u1(has), u2(hasn't), u3(has)]
             # resp.includes.tweets: [u1_pinned_tweet, u3_pinned_tweet]
-            pinned_tweet = [t for t in pinned_tweets if t['id'] == data['pinned_tweet_id']]
-            pinned_tweet_text = pinned_tweet[0]['text'] if pinned_tweet else ''
+            pinned_tweet = [t for t in pinned_tweets if t["id"] == data["pinned_tweet_id"]]
+            pinned_tweet_text = pinned_tweet[0]["text"] if pinned_tweet else ""
             return User.from_response(data, pinned_tweet_text)
 
         return [resp_to_user(d) for d in resp.data]
@@ -336,14 +396,12 @@ class Client(object):
         A recursion style generator that continue querying next page until hit the end.
         https://stackoverflow.com/questions/8991840/recursion-using-yield
         """
-        response = clt_func(max_results=1000,
-                            pagination_token=pagination_token,
-                            **params)
+        response = clt_func(max_results=1000, pagination_token=pagination_token, **params)
         yield response
 
         # if is called again, query next page
-        if hasattr(response, 'meta') and 'next_token' in response.meta:
-            yield from Client._paged_api_querier(clt_func, params, response.meta['next_token'])
+        if hasattr(response, "meta") and "next_token" in response.meta:
+            yield from Client._paged_api_querier(clt_func, params, response.meta["next_token"])
 
     def block_user_by_id(self, target_user_id: int | str) -> bool:
         """
@@ -364,19 +422,17 @@ class Client(object):
             return True
 
         # not block your follower
-        if (not config.settings.get('block_follower', True)) \
-                and target_user_id in self.cached_follower_id_list:
+        if (not config.settings.get("block_follower", True)) and target_user_id in self.cached_follower_id_list:
             logger.info(f"User[id={target_user_id}] is follower, not block base on config.")
             return False
 
         # not block your following
-        if (not config.settings.get('block_following', False)) \
-                and target_user_id in self.cached_following_id_list:
+        if (not config.settings.get("block_following", False)) and target_user_id in self.cached_following_id_list:
             logger.info(f"User[id={target_user_id}] is following, not block base on config.")
             return False
 
         # call the block api
-        return self.clt.block(target_user_id=target_user_id).data['blocking']
+        return self.clt.block(target_user_id=target_user_id).data["blocking"]
 
     def get_tweets_by_ids(self, ids: List[int | str]):
         """
@@ -385,7 +441,7 @@ class Client(object):
         https://developer.twitter.com/en/docs/twitter-api/tweets/lookup/api-reference/get-tweets
         """
         if len(ids) > 100:
-            raise ValueError('at most 100 tweet ids per request')
+            raise ValueError("at most 100 tweet ids per request")
 
         return self._resp_to_tweet(self.clt.get_tweets(ids=ids, **TWEET_API_PARAMS))
 

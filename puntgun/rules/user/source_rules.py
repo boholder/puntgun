@@ -39,7 +39,8 @@ class NameUserSourceRule(UserSourceRule, NeedClient):
     The "username" is that "@foobar" one, Twitter calls it "handle".
     https://help.twitter.com/en/managing-your-account/change-twitter-handle
     """
-    _keyword: ClassVar[str] = 'names'
+
+    _keyword: ClassVar[str] = "names"
     names: List[str]
 
     @handle_errors
@@ -58,7 +59,7 @@ class NameUserSourceRule(UserSourceRule, NeedClient):
 
     @classmethod
     def parse_from_config(cls, conf: dict):
-        """the config is { 'names': [...] } """
+        """the config is { 'names': [...] }"""
         return cls.parse_obj(conf)
 
 
@@ -68,7 +69,8 @@ class IdUserSourceRule(UserSourceRule, NeedClient):
     You can find someone's user id when logining to Twitter
     via browser and check the XHRs with browser dev tool.
     """
-    _keyword: ClassVar[str] = 'ids'
+
+    _keyword: ClassVar[str] = "ids"
     ids: List[int | str]
 
     @handle_errors

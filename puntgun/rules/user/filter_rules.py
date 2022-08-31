@@ -29,7 +29,8 @@ class PlaceHolderUserFilterRule(UserFilterRule):
     Here is the default one which will let all users from source trigger it
     so actions can apply on all users.
     """
-    _keyword = 'placeholder_user_filter_rule'
+
+    _keyword = "placeholder_user_filter_rule"
 
     def __call__(self, user: User):
         return RuleResult.true(self)
@@ -37,14 +38,15 @@ class PlaceHolderUserFilterRule(UserFilterRule):
 
 class FollowerUserFilterRule(NumericRangeFilterRule, UserFilterRule):
     """Check user's follower count."""
-    _keyword: ClassVar[str] = 'follower'
+
+    _keyword: ClassVar[str] = "follower"
 
     def __call__(self, user: User):
         return RuleResult(self, super().compare(user.followers_count))
 
 
 class ShortenFollowerUserFilterRule(UserFilterRule):
-    _keyword: ClassVar[str] = 'follower_less_than'
+    _keyword: ClassVar[str] = "follower_less_than"
 
     @classmethod
     def parse_from_config(cls, conf: dict):
@@ -53,14 +55,15 @@ class ShortenFollowerUserFilterRule(UserFilterRule):
 
 class FollowingUserFilterRule(NumericRangeFilterRule, UserFilterRule):
     """Check user's following count."""
-    _keyword: ClassVar[str] = 'following'
+
+    _keyword: ClassVar[str] = "following"
 
     def __call__(self, user: User):
         return RuleResult(self, super().compare(user.following_count))
 
 
 class ShortenFollowingUserFilterRule(UserFilterRule):
-    _keyword: ClassVar[str] = 'following_more_than'
+    _keyword: ClassVar[str] = "following_more_than"
 
     @classmethod
     def parse_from_config(cls, conf: dict):
@@ -69,14 +72,15 @@ class ShortenFollowingUserFilterRule(UserFilterRule):
 
 class CreatedUserFilterRule(TemporalRangeFilterRule, UserFilterRule):
     """Check user (account) creating date."""
-    _keyword: ClassVar[str] = 'created'
+
+    _keyword: ClassVar[str] = "created"
 
     def __call__(self, user: User):
         return RuleResult(self, super().compare(user.created_at))
 
 
 class CreatedAfterUserFilterRule(UserFilterRule):
-    _keyword: ClassVar[str] = 'created_after'
+    _keyword: ClassVar[str] = "created_after"
 
     @classmethod
     def parse_from_config(cls, conf: dict):
@@ -84,7 +88,7 @@ class CreatedAfterUserFilterRule(UserFilterRule):
 
 
 class CreatedWithinDaysUserFilterRule(UserFilterRule):
-    _keyword: ClassVar[str] = 'created_within_days'
+    _keyword: ClassVar[str] = "created_within_days"
     within_days: int
 
     @classmethod
@@ -97,7 +101,7 @@ class CreatedWithinDaysUserFilterRule(UserFilterRule):
 
 
 class TextMatchUserFilterRule(UserFilterRule):
-    _keyword: ClassVar[str] = 'profile_text_matches'
+    _keyword: ClassVar[str] = "profile_text_matches"
     pattern: str
 
     @classmethod
@@ -105,19 +109,20 @@ class TextMatchUserFilterRule(UserFilterRule):
         return cls(pattern=conf[cls._keyword])
 
     def __call__(self, user: User):
-        return any(re.compile(self.pattern).search(text) for text in
-                   [user.name, user.description, user.pinned_tweet_text])
+        return any(
+            re.compile(self.pattern).search(text) for text in [user.name, user.description, user.pinned_tweet_text]
+        )
 
 
 class FollowingCountRatioUserFilterRule(NumericRangeFilterRule, UserFilterRule):
-    _keyword: ClassVar[str] = 'following_count_ratio'
+    _keyword: ClassVar[str] = "following_count_ratio"
 
     def __call__(self, user: User):
         return RuleResult(self, super().compare(user.followers_count / user.following_count))
 
 
 class FollowingCountRatioLessThanUserFilterRule(UserFilterRule):
-    _keyword: ClassVar[str] = 'following_count_ratio_less_than'
+    _keyword: ClassVar[str] = "following_count_ratio_less_than"
 
     @classmethod
     def parse_from_config(cls, conf: dict):
@@ -125,14 +130,14 @@ class FollowingCountRatioLessThanUserFilterRule(UserFilterRule):
 
 
 class TweetCountUserFilterRule(NumericRangeFilterRule, UserFilterRule):
-    _keyword: ClassVar[str] = 'tweet_count'
+    _keyword: ClassVar[str] = "tweet_count"
 
     def __call__(self, user: User):
         return RuleResult(self, super().compare(user.tweet_count))
 
 
 class TweetCountLessThanUserFilterRule(UserFilterRule):
-    _keyword: ClassVar[str] = 'tweet_count_less_than'
+    _keyword: ClassVar[str] = "tweet_count_less_than"
 
     @classmethod
     def parse_from_config(cls, conf: dict):

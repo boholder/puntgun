@@ -31,6 +31,7 @@ class Record(object):
     """
     Record wrapper for a recordable object for format uniformity.
     """
+
     type: str
     data: dict
 
@@ -40,17 +41,17 @@ class Record(object):
 
     def to_json(self):
         """Translate this record into a yaml-list-item format string"""
-        return orjson.dumps({'type': self.type, 'data': self.data})
+        return orjson.dumps({"type": self.type, "data": self.data})
 
     @staticmethod
     def parse_from_dict(conf: dict):
         """
         Assume that the parameter is already a dictionary type parsed from a json file.
         """
-        return Record(type=conf.get('type', ''), data=conf.get('data', {}))
+        return Record(type=conf.get("type", ""), data=conf.get("data", {}))
 
     def __str__(self):
-        return f'Record(type={self.type}, data={self.data})'
+        return f"Record(type={self.type}, data={self.data})"
 
 
 class Recordable(object):
@@ -66,13 +67,13 @@ class Recordable(object):
         raise NotImplementedError
 
 
-COMMA = ','.encode('utf-8')
-PLACEHOLDER_ITEM = '{},'.encode('utf-8')
+COMMA = ",".encode("utf-8")
+PLACEHOLDER_ITEM = "{},".encode("utf-8")
 
 # 1. an empty list item (an empty map) for pairing one comma character behind the last plan item
 # 2. one square bracket for closing the "plans" list
 # 3. one curly bracket for closing the root level dictionary
-REPORT_TAIL = '{}]}'.encode('utf-8')
+REPORT_TAIL = "{}]}".encode("utf-8")
 
 
 class Recorder(object):
@@ -86,7 +87,7 @@ class Recorder(object):
     def _write(msg: bytes):
         """Any else more convenient than this?"""
         # the logger filter will recognize the "r" field and output this line of log into report file.
-        logger.bind(r=True).info(msg.decode('utf-8'))
+        logger.bind(r=True).info(msg.decode("utf-8"))
 
     @staticmethod
     def record(recordable: Recordable):
@@ -103,18 +104,20 @@ class Recorder(object):
         - for correctly formatting latter records in json format.
         """
 
-        head = {'reference_documentation': '',  # TODO doc link
-                # For version based branch logic in report-based "undo" operation.
-                # (you have different available actions at different version,
-                # which may require different "undo" process.)
-                # Works sort of like java's serial version uid.
-                'tool_version': config.tool_version,
-                'generate_time': datetime.datetime.utcnow(),
-                'plan_configuration': config.settings.get('plans', []),
-                # name -> plan_configuration, id -> records,
-                # this list sort of like a relation table.
-                'plan_ids': [{'name': p.name, 'id': p.id} for p in plans],
-                'records': []}
+        head = {
+            "reference_documentation": "",  # TODO doc link
+            # For version based branch logic in report-based "undo" operation.
+            # (you have different available actions at different version,
+            # which may require different "undo" process.)
+            # Works sort of like java's serial version uid.
+            "tool_version": config.tool_version,
+            "generate_time": datetime.datetime.utcnow(),
+            "plan_configuration": config.settings.get("plans", []),
+            # name -> plan_configuration, id -> records,
+            # this list sort of like a relation table.
+            "plan_ids": [{"name": p.name, "id": p.id} for p in plans],
+            "records": [],
+        }
 
         Recorder._write(orjson.dumps(head, option=orjson.OPT_INDENT_2)[:-3] + PLACEHOLDER_ITEM)
 
@@ -142,11 +145,13 @@ def load_report(file_content: bytes) -> dict:
     # we'll fix it manually as we know what it's missing.
     #
     # lambda for lazy calculating
-    cases = [lambda: file_content,
-             # The bigger the file_content (record file size),
-             # the slower the appending speed (you need to copy the whole list),
-             # but thankfully this method runs only once per program running.
-             lambda: file_content + REPORT_TAIL]
+    cases = [
+        lambda: file_content,
+        # The bigger the file_content (record file size),
+        # the slower the appending speed (you need to copy the whole list),
+        # but thankfully this method runs only once per program running.
+        lambda: file_content + REPORT_TAIL,
+    ]
 
     errors = []
     for case in cases:
@@ -155,10 +160,10 @@ def load_report(file_content: bytes) -> dict:
 
             # remove additional empty items added by this class when writing report.
             # "records" list's first and last item is empty item.
-            result['records'] = result['records'][1:-1]
+            result["records"] = result["records"][1:-1]
 
             return result
         except orjson.JSONDecodeError as e:
             errors.append(e)
 
-    raise ValueError(f'Can not parse given content, all approaches return error: {errors}')
+    raise ValueError(f"Can not parse given content, all approaches return error: {errors}")
