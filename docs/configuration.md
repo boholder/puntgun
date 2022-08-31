@@ -18,7 +18,7 @@ The tool is using the [Dynaconf](https://www.dynaconf.com/) as the configuration
 The tool will choose the tool configurations in the following order:
 
 1. Command line arguments & Environment variables[[ref](https://www.dynaconf.com/envvars/)].
-2. User writen plan configuration files.
+2. User written plan configuration files.
 3. Global settings file and secrets file.
 4. Default values set inside program.
 
@@ -64,14 +64,14 @@ There are some "one-off" configurations
 The tool will use `--secrets_file` and `--private_key_file` to manage secrets in a safe way,
 [here](#let-the-tool-manages-secrets) is more detailed introduction.
 
-| Argument             | Default                                                                     | Description                                                                           |
-|----------------------|-----------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
-| `--config_path`      | [`<home directory>`](https://en.wikipedia.org/wiki/Home_directory)/.puntgun | Path of various configuration files the tool needs                                    |
-| `--plan_file`        | `<config path>`/plan.yml                                                    | [Plan configuration file]() you'd like to execute                                     |
-| `--settings_file`    | `<config path>`/settings.yml                                                | Global tool settings that will apply to every execution                               |
-| `--private_key_file` | `<config path>`/.puntgun_rsa4096                                            | Tool generated password protected private key                                         |
-| `--secrets_file`     | `<config path>`/.secrets.yml                                                | Tool generated ciphertext or user writen plain text file contains [secrets](#secrets) |
-| `--report_file`      | `<config path>`/reports/`<plan_file>`_`<time>`_report.json                  | Expect path of the tool generated execution report                                    |
+| Argument             | Default                                                                     | Description                                                                            |
+|----------------------|-----------------------------------------------------------------------------|----------------------------------------------------------------------------------------|
+| `--config_path`      | [`<home directory>`](https://en.wikipedia.org/wiki/Home_directory)/.puntgun | Path of various configuration files the tool needs                                     |
+| `--plan_file`        | `<config path>`/plan.yml                                                    | [Plan configuration file]() you'd like to execute                                      |
+| `--settings_file`    | `<config path>`/settings.yml                                                | Global tool settings that will apply to every execution                                |
+| `--private_key_file` | `<config path>`/.puntgun_rsa4096                                            | Tool generated password protected private key                                          |
+| `--secrets_file`     | `<config path>`/.secrets.yml                                                | Tool generated ciphertext or user written plain text file contains [secrets](#secrets) |
+| `--report_file`      | `<config path>`/reports/`<plan_file>`_`<time>`_report.json                  | Expect path of the tool generated execution report                                     |
 
 ## Secrets
 

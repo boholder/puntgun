@@ -6,7 +6,7 @@ Any better idea?
 # TODO doc link
 tool_settings = """# The settings of the tool itself.
 # Options can be overridden by the same-name ones 
-# in the user-writen plan configuration file or in the environment variables.
+# in the user-written plan configuration file or in the environment variables.
 # The values of the commented out options are default values.
 # Reference documentation: TODO
 

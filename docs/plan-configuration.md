@@ -209,7 +209,7 @@ that:
   - created_within_days: 90
 ```
 
-Another flexable account creating time judging rule.
+Another flexible account creating time judging rule.
 
 ### profile_text_matches
 

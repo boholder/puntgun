@@ -52,7 +52,13 @@ doc = [
 
 [tool.pdm.build]
 excludes = ["./**/.git"]
-source-includes = ["tests", "CHANGELOG.md", "LICENSE", "README.md", "CONTRIBUTING.md"]
+source-includes = [
+    "tests",
+    "CHANGELOG.md",
+    "LICENSE",
+    "README.md",
+    "CONTRIBUTING.md"
+]
 
 # Scripts for development
 [tool.pdm.scripts]
@@ -84,6 +90,7 @@ exclude = '''
   | venv
   | build
   | dist
+  | old
 )/
 '''
 
