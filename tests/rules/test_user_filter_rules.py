@@ -98,7 +98,7 @@ class TestTextMatchUserFilterRule:
             texts = [text, "", ""]
             for _ in range(3):
                 texts = texts[1:] + [texts[0]]
-                assert rule(user_texts(texts)) == expect
+                assert bool(rule(user_texts(texts))) == expect
 
         return wrapper
 

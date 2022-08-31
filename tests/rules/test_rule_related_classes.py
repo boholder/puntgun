@@ -97,7 +97,9 @@ class TestConflictCheckFunction:
     def test_no_conflict(self):
         values = {"a": 1, "b": 2}
         conflict_field_groups = [["a", "b"], ["c"]]
-        assert rules.validate_fields_conflict(values, conflict_field_groups) == values
+        rules.validate_fields_conflict(values, conflict_field_groups)
+        # values not change
+        assert values == {"a": 1, "b": 2}
 
 
 class TestNumericRangeFilterRule:

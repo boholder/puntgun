@@ -27,9 +27,9 @@ class BlockUserActionRule(UserActionRule, NeedClient):
 
     _keyword: ClassVar[str] = "block"
 
-    def __call__(self, user: User):
+    def __call__(self, user: User) -> RuleResult:
         return RuleResult(self, self.client.block_user_by_id(user.id))
 
     @classmethod
-    def parse_from_config(cls, conf: dict | str):
+    def parse_from_config(cls, conf: dict) -> "BlockUserActionRule":
         return BlockUserActionRule()

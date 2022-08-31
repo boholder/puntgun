@@ -4,7 +4,7 @@ I'm using this file as util module for rule stuff.
 import datetime
 import itertools
 import sys
-from typing import ClassVar, List
+from typing import Any, ClassVar, List
 
 from pydantic import BaseModel, Field, root_validator
 from reactivex import Observable
@@ -20,7 +20,7 @@ class FromConfig(BaseModel):
     _keyword: ClassVar[str] = "corresponding_rule_name_in_config_of_this_rule"
 
     @classmethod
-    def parse_from_config(cls, conf: dict | str):
+    def parse_from_config(cls, conf: dict) -> "FromConfig":
         """
         Most rules have a dictionary structure of fields, their configurations are something like:
         { 'rule_name': {'field_1':1, 'field_2':2,...} }
@@ -33,10 +33,10 @@ class FromConfig(BaseModel):
 
         Anyway, we need this polymorphic method to let rules to custom their parsing processes.
         """
-        return cls.parse_obj(conf[cls._keyword])
+        return cls.parse_obj(conf.get(cls._keyword))
 
     @classmethod
-    def keyword(cls):
+    def keyword(cls) -> str:
         return cls._keyword
 
     class Config:
@@ -48,7 +48,7 @@ class FromConfig(BaseModel):
 plan_id_iter = itertools.count()
 
 
-def generate_id():
+def generate_id() -> int:
     return next(plan_id_iter)
 
 
@@ -101,19 +101,27 @@ class RuleResult(object):
         self.rule = rule
         self.result = result
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return self.result
 
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, type(self)):
+            rule_equal = self.rule == other.rule
+            result_equal = self.result == other.result
+            return rule_equal and result_equal
+        else:
+            return False
+
     @staticmethod
-    def true(rule):
+    def true(rule: FromConfig) -> "RuleResult":
         return RuleResult(rule, True)
 
     @staticmethod
-    def false(rule):
+    def false(rule: FromConfig) -> "RuleResult":
         return RuleResult(rule, False)
 
 
-def validate_required_fields_exist(rule_keyword, conf: dict, required_field_names: [str]):
+def validate_required_fields_exist(rule_keyword: str, conf: dict, required_field_names: List[str]) -> None:
     """
     Custom configuration parsing process
     - :class:`ConfigParser` sort of bypass the pydantic library's validation,
@@ -126,10 +134,10 @@ def validate_required_fields_exist(rule_keyword, conf: dict, required_field_name
 
     # point out all errors at once
     if missing:
-        raise ValueError(f"Missing required field(s) {missing} " f"in configuration [{rule_keyword}]: {conf}")
+        raise ValueError(f"Missing required field(s) {missing} in configuration [{rule_keyword}]: {conf}")
 
 
-def validate_fields_conflict(values, field_groups: List[List[str]]):
+def validate_fields_conflict(values: dict, field_groups: List[List[str]]) -> None:
     # only fields that are configured will be count in.
     for i in range(len(field_groups)):
         field_groups[i] = [f for f in field_groups[i] if values.get(f)]
@@ -154,12 +162,10 @@ def validate_fields_conflict(values, field_groups: List[List[str]]):
             f"to configurate in each conflict: {conflicts}"
         )
 
-    return values
-
 
 class FieldsRequired(BaseModel):
     @root_validator(pre=True)
-    def there_should_be_fields(cls, values):
+    def there_should_be_fields(cls, values: dict) -> dict:
         if len(values) == 0:
             raise ValueError("At least one field should be configured.")
         return values
@@ -176,13 +182,13 @@ class NumericRangeFilterRule(FromConfig, FieldsRequired):
     more_than = float(-sys.maxsize - 1)
 
     @root_validator
-    def validate_config(cls, values):
+    def validate_config(cls, values: dict) -> dict:
         lt, mt = values.get("less_than"), values.get("more_than")
         if lt <= mt:
-            raise ValueError(f"Invalid range, right 'less_than'({lt}) " f"should be bigger than left 'more_than'({mt})")
+            raise ValueError(f"Invalid range, right 'less_than'({lt}) should be bigger than left 'more_than'({mt})")
         return values
 
-    def compare(self, num):
+    def compare(self, num: int | float) -> bool:
         return self.more_than < num < self.less_than
 
 
@@ -195,11 +201,11 @@ class TemporalRangeFilterRule(FromConfig, FieldsRequired):
     after = datetime.datetime.min
 
     @root_validator
-    def validate_config(cls, values):
+    def validate_config(cls, values: dict) -> dict:
         b, a = values.get("before"), values.get("after")
         if b <= a:
-            raise ValueError(f"Invalid range, right time 'before'({b}) " f"should be after left time 'after'({a})")
+            raise ValueError(f"Invalid range, right time 'before'({b}) should be after left time 'after'({a})")
         return values
 
-    def compare(self, time):
+    def compare(self, time: datetime.datetime) -> bool:
         return self.after < time < self.before

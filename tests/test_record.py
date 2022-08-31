@@ -18,7 +18,7 @@ class TestRecord:
     def test_parse_from_dict(self):
         actual = Record.parse_from_dict({"type": "user", "data": {"a": {"b": 123}, "d": ["e", "f"]}})
         expect = Record(type="user", data={"a": {"b": 123}, "d": ["e", "f"]})
-        assert actual.__eq__(expect)
+        assert actual == expect
 
 
 MOCK_TIME_NOW = datetime.datetime(2022, 1, 1)

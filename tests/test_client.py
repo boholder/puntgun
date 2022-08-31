@@ -320,7 +320,7 @@ class TestUserPagedApi:
         )
         mock_tweepy_client.get_blocked.__name__ = "mock_get_blocked_func"
 
-        id_list = Client(mock_tweepy_client).cached_blocked_id_list
+        id_list = Client(mock_tweepy_client).cached_blocked_id_list()
 
         for i in range(2):
             # check user id
@@ -331,7 +331,7 @@ class TestUserPagedApi:
             side_effect=[response_with(meta={"next_token": 0}, data=[{"id": 0}]), response_with(data=[{"id": 1}])]
         )
         mock_tweepy_client.get_users_following.__name__ = "mock_get_users_following_func"
-        id_list = Client(mock_tweepy_client).cached_following_id_list
+        id_list = Client(mock_tweepy_client).cached_following_id_list()
         for i in range(2):
             assert id_list[i] == i
 
@@ -340,7 +340,7 @@ class TestUserPagedApi:
             side_effect=[response_with(meta={"next_token": 0}, data=[{"id": 0}]), response_with(data=[{"id": 1}])]
         )
         mock_tweepy_client.get_users_followers.__name__ = "mock_get_users_followers_func"
-        id_list = Client(mock_tweepy_client).cached_follower_id_list
+        id_list = Client(mock_tweepy_client).cached_follower_id_list()
         for i in range(2):
             assert id_list[i] == i
 

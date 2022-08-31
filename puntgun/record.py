@@ -18,7 +18,7 @@ I've heard about the effort different json parsing libraries have made.
 IMPROVE: More elegant way to generating a json format report file.
 """
 import datetime
-from typing import List
+from typing import Any, List
 
 import orjson
 from loguru import logger
@@ -39,19 +39,27 @@ class Record(object):
         self.type = type
         self.data = data
 
-    def to_json(self):
+    def to_json(self) -> bytes:
         """Translate this record into a yaml-list-item format string"""
         return orjson.dumps({"type": self.type, "data": self.data})
 
     @staticmethod
-    def parse_from_dict(conf: dict):
+    def parse_from_dict(conf: dict) -> "Record":
         """
         Assume that the parameter is already a dictionary type parsed from a json file.
         """
         return Record(type=conf.get("type", ""), data=conf.get("data", {}))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Record(type={self.type}, data={self.data})"
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, type(self)):
+            type_equal = self.type == other.type
+            data_equal = self.data == other.data
+            return type_equal and data_equal
+        else:
+            return False
 
 
 class Recordable(object):
@@ -62,7 +70,7 @@ class Recordable(object):
         raise NotImplementedError
 
     @staticmethod
-    def parse_from_record(record: Record):
+    def parse_from_record(record: Record) -> "Recordable":
         """Generate an instance from a record."""
         raise NotImplementedError
 
@@ -84,13 +92,13 @@ class Recorder(object):
     """
 
     @staticmethod
-    def _write(msg: bytes):
+    def _write(msg: bytes) -> None:
         """Any else more convenient than this?"""
         # the logger filter will recognize the "r" field and output this line of log into report file.
         logger.bind(r=True).info(msg.decode("utf-8"))
 
     @staticmethod
-    def record(recordable: Recordable):
+    def record(recordable: Recordable) -> None:
         """
         Log recordable instances into report file as normal log.
         """
@@ -98,7 +106,7 @@ class Recorder(object):
         Recorder._write(recordable.to_record().to_json() + COMMA)
 
     @staticmethod
-    def write_report_header(plans: List[Plan]):
+    def write_report_header(plans: List[Plan]) -> None:
         """
         This paragraph works as the report file content's header
         - for correctly formatting latter records in json format.
@@ -122,7 +130,7 @@ class Recorder(object):
         Recorder._write(orjson.dumps(head, option=orjson.OPT_INDENT_2)[:-3] + PLACEHOLDER_ITEM)
 
     @staticmethod
-    def write_report_tail():
+    def write_report_tail() -> None:
         """
         After all records are written, at the end of the program running,
         append this part to remain a correct json format.

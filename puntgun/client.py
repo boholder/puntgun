@@ -1,5 +1,5 @@
 import functools
-from typing import Callable, List
+from typing import Any, Callable, Iterator, List
 
 import tweepy
 from loguru import logger
@@ -14,7 +14,7 @@ from puntgun.rules.user import User
 class TwitterClientError(Exception):
     """Class for wrapping all Twitter client library custom errors."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Twitter client raises unrecoverable error while querying Twitter API")
 
 
@@ -23,7 +23,7 @@ class TwitterApiError(Exception):
 
     title = "generic twitter api error"
 
-    def __init__(self, title, ref_url, detail, parameter, value):
+    def __init__(self, title: str, ref_url: str, detail: str, parameter: str, value: Any):
         super().__init__(f"{detail} Refer: {ref_url}")
         self.title = title
         self.ref_url = ref_url
@@ -32,7 +32,7 @@ class TwitterApiError(Exception):
         self.value = value
 
     @staticmethod
-    def from_response(resp_error: dict):
+    def from_response(resp_error: dict) -> "TwitterApiError":
         # build an accurate error type according to the response content
         for subclass in TwitterApiError.__subclasses__():
             if subclass.title == resp_error.get("title"):
@@ -78,7 +78,7 @@ class TwitterApiErrors(Exception, Recordable):
     contains a list of :class:`TwitterApiError`.
     """
 
-    def __init__(self, query_func_name: str, query_params, resp_errors: List[dict]):
+    def __init__(self, query_func_name: str, query_params: dict, resp_errors: List[dict]):
         """Details for debugging via log."""
         self.query_func_name = query_func_name
         self.query_params = query_params
@@ -91,19 +91,19 @@ class TwitterApiErrors(Exception, Recordable):
             f"errors: {self.errors}"
         )
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return bool(self.errors)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.errors)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[TwitterApiError]:
         return iter(self.errors)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> TwitterApiError:
         return self.errors[index]
 
-    def to_record(self):
+    def to_record(self) -> Record:
         return Record(
             type="twitter_api_errors",
             data={
@@ -114,12 +114,12 @@ class TwitterApiErrors(Exception, Recordable):
         )
 
     @staticmethod
-    def parse_from_record(record: Record):
+    def parse_from_record(record: Record) -> "TwitterApiErrors":
         data = record.data
         return TwitterApiErrors(data.get("query_func_name", ""), data.get("query_params", ()), data.get("errors", []))
 
 
-def record_twitter_api_errors(client_func):
+def record_twitter_api_errors(client_func: Callable[..., tweepy.Response]) -> Callable:
     """
     Decorator for recording Twitter API errors returned by tweepy or Twitter server
     while invoking :class:`tweepy.Client`.
@@ -128,12 +128,12 @@ def record_twitter_api_errors(client_func):
     or simplify this api-error-recording implement in another way.
     """
 
-    def record_api_errors(request_params, resp_errors):
+    def record_api_errors(request_params: dict, resp_errors: list) -> None:
         api_errors = TwitterApiErrors(client_func.__name__, request_params, resp_errors)
         logger.bind(o=True).info(api_errors)
         Recorder.record(api_errors)
 
-    def decorator(*args, **kwargs):
+    def decorator(*args: Any, **kwargs: Any) -> tweepy.Response:
         try:
             resp = client_func(*args, **kwargs)
             if hasattr(resp, "errors") and len(resp.errors) > 0:
@@ -261,7 +261,7 @@ class Client(object):
 
     @staticmethod
     @functools.lru_cache(maxsize=1)
-    def singleton():
+    def singleton() -> "Client":
         secrets = secret.load_or_request_all_secrets(encrypto.load_or_generate_private_key())
         return Client(
             tweepy.Client(
@@ -272,7 +272,7 @@ class Client(object):
             )
         )
 
-    def get_users_by_usernames(self, names: List[str]):
+    def get_users_by_usernames(self, names: List[str]) -> List[User]:
         """
         Query users information.
         **rate limit: 900 / 15 min**
@@ -283,7 +283,7 @@ class Client(object):
 
         return self._resp_to_user(self.clt.get_users(usernames=names, **USER_API_PARAMS))
 
-    def get_users_by_ids(self, ids: List[int | str]):
+    def get_users_by_ids(self, ids: List[int | str]) -> List[User]:
         """
         Query users information.
         **rate limit: 900 / 15 min**
@@ -295,7 +295,7 @@ class Client(object):
         return self._resp_to_user(self.clt.get_users(ids=ids, **USER_API_PARAMS))
 
     @staticmethod
-    def _resp_to_user(resp: tweepy.Response):
+    def _resp_to_user(resp: tweepy.Response) -> List[User]:
         """Build a list of :class:`User` instances from one response."""
         if not resp.data:
             return []
@@ -316,7 +316,7 @@ class Client(object):
 
         return [resp_to_user(d) for d in resp.data]
 
-    def get_blocked(self):
+    def get_blocked(self) -> List[User]:
         """
         Get the latest blocking list of the current account.
         **rate limit: 15 / 15 min**
@@ -324,9 +324,8 @@ class Client(object):
         """
         return self._get_paged_user_api_response_list(self.clt.get_blocked)
 
-    @property
     @functools.lru_cache(maxsize=1)
-    def cached_blocked(self):
+    def cached_blocked(self) -> List[User]:
         """
         Call query method, cache them, and return the cache on latter calls.
         Since the tool may be constantly modifying the block list,
@@ -335,12 +334,11 @@ class Client(object):
         """
         return self.get_blocked()
 
-    @property
     @functools.lru_cache(maxsize=1)
-    def cached_blocked_id_list(self):
-        return [u.id for u in self.cached_blocked]
+    def cached_blocked_id_list(self) -> List[int]:
+        return [u.id for u in self.cached_blocked()]
 
-    def get_following(self, user_id):
+    def get_following(self, user_id: int | str) -> List[User]:
         """
         Get the latest following list of a user.
         **rate limit: 15 / 15 min**
@@ -348,17 +346,15 @@ class Client(object):
         """
         return self._get_paged_user_api_response_list(self.clt.get_users_following, id=user_id)
 
-    @property
     @functools.lru_cache(maxsize=1)
-    def cached_following(self):
+    def cached_following(self) -> List[User]:
         return self.get_following(self.id)
 
-    @property
     @functools.lru_cache(maxsize=1)
-    def cached_following_id_list(self):
-        return [u.id for u in self.cached_following]
+    def cached_following_id_list(self) -> List[int]:
+        return [u.id for u in self.cached_following()]
 
-    def get_follower(self, user_id):
+    def get_follower(self, user_id: int | str) -> List[User]:
         """
         Get the latest follower list of a user.
         **rate limit: 15 / 15 min**
@@ -366,17 +362,15 @@ class Client(object):
         """
         return self._get_paged_user_api_response_list(self.clt.get_users_followers, id=user_id)
 
-    @property
     @functools.lru_cache(maxsize=1)
-    def cached_follower(self):
+    def cached_follower(self) -> List[User]:
         return self.get_follower(self.id)
 
-    @property
     @functools.lru_cache(maxsize=1)
-    def cached_follower_id_list(self):
-        return [u.id for u in self.cached_follower]
+    def cached_follower_id_list(self) -> List[int]:
+        return [u.id for u in self.cached_follower()]
 
-    def _get_paged_user_api_response_list(self, clt_func: Callable[..., Response], **kwargs):
+    def _get_paged_user_api_response_list(self, clt_func: Callable[..., Response], **kwargs: Any) -> List[User]:
         # mix two part of params into one dict
         params = {}
         for k, v in USER_API_PARAMS.items():
@@ -391,7 +385,9 @@ class Client(object):
         return functools.reduce(lambda a, b: a + b, [self._resp_to_user(r) for r in responses], [])
 
     @staticmethod
-    def _paged_api_querier(clt_func: Callable[..., Response], params: dict, pagination_token=None):
+    def _paged_api_querier(
+        clt_func: Callable[..., Response], params: dict, pagination_token: str = None
+    ) -> tweepy.Response:
         """
         A recursion style generator that continue querying next page until hit the end.
         https://stackoverflow.com/questions/8991840/recursion-using-yield
@@ -417,24 +413,24 @@ class Client(object):
         """
 
         # this user has already been blocked
-        if target_user_id in self.cached_blocked_id_list:
+        if target_user_id in self.cached_blocked_id_list():
             logger.info(f"User[id={target_user_id}] has already been blocked.")
             return True
 
         # not block your follower
-        if (not config.settings.get("block_follower", True)) and target_user_id in self.cached_follower_id_list:
+        if (not config.settings.get("block_follower", True)) and target_user_id in self.cached_follower_id_list():
             logger.info(f"User[id={target_user_id}] is follower, not block base on config.")
             return False
 
         # not block your following
-        if (not config.settings.get("block_following", False)) and target_user_id in self.cached_following_id_list:
+        if (not config.settings.get("block_following", False)) and target_user_id in self.cached_following_id_list():
             logger.info(f"User[id={target_user_id}] is following, not block base on config.")
             return False
 
         # call the block api
         return self.clt.block(target_user_id=target_user_id).data["blocking"]
 
-    def get_tweets_by_ids(self, ids: List[int | str]):
+    def get_tweets_by_ids(self, ids: List[int | str]) -> List[Tweet]:
         """
         Query tweets information.
         **rate limit: 900 / 15 min**
@@ -446,7 +442,7 @@ class Client(object):
         return self._resp_to_tweet(self.clt.get_tweets(ids=ids, **TWEET_API_PARAMS))
 
     @staticmethod
-    def _resp_to_tweet(resp: tweepy.Response):
+    def _resp_to_tweet(resp: tweepy.Response) -> List[Tweet]:
         """Build a list of :class:`Tweet` instances from one response."""
         # TODO unfinished
         if not resp.data:

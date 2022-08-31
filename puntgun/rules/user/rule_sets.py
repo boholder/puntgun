@@ -6,7 +6,7 @@ The rule set itself can be contained inside another rule set,
 so you can make complex cascading execution order tree with them.
 It's the composite pattern I guess.
 """
-from typing import List
+from typing import Callable, List, Type
 
 import reactivex as rx
 from loguru import logger
@@ -33,7 +33,7 @@ class UserSourceRuleResultMergingSet(UserSourceRule):
     rules: List[UserSourceRule]
 
     @classmethod
-    def parse_from_config(cls, conf: dict):
+    def parse_from_config(cls, conf: dict) -> "UserSourceRuleResultMergingSet":
         return cls(rules=[ConfigParser.parse(c, UserSourceRule) for c in conf["any_of"]])
 
     def __call__(self) -> Observable[User]:
@@ -53,20 +53,20 @@ class UserFilterRuleSet(BaseModel):
     slow_rules: List[UserFilterRule]
 
     @staticmethod
-    def divide_and_construct(cls, rules: [UserFilterRule]):
+    def divide_and_construct(cls: Type["UserFilterRuleSet"], rules: List[UserFilterRule]) -> "UserFilterRuleSet":
         return cls(
             slow_rules=[r for r in rules if isinstance(r, NeedClient)],
             immediate_rules=[r for r in rules if not isinstance(r, NeedClient)],
         )
 
 
-def execution_wrapper(u: User, rule: UserFilterRule | UserActionRule):
+def execution_wrapper(u: User, rule: UserFilterRule | UserActionRule) -> Callable:
     """
     Because the rx.start() only accept no-param functions as its parameter,
     but user filter rule need a user instance param for judgement.
     """
 
-    def run_the_rule():
+    def run_the_rule() -> RuleResult:
         return rule(u)
 
     return run_the_rule
@@ -85,7 +85,7 @@ class UserFilterRuleAllOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
     _keyword = "all_of"
 
     @classmethod
-    def parse_from_config(cls, conf: dict):
+    def parse_from_config(cls, conf: dict) -> "UserFilterRuleSet":
         return UserFilterRuleSet.divide_and_construct(
             cls, [ConfigParser.parse(c, UserFilterRule) for c in conf["all_of"]]
         )
@@ -115,7 +115,7 @@ class UserFilterRuleAnyOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
     _keyword = "any_of"
 
     @classmethod
-    def parse_from_config(cls, conf: dict):
+    def parse_from_config(cls, conf: dict) -> "UserFilterRuleSet":
         return UserFilterRuleSet.divide_and_construct(
             cls, [ConfigParser.parse(c, UserFilterRule) for c in conf["any_of"]]
         )
@@ -144,7 +144,7 @@ class UserActionRuleResultCollectingSet(UserActionRule):
     rules: List[UserActionRule]
 
     @classmethod
-    def parse_from_config(cls, conf: dict):
+    def parse_from_config(cls, conf: dict) -> "UserActionRuleResultCollectingSet":
         return cls(rules=[ConfigParser.parse(c, UserActionRule) for c in conf["all_of"]])
 
     def __call__(self, user: User) -> Observable[List[RuleResult]]:

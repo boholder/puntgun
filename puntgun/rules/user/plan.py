@@ -54,14 +54,20 @@ class UserPlanResult(Recordable):
         )
 
     @staticmethod
-    def parse_from_record(record: Record):
+    def parse_from_record(record: Record) -> "UserPlanResult":
         user: dict = record.data.get("user", {})
+        filter_rule_record = record.data.get("decisive_filter_rule", {})
         action_rule_results: list = record.data.get("action_rule_results", [])
         return UserPlanResult(
             plan_id=record.data.get("plan_id", 0),
             user=User(id=user.get("id"), username=user.get("username")),
-            # we don't need this (while parsing from record for "undo" operations)
-            filtering_result=RuleResult.true(None),
+            # Trying to rebuild rule instances from record,
+            # but always result in config parsing errors and fake rule instance return values.
+            filtering_result=RuleResult.true(
+                ConfigParser.parse({filter_rule_record.get("keyword"): {}}, UserFilterRule)
+            ),
+            # Make sure every action rule can accept zero init arg, TODO write test for all action rules
+            # we depend on their type to perform undo operation.
             action_results=[
                 RuleResult(rule=ConfigParser.parse({r.get("keyword"): {}}, UserActionRule), result=r.get("done"))
                 for r in action_rule_results
@@ -80,11 +86,11 @@ class UserPlan(Plan):
     actions: UserActionRuleResultCollectingSet
 
     class DefaultAllTriggerUserFilterRule(UserFilterRule):
-        def __call__(self, user: User):
+        def __call__(self, user: User) -> bool:
             return True
 
     @classmethod
-    def parse_from_config(cls, conf: dict):
+    def parse_from_config(cls, conf: dict) -> "UserPlan":
         # we won't directly extract values from configuration and assign them to fields,
         # so custom validation is needed
         # as we can't use pydantic library's validating function on fields.
@@ -137,7 +143,7 @@ class UserPlan(Plan):
             )
         )
 
-    def _filtering(self):
+    def _filtering(self) -> Observable[tuple]:
         """
         Pass source users to filter chain and combine filtering result with origin user instance.
         result explanation: (<user instance>, <filtering result>)

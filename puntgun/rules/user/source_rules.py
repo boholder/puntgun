@@ -1,4 +1,4 @@
-from typing import ClassVar, List
+from typing import Any, Callable, ClassVar, List
 
 import reactivex as rx
 from loguru import logger
@@ -10,12 +10,12 @@ from puntgun.rules import FromConfig
 from puntgun.rules.user import User
 
 
-def handle_errors(func):
-    def log_and_throw(e, _):
+def handle_errors(func: Callable[..., rx.Observable]) -> Callable[..., rx.Observable]:
+    def log_and_throw(e: Exception, _: Any) -> rx.Observable:
         logger.error("An exception is thrown from source rules and stops the pipeline.")
         return rx.throw(e)
 
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> rx.Observable:
         return func(*args, **kwargs).pipe(op.catch(log_and_throw))
 
     return wrapper
@@ -45,7 +45,7 @@ class NameUserSourceRule(UserSourceRule, NeedClient):
     names: List[str]
 
     @handle_errors
-    def __call__(self):
+    def __call__(self) -> rx.Observable:
         return rx.from_iterable(self.names).pipe(
             # Some Twitter API limits the number of usernames
             # in a single request up to 100 like this one.
@@ -59,7 +59,7 @@ class NameUserSourceRule(UserSourceRule, NeedClient):
         )
 
     @classmethod
-    def parse_from_config(cls, conf: dict):
+    def parse_from_config(cls, conf: dict) -> "NameUserSourceRule":
         """the config is { 'names': [...] }"""
         return cls.parse_obj(conf)
 
@@ -75,7 +75,7 @@ class IdUserSourceRule(UserSourceRule, NeedClient):
     ids: List[int | str]
 
     @handle_errors
-    def __call__(self):
+    def __call__(self) -> rx.Observable:
         return rx.from_iterable(self.ids).pipe(
             # this api also allows to query 100 users at once.
             op.buffer_with_count(100),
@@ -84,5 +84,5 @@ class IdUserSourceRule(UserSourceRule, NeedClient):
         )
 
     @classmethod
-    def parse_from_config(cls, conf: dict):
+    def parse_from_config(cls, conf: dict) -> "IdUserSourceRule":
         return cls.parse_obj(conf)

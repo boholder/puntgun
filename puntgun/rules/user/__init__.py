@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, validator
 
@@ -34,36 +34,36 @@ class User(BaseModel):
     tweet_count: Optional[int] = 0
     pinned_tweet_id: Optional[int] = 0
     pinned_tweet_text: Optional[str] = ""
-    entities: Optional[dict] = {}
+    entities: Optional[Dict[str, Any]] = {}
     url: Optional[str] = ""
-    withheld: Optional[dict] = {}
+    withheld: Optional[Dict[str, Any]] = {}
 
     class Config:
         validate_assignment = True
 
     @validator("location")
-    def set_location(cls, loc):
+    def set_location(cls, loc: str) -> str:
         # When 'location' is provided but the value is None, set it to default value.
         return loc or ""
 
     @validator("pinned_tweet_id")
-    def set_pinned_tweet_id(cls, tid):
+    def set_pinned_tweet_id(cls, tid: int) -> int:
         return tid or 0
 
     @validator("entities")
-    def set_entities(cls, ent):
+    def set_entities(cls, ent: dict) -> dict:
         return ent or {}
 
     @validator("url")
-    def set_url(cls, url):
+    def set_url(cls, url: dict) -> dict:
         return url or {}
 
     @validator("withheld")
-    def set_withheld(cls, wh):
+    def set_withheld(cls, wh: dict) -> dict:
         return wh or {}
 
     @staticmethod
-    def from_response(resp_data: dict, pinned_tweet_text: str):
+    def from_response(resp_data: dict, pinned_tweet_text: str) -> "User":
         # tweepy 4.10.0 changed return structure of tweepy.Client.get_me()
         # lacking most of the response field, helps enhancement of this constructor.
 
@@ -83,10 +83,11 @@ class User(BaseModel):
             pinned_tweet_text=pinned_tweet_text
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         if isinstance(other, type(self)):
             return self.id == other.id
-        return False
+        else:
+            return False
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return bool(self.id)

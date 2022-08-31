@@ -1,6 +1,7 @@
 """Methods that access, modify, and save secrets that need to be encrypted, as well as private key itself."""
 import functools
 import sys
+from pathlib import Path
 
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
@@ -14,7 +15,7 @@ encrypt_padding = padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()), algo
 
 
 @functools.lru_cache(maxsize=1)
-def load_or_generate_public_key():
+def load_or_generate_public_key() -> RSAPublicKey:
     """For encrypting secrets."""
     return load_or_generate_private_key().public_key()
 
@@ -41,10 +42,10 @@ just delete the private key file and the secrets file and run it again.
 {secrets_file}"""
 
 
-def load_or_generate_private_key():
+def load_or_generate_private_key() -> RSAPrivateKey:
     """Load private key for decrypting secrets."""
 
-    def load_with_password_from_prompt():
+    def load_with_password_from_prompt() -> RSAPrivateKey:
         """Trying different passwords in an infinity loop till the user get bored."""
         err_count = 0
         while True:
@@ -58,10 +59,10 @@ def load_or_generate_private_key():
                 err_count += 1
                 print("Incorrect password.")
 
-    def load_with_password_from_stdin():
+    def load_with_password_from_stdin() -> RSAPrivateKey:
         return load_private_key("".join(sys.stdin.readlines()), config.pri_key_file)
 
-    def generate_and_save():
+    def generate_and_save() -> RSAPrivateKey:
         pwd = util.get_secret_from_terminal("Password")
         pri_key = generate_private_key()
         dump_private_key(pri_key, pwd, config.pri_key_file)
@@ -85,15 +86,15 @@ def load_or_generate_private_key():
 # == low level ==
 
 
-def encrypt(pub_key: RSAPublicKey, plaintext: str):
+def encrypt(pub_key: RSAPublicKey, plaintext: str) -> bytes:
     return pub_key.encrypt(bytes(plaintext, "utf-8"), encrypt_padding)
 
 
-def decrypt(pri_key: RSAPrivateKey, ciphertext: bytes):
+def decrypt(pri_key: RSAPrivateKey, ciphertext: bytes) -> str:
     return pri_key.decrypt(ciphertext, encrypt_padding).decode("utf-8")
 
 
-def dump_private_key(pri_key: RSAPrivateKey, pwd: str, file_path):
+def dump_private_key(pri_key: RSAPrivateKey, pwd: str, file_path: Path) -> None:
     """will overwrite the file if it already exists"""
     util.backup_if_exists(file_path)
     with open(file_path, "wb") as f:
@@ -110,12 +111,12 @@ def dump_private_key(pri_key: RSAPrivateKey, pwd: str, file_path):
         )
 
 
-def load_private_key(pwd: str, file_path):
+def load_private_key(pwd: str, file_path: Path) -> RSAPrivateKey:
     with open(file_path, "rb") as f:
         return serialization.load_pem_private_key(f.read(), password=bytes(pwd, "utf-8"))
 
 
-def generate_private_key():
+def generate_private_key() -> RSAPrivateKey:
     # https://crypto.stackexchange.com/questions/19458/what-is-the-difference-between-secp-and-sect
     #
     # IMPROVE: If we can change the encryption algorithm to something in elliptic curve class,

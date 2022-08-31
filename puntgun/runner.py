@@ -29,7 +29,7 @@ class InvalidConfigurationError(ValueError):
 
 
 @logger.catch(onerror=lambda _: sys.exit(1))
-def start():
+def start() -> None:
     # Warm up? Initialization?
     # Load secrets and create singleton client instance before parsing and executing plans.
     #
@@ -58,7 +58,7 @@ and fix it with reference documentation:
 fake-doc """
 
 
-def get_and_validate_plan_config():
+def get_and_validate_plan_config() -> list[dict]:
     plans_config = config.settings.get("plans")
     if plans_config is None:
         print(NO_PLAN_LOAD.format(plan_file=config.plan_file))
@@ -67,7 +67,8 @@ def get_and_validate_plan_config():
 
 
 # TODO doc link
-# copy the format from Prometheus's promtool
+# copy the format from Prometheus's "promtool" command lint tool
+# https://prometheus.io/docs/prometheus/latest/configuration/unit_testing_rules/
 CHECK_PLAN_FAIL = """Checking {plan_file} FAIL,
 Please fix these errors in plan configuration file with reference document.
 Reference documentation:
@@ -79,7 +80,7 @@ CHECK_PLAN_SUCC = """Checking {plan_file} SUCCESS,
 {plan_num} plans found."""
 
 
-def parse_plans_config(_plans_config):
+def parse_plans_config(_plans_config: list[dict]) -> List[Plan]:
     """Let the ConfigParser recursively constructing plan instances and rule instances inside plans."""
     plans: List[Plan] = [ConfigParser.parse(p, Plan) for p in _plans_config]
 
@@ -98,12 +99,12 @@ optimal_thread_count = multiprocessing.cpu_count()
 pool_scheduler = ThreadPoolScheduler(optimal_thread_count)
 
 
-def execute_plans(plans: List[Plan]):
-    def on_error(e):
+def execute_plans(plans: List[Plan]) -> None:
+    def on_error(e: Exception) -> None:
         logger.error("Error occurred when executing plan", e)
         raise e
 
-    def run_plans():
+    def run_plans() -> None:
         for plan in plans:
             logger.info("Plan[id={}] start", plan.id)
 
@@ -126,6 +127,6 @@ def execute_plans(plans: List[Plan]):
     Recorder.write_report_tail()
 
 
-def process_plan_result(result: Recordable):
+def process_plan_result(result: Recordable) -> None:
     logger.bind(o=True).info("Finished actions on one target: {}", result.to_record())
     Recorder.record(result)

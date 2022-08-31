@@ -19,53 +19,39 @@ from puntgun.rules.user.source_rules import UserSourceRule
 
 class TRule(UserActionRule, UserFilterRule):
     _keyword = "ptr"
-    field_a: str
+    field_a: str = ""
 
 
 class TestUserPlanResult:
-    def test_to_record(self):
-        actual = UserPlanResult(
-            plan_id=123,
-            user=User(id=1, username="uname"),
-            filtering_result=RuleResult.true(TRule(field_a="a")),
-            action_results=[RuleResult.true(TRule(field_a="b"))],
-        ).to_record()
-        expect = Record(
-            type="user_plan_result",
-            data={
-                "plan_id": 123,
-                "user": {"id": 1, "username": "uname"},
-                "decisive_filter_rule": {"keyword": "ptr", "value": "field_a=a"},
-                "action_rule_results": [{"keyword": "ptr", "value": "field_a=a", "done": True}],
-            },
-        )
+    result = UserPlanResult(
+        plan_id=123,
+        user=User(id=1, username="uname"),
+        filtering_result=RuleResult.true(TRule(field_a="a")),
+        action_results=[RuleResult.true(TRule(field_a="b"))],
+    )
 
-        assert actual.__eq__(expect)
+    record = Record(
+        type="user_plan_result",
+        data={
+            "plan_id": 123,
+            "user": {"id": 1, "username": "uname"},
+            "decisive_filter_rule": {"keyword": "ptr", "value": "field_a='a'"},
+            "action_rule_results": [{"keyword": "ptr", "value": "field_a='b'", "done": True}],
+        },
+    )
+
+    def test_to_record(self):
+        assert self.result.to_record() == self.record
 
     def test_parse_from_record(self):
-        actual = UserPlanResult.parse_from_record(
-            Record(
-                type="user_plan_result",
-                data={
-                    "plan_id": 123,
-                    "user": {"id": 1, "username": "uname"},
-                    "decisive_filter_rule": {"keyword": "ptr", "value": "field_a=a"},
-                    "action_rule_results": [{"keyword": "ptr", "value": "field_a=a", "done": False}],
-                },
-            )
-        )
+        actual = UserPlanResult.parse_from_record(self.record)
+        expect = self.result
+        assert actual.plan_id == expect.plan_id
+        assert actual.user == expect.user
+        # consider is success if we can build action rule instance from record
+        assert type(actual.action_results[0].rule) == TRule
 
-        expect = UserPlanResult(
-            plan_id=123,
-            user=User(id=1, username="uname"),
-            filtering_result=RuleResult.true(None),
-            action_results=[RuleResult.false(TRule(field_a="b"))],
-        )
-
-        assert actual.__eq__(expect)
-
-
-# == things for testing user plan ==
+    # == things for testing user plan ==
 
 
 class TUserSourceRule(UserSourceRule):

@@ -9,7 +9,7 @@ from puntgun.conf import config, encrypto, example, secret
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
-def fire(plan, report, settings, config_path, secrets, private_key):
+def fire(plan: str, report: str, settings: str, config_path: str, secrets: str, private_key: str) -> None:
     logger.info("Run command [fire]")
     config.reload_important_files(
         config_path=config_path,
@@ -29,7 +29,7 @@ def fire(plan, report, settings, config_path, secrets, private_key):
         exit(1)
 
 
-def load_secrets_with_keyboard_interrupt_exit():
+def load_secrets_with_keyboard_interrupt_exit() -> dict[str, str]:
     try:
         return secret.load_or_request_all_secrets(encrypto.load_or_generate_private_key())
     except KeyboardInterrupt:
@@ -44,25 +44,25 @@ plan: {example_plan_file}"""
 
 class Gen(object):
     @staticmethod
-    def secrets(private_key_file, secrets_file):
+    def secrets(private_key_file: str, secrets_file: str) -> None:
         config.reload_important_files(secrets_file=secrets_file, pri_key_file=private_key_file)
         load_secrets_with_keyboard_interrupt_exit()
 
     @staticmethod
-    def plain_secrets(output_file, private_key_file, secrets_file):
+    def plain_secrets(output_file: str, private_key_file: str, secrets_file: str) -> None:
         config.reload_important_files(secrets_file=secrets_file, pri_key_file=private_key_file)
         secrets = load_secrets_with_keyboard_interrupt_exit()
 
         # this path will only be used here, so we needn't add it to config module.
-        output_file = Path(output_file)
-        util.backup_if_exists(output_file)
-        with open(output_file, "w", encoding="utf-8") as f:
+        output_file_path = Path(output_file)
+        util.backup_if_exists(output_file_path)
+        with open(output_file_path, "w", encoding="utf-8") as f:
             f.writelines(f"{key}: {value}\n" for key, value in secrets.items())
 
-        print(f"Secrets are dumped: {output_file}")
+        print(f"Secrets are dumped: {output_file_path}")
 
     @staticmethod
-    def config(output_path):
+    def config(output_path: str) -> None:
         example_settings_file = Path(output_path).joinpath("example-settings.yml")
         util.backup_if_exists(example_settings_file)
         with open(example_settings_file, "w", encoding="utf-8") as f:
@@ -80,6 +80,6 @@ class Gen(object):
 
 class Check(object):
     @staticmethod
-    def plan(plan_file):
+    def plan(plan_file: str) -> None:
         config.reload_important_files(plan_file=plan_file)
         runner.parse_plans_config(runner.get_and_validate_plan_config())

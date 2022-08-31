@@ -48,7 +48,7 @@ if not report_path.exists():
 tool_version = metadata.version("puntgun")
 
 
-def load_settings():
+def load_settings() -> Dynaconf:
     return Dynaconf(
         # environment variables' prefix
         envvar_prefix="BULLET",
@@ -65,7 +65,7 @@ def load_settings():
 settings = load_settings()
 
 
-def reload_important_files(**kwargs):
+def reload_important_files(**kwargs: str) -> None:
     """
     Change file paths base on command arguments passed by user,
     and reload configuration from new files.
@@ -110,7 +110,7 @@ logger_format = (
 log_level = settings.get("log_level", "INFO").upper()
 
 
-def config_logging_options():
+def config_logging_options() -> None:
     # technical diagnostic logs go to stderr
     logger.add(
         sys.stderr,

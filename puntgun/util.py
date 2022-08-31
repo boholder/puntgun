@@ -16,7 +16,7 @@ def get_secret_from_terminal(key: str) -> str:
     return get_input_wrapper(getpass.getpass, prompt="{}: ".format(key))
 
 
-def get_input_wrapper(func: Callable, *args, **kwargs):
+def get_input_wrapper(func: Callable[..., str], *args: str, **kwargs: str) -> str:
     """A more friendly mistake-tolerating input method"""
     loop = True
     value = ""
@@ -30,7 +30,7 @@ def get_input_wrapper(func: Callable, *args, **kwargs):
     return value
 
 
-def backup_if_exists(path: Path):
+def backup_if_exists(path: Path) -> None:
     if path.exists():
         logger.warning("Indicated output file [{}] already exists, back up the origin file", path)
         shutil.copy2(path, path.with_suffix(os.path.splitext(path)[1] + ".bak"))

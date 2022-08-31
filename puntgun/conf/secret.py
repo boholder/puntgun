@@ -1,6 +1,8 @@
 import binascii
 from pathlib import Path
+from typing import Dict
 
+import dynaconf
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPublicKey
 from loguru import logger
 from pydantic import BaseModel
@@ -58,21 +60,21 @@ class TwitterAPISecrets(BaseModel):
         max_anystr_length = 100
 
     @staticmethod
-    def from_environment():
+    def from_environment() -> "TwitterAPISecrets":
         return TwitterAPISecrets(
             key=load_settings_from_environment_variables(twitter_api_key_name),
             secret=load_settings_from_environment_variables(twitter_api_key_secret_name),
         )
 
     @staticmethod
-    def from_settings(pri_key: RSAPrivateKey):
+    def from_settings(pri_key: RSAPrivateKey) -> "TwitterAPISecrets":
         return TwitterAPISecrets(
             key=load_and_decrypt_secret_from_settings(pri_key, twitter_api_key_name),
             secret=load_and_decrypt_secret_from_settings(pri_key, twitter_api_key_secret_name),
         )
 
     @staticmethod
-    def from_input():
+    def from_input() -> "TwitterAPISecrets":
         print(GET_API_SECRETS_FROM_INPUT)
         return TwitterAPISecrets(
             key=util.get_secret_from_terminal("Api key"), secret=util.get_secret_from_terminal("Api key secret")
@@ -100,21 +102,21 @@ class TwitterAccessTokenSecrets(BaseModel):
         max_anystr_length = 100
 
     @staticmethod
-    def from_environment():
+    def from_environment() -> "TwitterAccessTokenSecrets":
         return TwitterAccessTokenSecrets(
             token=load_settings_from_environment_variables(twitter_access_token_name),
             secret=load_settings_from_environment_variables(twitter_access_token_secret_name),
         )
 
     @staticmethod
-    def from_settings(pri_key: RSAPrivateKey):
+    def from_settings(pri_key: RSAPrivateKey) -> "TwitterAccessTokenSecrets":
         return TwitterAccessTokenSecrets(
             token=load_and_decrypt_secret_from_settings(pri_key, twitter_access_token_name),
             secret=load_and_decrypt_secret_from_settings(pri_key, twitter_access_token_secret_name),
         )
 
     @staticmethod
-    def from_input(api_secrets: TwitterAPISecrets):
+    def from_input(api_secrets: TwitterAPISecrets) -> "TwitterAccessTokenSecrets":
         oauth1_user_handler = OAuth1UserHandler(api_secrets.key, api_secrets.secret, callback="oob")
         print(AUTH_URL.format(auth_url=oauth1_user_handler.get_authorization_url()))
         pin = util.get_input_from_terminal("PIN")
@@ -127,7 +129,7 @@ so next time you running this tool you need not enter these annoying unreadable 
 And we'll encrypt them before saving, it's time to load your private key."""
 
 
-def load_or_request_all_secrets(pri_key: RSAPrivateKey):
+def load_or_request_all_secrets(pri_key: RSAPrivateKey) -> Dict[str, str]:
     api_secrets = load_or_request_api_secrets(pri_key)
     access_token_secrets = load_or_request_access_token_secrets(api_secrets, pri_key)
     secrets = {
@@ -147,7 +149,7 @@ def load_or_request_all_secrets(pri_key: RSAPrivateKey):
     return secrets
 
 
-def load_or_request_api_secrets(pri_key: RSAPrivateKey = None):
+def load_or_request_api_secrets(pri_key: RSAPrivateKey = None) -> TwitterAPISecrets:
     try:
         return TwitterAPISecrets.from_environment()
     except ValueError:
@@ -174,7 +176,9 @@ def load_or_request_api_secrets(pri_key: RSAPrivateKey = None):
     return TwitterAPISecrets.from_input()
 
 
-def load_or_request_access_token_secrets(api_secrets: TwitterAPISecrets, pri_key: RSAPrivateKey = None):
+def load_or_request_access_token_secrets(
+    api_secrets: TwitterAPISecrets, pri_key: RSAPrivateKey = None
+) -> TwitterAccessTokenSecrets:
     try:
         return TwitterAccessTokenSecrets.from_environment()
     except ValueError:
@@ -188,7 +192,7 @@ def load_or_request_access_token_secrets(api_secrets: TwitterAPISecrets, pri_key
             return TwitterAccessTokenSecrets.from_settings(pri_key)
         except (ValueError, TypeError):
             logger.info(
-                "Failed to load access token secrets from settings, " "trying to get access token secrets from input"
+                "Failed to load access token secrets from settings, trying to get access token secrets from input"
             )
 
     # here we need the api secrets to generate new access token.
@@ -198,7 +202,7 @@ def load_or_request_access_token_secrets(api_secrets: TwitterAPISecrets, pri_key
 # == low level ==
 
 
-def load_settings_from_environment_variables(name: str, dynaconf_settings=None):
+def load_settings_from_environment_variables(name: str, dynaconf_settings: dynaconf.Dynaconf = None) -> str:
     """
     Secrets stored as environment variables can be loaded by dynaconf.
     In this case they are stored in plaintext.
@@ -208,19 +212,23 @@ def load_settings_from_environment_variables(name: str, dynaconf_settings=None):
     return dynaconf_settings.get(name)
 
 
-def load_and_decrypt_secret_from_settings(private_key: RSAPrivateKey, name: str, dynaconf_settings=None):
+def load_and_decrypt_secret_from_settings(
+    private_key: RSAPrivateKey, name: str, dynaconf_settings: dynaconf.Dynaconf = None
+) -> str:
     if not dynaconf_settings:
         dynaconf_settings = config.settings
     return encrypto.decrypt(private_key, binascii.unhexlify(dynaconf_settings.get(name)))
 
 
-def encrypt_and_save_secrets_into_file(public_key: RSAPublicKey, file_path: Path = config.secrets_file, **kwargs):
+def encrypt_and_save_secrets_into_file(
+    public_key: RSAPublicKey, file_path: Path = config.secrets_file, **kwargs: str
+) -> None:
     """
     Will overwrite the file if already exists.
     Save the encrypted bytes as hex format into a file.
     """
 
-    def transform(msg):
+    def transform(msg: str) -> str:
         return binascii.hexlify(encrypto.encrypt(public_key, msg)).decode("utf-8")
 
     with open(file_path, "w", encoding="utf-8") as f:
@@ -228,8 +236,8 @@ def encrypt_and_save_secrets_into_file(public_key: RSAPublicKey, file_path: Path
         f.writelines(f"{key}: {transform(value)}\n" for key, value in kwargs.items())
 
 
-def secrets_config_file_valid():
-    def not_empty_or_has_only_blank_characters():
+def secrets_config_file_valid() -> bool:
+    def not_empty_or_has_only_blank_characters() -> bool:
         with open(config.secrets_file, "r", encoding="utf-8") as f:
             return bool(f.read().strip())
 

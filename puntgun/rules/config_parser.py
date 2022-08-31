@@ -1,6 +1,6 @@
 import importlib
 import pkgutil
-from typing import List, TypeVar
+from typing import Any, List, Type, TypeVar
 
 from loguru import logger
 from pydantic import ValidationError
@@ -8,7 +8,7 @@ from pydantic import ValidationError
 from puntgun.rules import FromConfig
 
 
-def import_rule_classes():
+def import_rule_classes() -> None:
     """
     :class:`ConfigParser` will dynamically construct rule class base on configuration passed to it,
     ( using object.__subclasses__ )
@@ -40,7 +40,7 @@ class ConfigParser(object):
     _T = TypeVar("_T", bound=FromConfig)
 
     @staticmethod
-    def parse(conf: dict, expected_type: _T):
+    def parse(conf: dict, expected_type: _T | Type[_T]) -> _T:
         """
         Take a piece of configuration and the expected type from caller,
         recognize which rule it is and parse it into corresponding rule instance.
@@ -52,7 +52,7 @@ class ConfigParser(object):
         and the user can fix them at once without running over again for configuration validation.
         """
 
-        def generate_placeholder_instance():
+        def generate_placeholder_instance() -> Any:
             """
             Return a placeholder instance which inherits from the given expected class.
             For letting caller continue parsing.
@@ -78,12 +78,12 @@ class ConfigParser(object):
         return generate_placeholder_instance()
 
     @staticmethod
-    def errors():
+    def errors() -> List[Exception]:
         """Get errors occurred when paring plan configuration"""
         return ConfigParser._errors
 
     @staticmethod
-    def clear_errors():
+    def clear_errors() -> None:
         ConfigParser._errors = []
 
 
