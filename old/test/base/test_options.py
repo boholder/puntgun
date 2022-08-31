@@ -80,7 +80,7 @@ class TestAbstractMapOption(TestCase):
         class TestSubClassField(TestField):
             config_keyword = "test_sub_class_field"
 
-        # supress unused warning
+        # suppress unused warning
         TestSubClassField.expect_type = str
 
         class TestOption(MapOption):
@@ -117,7 +117,7 @@ class TestAbstractMapOption(TestCase):
         class TestOption(MapOption):
             valid_options = [Field.of("field1", str)]
 
-        assert_that(getattr(TestOption({"field1": "value"}), "field1"), equal_to("value"))
+        assert_that(TestOption({"field1": "value"}).field1, equal_to("value"))
 
     def test_auto_fill_default_field(self):
         class TestOption(MapOption):
@@ -193,5 +193,5 @@ class TestAbstractListOption(TestCase):
             valid_options = [Field.of("item1", str), Field.of("item2", dict)]
 
         option = TestOption([{"item1": "t1"}, {"item1": "t2"}, {"item2": {"inner": "t3"}}, {"item2": {"inner": "t4"}}])
-        assert_that(getattr(option, "item1"), equal_to(["t1", "t2"]))
-        assert_that(getattr(option, "item2"), equal_to([{"inner": "t3"}, {"inner": "t4"}]))
+        assert_that(option.item1, equal_to(["t1", "t2"]))
+        assert_that(option.item2, equal_to([{"inner": "t3"}, {"inner": "t4"}]))

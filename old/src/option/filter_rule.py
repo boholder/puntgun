@@ -1,7 +1,6 @@
 import datetime
 import re
 import sys
-from abc import ABC
 from datetime import datetime as dt
 from typing import Any, Dict, Tuple
 
@@ -12,13 +11,13 @@ from old.test.base.options import Field, MapOption, Option
 from old.test.model.context import Context
 
 
-class FilterRule(Option, ABC):
+class FilterRule(Option):
     """
     Let the subclasses choose their type and left this base class as merely a tag.
     """
 
 
-class ImmediateFilterRule(FilterRule, ABC):
+class ImmediateFilterRule(FilterRule):
     """
     A filter rule that can make judgment without querying other resource.
     """
@@ -30,7 +29,7 @@ class ImmediateFilterRule(FilterRule, ABC):
         raise NotImplementedError
 
 
-class DelayedFilterRule(FilterRule, ABC):
+class DelayedFilterRule(FilterRule):
     """
     A filter rule that needs to make judgment with querying other resource (which takes time).
     """

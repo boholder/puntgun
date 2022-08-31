@@ -43,19 +43,19 @@ class AnyOfRuleSet(RuleSet):
         pass
 
 
-class WightCondition(MapOption):
+class weightCondition(MapOption):
     config_keyword = "condition"
     logger = util.get_logger(__qualname__)
-    valid_options = [Field.of("wight", int, required=True, singleton=True), FilterRule]
+    valid_options = [Field.of("weight", int, required=True, singleton=True), FilterRule]
 
     def __init__(self, config_value: Dict[str, Any]):
-        other_keywords = [key for key in config_value.keys() if key != "wight"]
+        other_keywords = [key for key in config_value.keys() if key != "weight"]
         assert (
             len(other_keywords) == 1
         ), f"Option [{self}]: must have exact one filter option, but found {len(other_keywords)}."
 
         # the config_value should be something like:
-        # {"wight":1, "a_filter_option_keyword": option_value}
+        # {"weight":1, "a_filter_option_keyword": option_value}
         # we need to assign that option's instance to a known attribute,
         # or we don't know how to access it once exit __init__ method.
         rule_keyword = other_keywords[0]
@@ -67,13 +67,13 @@ class WightCondition(MapOption):
         self.rule = getattr(self, rule_keyword)
 
 
-class WightOfRuleSet(RuleSet):
-    config_keyword = "wight_of"
+class weightOfRuleSet(RuleSet):
+    config_keyword = "weight_of"
     logger = util.get_logger(__qualname__)
     valid_options = [
         Field.of("name", str, singleton=True),
         Field.of("goal", int, required=True, singleton=True),
-        WightCondition,
+        weightCondition,
     ]
 
     def __init__(self, config_value: List[Any]):
@@ -87,9 +87,9 @@ class WightOfRuleSet(RuleSet):
 
     @util.log_error_with(logger)
     def __check_goal_constraints(self):
-        sum_of_wight = sum([c.wight for c in self.condition])
-        assert sum_of_wight >= self.goal, (
-            f"Option [{self}]: The sum of all conditions' wight (current:{sum_of_wight}) "
+        sum_of_weight = sum([c.weight for c in self.condition])
+        assert sum_of_weight >= self.goal, (
+            f"Option [{self}]: The sum of all conditions' weight (current:{sum_of_weight}) "
             f"must be greater than the goal (current:{self.goal}), "
             f"or you will never trigger this option set."
         )

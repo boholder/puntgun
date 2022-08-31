@@ -10,7 +10,7 @@ map:
   list:
     - item1
     - item2
-  another: text 
+  another: text
         """
         parsed = HuntingPlan.parse_yaml_config(yaml_string)
         self.assertIsInstance(parsed.get("map"), dict)

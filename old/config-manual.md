@@ -36,7 +36,7 @@ For character escaping content, read [this part](https://pyyaml.org/wiki/PyYAMLD
 * [Rule Set](#rule-set)
     * [all_of](#all_of)
     * [any_of](#any_of)
-    * [wight_of](#wight_of)
+    * [weight_of](#weight_of)
 * [Reusable Mechanism](#reusable-mechanism)
 
 ## Script Behavior Settings
@@ -730,34 +730,34 @@ I don't think I need to introduce it more, do I?
 
 OR logic rule set, any of under rules triggered, this set triggered.
 
-### wight_of
+### weight_of
 
 | field | value |
 |:--:|:-----:|
 | possible | required `goal`, optional `name`, and multiple `condition` |
 | `name` | the custom name of the rule set |
 | `goal` | when to trigger the rule, number |
-| `condition` | contains one `wight` and one [Filter Rule](#filter-rule) or nested [Rule Set](#rule-set) |
+| `condition` | contains one `weight` and one [Filter Rule](#filter-rule) or nested [Rule Set](#rule-set) |
 
 As you can see in the example,
 filter rules and nested rule sets need to be wrapped into a `condition`,
-pairing with a `wight` to indicate the wight of this rule.
+pairing with a `weight` to indicate the weight of this rule.
 
-The value of `goal`, `wight` field can be any positive integer.
-When accumulated triggered rules' wights not less than this value,
-the `wight_of` rule triggered.
+The value of `goal`, `weight` field can be any positive integer.
+When accumulated triggered rules' weights not less than this value,
+the `weight_of` rule triggered.
 
 ```yaml
-wight_of:
+weight_of:
   - goal: 2
   - condition:
-      - wight: 2
+      - weight: 2
       - user_foer_foing_ratio_less_than: 0.1
   - condition:
-      - wight: 1
+      - weight: 1
       - user_tweet_count_less_than: 10
   - condition:
-      - wight: 1
+      - weight: 1
       - any_of:
           - user_recent_speaking_ratio_less_than: 0.05
           - last_active_time:
