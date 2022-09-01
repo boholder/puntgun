@@ -8,9 +8,9 @@
     |_|    \__,_|_| |_|\__|  \____|\__,_|_| |_|      [ ))"---------..__|
 ```
 
-[![test ci workflow status badge](https://github.com/boholder/puntgun/actions/workflows/ci_main.yml/badge.svg)](https://github.com/boholder/puntgun/actions/workflows/test.yml)
+[![TEST](https://github.com/boholder/puntgun/actions/workflows/test.yml/badge.svg)](https://github.com/boholder/puntgun/actions/workflows/test.yml)
 [![coverage status badge](https://coveralls.io/repos/github/boholder/puntgun/badge.svg?branch=main)](https://coveralls.io/github/boholder/puntgun?branch=main)
-[![total downloads badge](https://img.shields.io/github/downloads/boholder/puntgun/total)](https://github.com/boholder/puntgun/releases)
+[![downloads badge](https://img.shields.io/pypi/dm/puntgun)](https://pypi.org/project/puntgun/)
 [![pypi python version badge](https://img.shields.io/pypi/pyversions/puntgun)](https://pypi.org/project/puntgun/)
 
 > **Warning**
