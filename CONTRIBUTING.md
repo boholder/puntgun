@@ -4,7 +4,7 @@ Thank you for considering making this tool better.
 
 You'll need a [GitHub account](https://github.com/) to participate in contributing,
 which can be an obstacle, and I apologize for that.
-You can also email me (I generally check my email once a week),
+You can also [email me](mailto:bottleholder@anche.no) (I generally check email once a week),
 but it is difficult for me personally to reply to everyone appropriately,
 so please consider this as a backup option only.
 
@@ -25,14 +25,15 @@ For security and vulnerability reports, please read [this documentation](https:/
 
 ## Non-programming aspect
 
-* Improving documentation:
-    * Make documentations easier to understand by changing expressions.
+* Improving [documentation](https://github.com/boholder/puntgun/tree/main/docs/docs):
+    * Make documentation easier to understand by changing expressions.
     * Fixing syntax and typo errors in documentation.
     * Add more necessary details for the user to know the specific behavior of the tool without having to read the code.
 
 * Join [the community](https://github.com/boholder/puntgun/discussions) on the GitHub:
     * Help others by [answering questions](https://github.com/boholder/puntgun/discussions/categories/q-a).
     * [Request or vote new features](https://github.com/boholder/puntgun/discussions/categories/feature-requests) (the more details the better!).
+    * [Share](https://github.com/boholder/puntgun/discussions/categories/good-usage) good plan configuration and automation usage.
 
 ## Recommended contributing approaches
 
@@ -52,6 +53,11 @@ and you do not need to get anyone's permission to make changes to (your fork of)
 If you feel that your changes will also benefit the upstream, you can submit a Pull Request to the upstream,
 and only then does the "contribution" begin.
 
+### PR should pass lint checks
+
+Remember to run `pdm run lint` and make sure all checks pass before creating Pull Request,
+[the CI](https://github.com/boholder/puntgun/blob/main/.github/workflows/test.yml) will fail if any lint tool complains.
+
 ## Prepare for local development
 
 If you are not familiar with how to clone a project and submit a pull request using GitHub,
@@ -60,13 +66,13 @@ please read [this documentation from GitHub official](https://docs.github.com/en
 This project requires Python version **3.10**,
 please [download a new one](https://www.python.org/downloads/) or upgrade your existing Python's version.
 
-(Sorry to be abrupt, but... [pipx](https://github.com/pypa/pipx) is an excellent tool for managing executable python libraries,
-you may want to use it instead of `pip` for installing pypi-based executable tools.
+(Sorry to be abrupt, but... [**pipx**](https://github.com/pypa/pipx) is an excellent tool for managing executable python libraries,
+you may want to use it instead of **pip** for installing pypi-based executable tools.
 Almost all tools used in the project can be happily installed in this convenient way,
 though they will be well cared by other managing tools, so you need not manually install them while you using scripts.
-If you install them with `pipx` outside of venv and PDM, you can use them anywhere, that is convenient.)
+If you install them with **pipx** in addition to venv and PDM, you can use them anywhere, that is convenient.)
 
-This project uses the [PDM](https://pdm.fming.dev/latest/) as package managing tool,
+This project uses the [**PDM**](https://pdm.fming.dev/latest/) as package managing tool,
 if you are not skilled enough to use other package management tools to
 be compatible with the PDM configuration (scripts defined in `pyproject.toml`, etc.),
 [install the PDM](https://pdm.fming.dev/latest/#recommended-installation-method).
@@ -88,7 +94,7 @@ All development scripts are defined under `[tool.pdm.scripts]` section in `pypro
 pdm run test
 ```
 
-This project uses [pytest](https://docs.pytest.org/en/7.1.x/) as the unit testing framework,
+This project uses [**pytest**](https://docs.pytest.org/en/7.1.x/) as the unit testing framework,
 which will be installed with development dependencies.
 Test cases are written under `./tests` directory with `test_` prefix.
 
@@ -101,9 +107,16 @@ Test cases are written under `./tests` directory with `test_` prefix.
 pdm run lint
 ```
 
-This project uses [pre-commit](https://pre-commit.com/#intro) for [linting](https://en.wikipedia.org/wiki/Lint_(software)),
+This project uses [**pre-commit**](https://pre-commit.com/#intro) for [linting](https://en.wikipedia.org/wiki/Lint_(software)),
 it will help us to manage other linting tools.
-Check `.pre-commit-config.yaml` under root directory to see what pre-commit hooks this project is using.
+Check `.pre-commit-config.yaml` under root directory to see pre-commit hooks configuration.
+Currently, this project uses:
+
+* [**black**](https://black.readthedocs.io/en/stable/) for code style automatic formatting.
+* [**isort**](https://pycqa.github.io/isort/) for import statements sorting.
+* [**codespell**](https://github.com/codespell-project/codespell) for typo checking.
+* [**flake8**](https://flake8.pycqa.org/en/latest/index.html) for common Python programming problem checking.
+* [**mypy**](https://mypy.readthedocs.io/en/stable/) for static type hint scanning.
 
 ### Render the documentation website
 
@@ -111,7 +124,7 @@ Check `.pre-commit-config.yaml` under root directory to see what pre-commit hook
 pdm run doc
 ```
 
-This project uses [MkDocs](https://www.mkdocs.org/getting-started/) as documentation website framework,
-with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/getting-started/#getting-started) as website theme.
+This project uses [**MkDocs**](https://www.mkdocs.org/getting-started/) as documentation website framework,
+with [**Material for MkDocs**](https://squidfunk.github.io/mkdocs-material/getting-started/#getting-started) as website theme.
 They will also be installed with development dependencies.
 Documentation source is written in Markdown format, under `./docs` directory.
