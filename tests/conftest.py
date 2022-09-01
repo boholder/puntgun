@@ -1,4 +1,5 @@
 import re
+import threading
 from unittest.mock import MagicMock, Mock
 
 import pytest
@@ -29,6 +30,9 @@ def mock_client(monkeypatch):
     return c
 
 
+lock = threading.Lock()
+
+
 @pytest.fixture
 def user_id_sequence_checker():
     """
@@ -47,11 +51,22 @@ def user_id_sequence_checker():
     3. After the pipeline ran, we verify the invocation count should not be zero.
     """
     call_count = 0
+    # Has been called with what user id
+    called_user_ids = set()
 
     def check_result(u):
         nonlocal call_count
-        # check user's id
-        assert u.id == call_count
+        nonlocal called_user_ids
+
+        # Due to the pipeline is running on multiple threads,
+        # users may not be passed in correct id order,
+        # so just check if this user id has not been passed to
+        # this consumer function.
+        lock.acquire()
+        assert u.id not in called_user_ids
+        called_user_ids.add(u.id)
+        lock.release()
+
         call_count += 1
 
         # let test cases to verify the consumer is really running

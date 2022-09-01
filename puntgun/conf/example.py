@@ -51,5 +51,5 @@ plans:
             more_than: 100000000
     do:
       # block them
-      - block
+      - block: {}
  """

@@ -268,7 +268,7 @@ Low tweet count (including retweets) means the user doesn't post much, leave a r
 
 ```yaml
 do:
-  - block
+  - block: {}
 ```
 
 Block users that trigger the filter rules.

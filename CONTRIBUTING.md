@@ -70,18 +70,18 @@ please [download a new one](https://www.python.org/downloads/) or upgrade your e
 you may want to use it instead of **pip** for installing pypi-based executable tools.
 Almost all tools used in the project can be happily installed in this convenient way,
 though they will be well cared by other managing tools, so you need not manually install them while you using scripts.
-If you install them with **pipx** in addition to venv and PDM, you can use them anywhere, that is convenient.)
+If you install them with **pipx** in addition to venv and **PDM**, you can use them anywhere, that is convenient.)
 
 This project uses the [**PDM**](https://pdm.fming.dev/latest/) as package managing tool,
 if you are not skilled enough to use other package management tools to
-be compatible with the PDM configuration (scripts defined in `pyproject.toml`, etc.),
-[install the PDM](https://pdm.fming.dev/latest/#recommended-installation-method).
+be compatible with the **PDM** configuration (scripts defined in `pyproject.toml`, etc.),
+[install the **PDM**](https://pdm.fming.dev/latest/#recommended-installation-method).
 
 PDM will [detect and reuses](https://pdm.fming.dev/latest/usage/venv/) the virtualenv python environment under the project directory,
 so you can write code with your PDM-not-supported IDEs (PyCharm for example) in virtualenv style,
 while using PDM truly managing everything via terminal.
 
-Now simply install both production and development dependencies with `pdm install`.
+Now simply install all dependencies with `pdm install`.
 All set, now you can play with the code or get your hands dirty to make things happen.
 
 ## Scripts and tools for development
@@ -97,6 +97,13 @@ pdm run test
 This project uses [**pytest**](https://docs.pytest.org/en/7.1.x/) as the unit testing framework,
 which will be installed with development dependencies.
 Test cases are written under `./tests` directory with `test_` prefix.
+
+```shell
+pdm run coverage
+```
+
+This script will run the test suite with **pytest** while
+generating a html format coverage report with [**coverage.py**](https://coverage.readthedocs.io).
 
 ### Linting
 
