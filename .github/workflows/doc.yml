@@ -1,3 +1,5 @@
+# This workflow will and only will update "dev" version documentation,
+# following documentation updates in development.
 name: Documentation
 
 on:
@@ -25,7 +27,7 @@ jobs:
 
       - name: Install doc dependencies
         run: |
-          pip install pdm
+          python3 -m pip install -U pdm
           pdm install -dG doc
 
       - name: Build doc and upload to gh-pages branch

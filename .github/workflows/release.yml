@@ -1,15 +1,11 @@
-# Action that be active only when a "v*.*.*" version tag is pushed to the repo.
+# Workflow that be active only a "v*.*.*" version tag is pushed to the main branch.
 # Version tags should only be created on commits that HAVE passed unit tests ("TEST" GitHub action).
 #
-# This action will:
-# 1. Build wheels and source distribution.
-# 2. Upload files generated in step 1 to pypi.
+# This workflow will:
+# 1. Build wheel and source distribution.
+# 2. Upload wheel and source to the pypi.
 # 3. Create a release with information from CHANGELOG.md.
-#
-# Drawing on:
-# https://github.com/pypa/cibuildwheel/blob/main/examples/github-deploy.yml
-# https://github.com/pdm-project/pdm/blob/main/.github/workflows/release.yml
-# https://github.com/softprops/action-gh-release
+# 4. Build fixed version documentation and push it to "gh-pages" branch.
 
 name: Release
 
@@ -17,20 +13,37 @@ on:
   push:
     tags:
       - "v*.*.*"
-  pull_request:
-    tags:
-      - "v*.*.*"
 
 env:
   default-python: "3.10"
 
 jobs:
-  build:
-    name: Build wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ windows-latest, macos-latest, ubuntu-latest ]
+  build-doc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.default-python }}
+
+      - name: Install doc dependencies
+        run: |
+          python3 -m pip install -U pdm
+          pdm install -dG doc
+
+      - name: Build doc and upload to gh-pages branch
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git fetch origin gh-pages:gh-pages
+          tag="${{ github.ref_name }}"
+          DOC_VERSION=${tag%.*}
+          cd docs && pdm run mike deploy --no-redirect --update-aliases "$DOC_VERSION" latest
+          git push origin gh-pages
+
+  build-wheel-and-src:
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
@@ -39,52 +52,25 @@ jobs:
         with:
           python-version: ${{ env.default-python }}
 
-      - name: Install build tool
+      - name: Build wheels and source distribution
         run: |
-          pip install -U build .
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.9.0
-        with:
-          package-dir: .
-          output-dir: dist
-          config-file: "{package}/pyproject.toml"
+          python3 -m pip install -U build
+          python3 -m build --sdist --wheel .
 
       - name: Test wheel build
         run: |
           python3 -m venv fresh_env
           . fresh_env/bin/activate
-          pip install ./dist/*.whl
+          python3 -m pip install -U dist/*.whl
           fresh_env/bin/puntgun --help
-
-      - name: Build source distribution
-        run: |
-          python -m build --sdist .
 
       - uses: actions/upload-artifact@v3
         with:
           name: artifact
           path: dist/*
 
-  build-doc:
-    needs: [ build ]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Build documentation
-        run: |
-          pip install pdm
-          pdm install -G doc
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git fetch origin gh-pages:gh-pages
-          tag="${{ github.ref_name }}"
-          DOC_VERSION=${tag%.*}
-          cd docs
-          pdm run mike deploy --no-redirect --update-aliases "$DOC_VERSION" latest
-          git push origin gh-pages
-
   upload_to_pypi:
-    needs: [ build ]
+    needs: [ build-wheel-and-src ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v3
@@ -98,18 +84,19 @@ jobs:
           password: ${{ secrets.PYPI_TOKEN }}
 
   create-github-release:
-    needs: [ build ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
-      - name: Get Changelog
+      - name: Get changelog
         run: |
           awk '/-{3,}/{flag=1;next}/Release/{if (flag==1)exit}flag' CHANGELOG.md > .changelog.md
 
-      - name: Create Release
+      - name: Create release
+        # https://github.com/softprops/action-gh-release
         uses: softprops/action-gh-release@v1
         with:
+          name: ${{ github.ref_name }}
           tag_name: ${{ github.ref }}
           body_path: .changelog.md
           draft: false
