@@ -23,7 +23,7 @@ jobs:
       - name: Install lint dependencies
         run: |
           python -m pip install pdm
-          pdm install -G lint
+          pdm install -dG lint
 
       - name: Run lint check
         run: pdm run lint
