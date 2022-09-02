@@ -18,7 +18,7 @@ def cli() -> None:
 
     \b
     puntgun - a configurable automation command line tool for Twitter
-    > https://github.com/boholder/puntgun/"""
+    > https://boholder.github.io/puntgun"""
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
