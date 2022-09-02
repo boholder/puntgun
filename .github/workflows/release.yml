@@ -11,7 +11,7 @@
 # https://github.com/pdm-project/pdm/blob/main/.github/workflows/release.yml
 # https://github.com/softprops/action-gh-release
 
-name: RELEASE
+name: Release
 
 on:
   push:

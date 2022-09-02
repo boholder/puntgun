@@ -66,7 +66,7 @@ What's more, you can only [search for last 7 days tweets](https://developer.twit
 Currently, we use the [RSA4096](https://en.wikipedia.org/wiki/RSA_(cryptosystem)) with
 the cryptographic library [Cryptography](https://github.com/pyca/cryptography/)
 for processing secrets to prevent them being saved into configuration file in plaintext format.
-For implementation details, check [these source codes](puntgun/conf/encrypto.py).
+For implementation details, check [these source codes](https://github.com/boholder/puntgun/tree/main/puntgun/conf/encrypto.py).
 For Cryptography's security limitation, check [this documentation](https://cryptography.io/en/latest/limitations/).
 
 When the tool is running, the secrets will stay inside a client object of the Twitter API client library [Tweepy](https://docs.tweepy.org),

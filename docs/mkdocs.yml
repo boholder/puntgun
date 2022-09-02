@@ -1,0 +1,90 @@
+site_name: puntgun
+
+repo_url: https://github.com/boholder/puntgun
+edit_uri: edit/main/docs/docs
+
+nav:
+  - Home: index.md
+  - Configuration:
+      - configuration/tool-configuration.md
+      - configuration/plan-configuration.md
+      - configuration/detailed-plan-configuration.md
+  - Development:
+      - development/contributing.md
+      - development/security-policy.md
+
+theme:
+  # https://squidfunk.github.io/mkdocs-material
+  name: material
+  # light/dark mode switch
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: teal
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: teal
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+  font:
+    # https://www.opensans.com/
+    text: Open Sans
+    # https://github.com/tonsky/FiraCode
+    code: Fira Code
+
+  # https://squidfunk.github.io/mkdocs-material/setup/changing-the-logo-and-icons/#logo
+  # Searched one on:
+  # https://squidfunk.github.io/mkdocs-material/reference/icons-emojis/
+  icon:
+    logo: material/feather
+
+  # https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/
+  features:
+    - navigation.top
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+
+plugins:
+  # https://squidfunk.github.io/mkdocs-material/setup/setting-up-site-search/
+  - search
+  # https://github.com/jimporter/mike
+  - mike
+  # https://github.com/rmariuzzo/markdown-exec
+  - markdown-exec
+  # https://mkdocstrings.github.io/usage/
+  # transform exist code to doc
+  - mkdocstrings:
+      handlers:
+        python:
+          selection:
+            docstring_style: google
+
+# https://facelessuser.github.io/pymdown-extensions/#extensions
+markdown_extensions:
+  - pymdownx.highlight:
+      linenums: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - admonition
+  - tables
+  - toc:
+      permalink: "#"
+  - markdown_include.include:
+      base_path: docs
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+extra:
+  version:
+    provider: mike
+
+copyright: Copyright &copy; 2022 <a href="https://boholder.github.io/en-us/about/">BoHolder</a>

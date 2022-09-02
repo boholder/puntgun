@@ -1,8 +1,3 @@
----
-title: Plan Configuration
-nav_order: 2
----
-
 # Plan Configuration
 
 This page describes configurations for plan, one run of the tool -

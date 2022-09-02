@@ -1,9 +1,4 @@
----
-title: Configuration
-nav_order: 1
----
-
-# Configuration
+# Tool Configuration
 
 This page is describing configurations of the tool itself.
 For all available plan configurations, please check [the plan configuration documentation page](plan-configuration.md).

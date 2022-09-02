@@ -161,7 +161,7 @@ summary = "Python implementation of Markdown."
 
 [[package]]
 name = "markdown-exec"
-version = "0.7.1"
+version = "0.7.2"
 requires_python = ">=3.7"
 summary = "Utilities to execute code blocks in Markdown files."
 dependencies = [
@@ -540,7 +540,7 @@ summary = "Backport of pathlib-compatible object wrapper for zip files"
 
 [metadata]
 lock_version = "4.0"
-content_hash = "sha256:6707387a57ea0981d421d13387602e9df835146fe68b3ccd8bf97338d72e22de"
+content_hash = "sha256:edbf178e18bc95934dd876989f2694c446ecd47b928bceac56cb95aa7858367b"
 
 [metadata.files]
 "atomicwrites 1.4.1" = [
@@ -760,9 +760,9 @@ content_hash = "sha256:6707387a57ea0981d421d13387602e9df835146fe68b3ccd8bf97338d
     {url = "https://files.pythonhosted.org/packages/d6/58/79df20de6e67a83f0d0bbfe6c19bb82adf68cdf362885257eb01099f930a/Markdown-3.3.7.tar.gz", hash = "sha256:cbb516f16218e643d8e0a95b309f77eb118cb138d39a4f27851e6a63581db874"},
     {url = "https://files.pythonhosted.org/packages/f3/df/ca72f352e15b6f8ce32b74af029f1189abffb906f7c137501ffe69c98a65/Markdown-3.3.7-py3-none-any.whl", hash = "sha256:f5da449a6e1c989a4cea2631aa8ee67caa5a2ef855d551c88f9e309f4634c621"},
 ]
-"markdown-exec 0.7.1" = [
-    {url = "https://files.pythonhosted.org/packages/a9/0b/934da4d0d9d2ef1d053aad273ff6f85a3ba088617d539877f44c12f67f1a/markdown_exec-0.7.1-py3-none-any.whl", hash = "sha256:d9c35fdefc2ea9fd89a3e12ed16e509cd766040a9e4a8559f4bd95bcf5bdec17"},
-    {url = "https://files.pythonhosted.org/packages/d7/87/afb483bee82abfb32835eff6b14943808ae003256d4910c41f8b86665ca4/markdown-exec-0.7.1.tar.gz", hash = "sha256:e3881a48834b0630982e582104012885e8ddc70bf4690c7b44075d72269ba9d7"},
+"markdown-exec 0.7.2" = [
+    {url = "https://files.pythonhosted.org/packages/04/97/5b2e9b8bba1b1d1234b182a355ed2905512d88dd2ed52686449dc1f08c4f/markdown-exec-0.7.2.tar.gz", hash = "sha256:7de49ab06835913b684245a79bafadecbf6dba62dd38904150bd0f4178a352c4"},
+    {url = "https://files.pythonhosted.org/packages/5c/3d/b9a86aff98f51f6f790c263f4d854fa682d9428e68da4608270d66a59ead/markdown_exec-0.7.2-py3-none-any.whl", hash = "sha256:abed2205732d7855d1bb424c8fae9d736714a1c6610aba0ef8dca38bb02476ba"},
 ]
 "markdown-include 0.7.0" = [
     {url = "https://files.pythonhosted.org/packages/ee/5a/388ea1dbaed7e51f8f6561267bd915cefc757eaa7e9f5f4fcdb2fbfd0d03/markdown_include-0.7.0-py3-none-any.whl", hash = "sha256:a06183b7c7225e73112737acdc6fe0ac0686c39457234eeb5ede23881fed001d"},
