@@ -66,6 +66,23 @@ jobs:
           name: artifact
           path: dist/*
 
+  build-doc:
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build documentation
+        run: |
+          pip install pdm
+          pdm install -G doc
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git fetch origin gh-pages:gh-pages
+          tag="${{ github.ref_name }}"
+          DOC_VERSION=${tag%.*}
+          cd docs
+          pdm run mike deploy --no-redirect --update-aliases "$DOC_VERSION" latest
+          git push origin gh-pages
+
   upload_to_pypi:
     needs: [ build ]
     runs-on: ubuntu-latest
@@ -80,7 +97,7 @@ jobs:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
 
-  create-release:
+  create-github-release:
     needs: [ build ]
     runs-on: ubuntu-latest
     steps:
@@ -88,8 +105,8 @@ jobs:
 
       - name: Get Changelog
         run: |
-            awk '/-{3,}/{flag=1;next}/Release/{if (flag==1)exit}flag' CHANGELOG.md > .changelog.md
-          
+          awk '/-{3,}/{flag=1;next}/Release/{if (flag==1)exit}flag' CHANGELOG.md > .changelog.md
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
