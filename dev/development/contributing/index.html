@@ -1,0 +1,885 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.4.2">
+    
+    
+      
+        <title>Contributing - puntgun</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.69437709.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.cbb835fc.min.css">
+        
+      
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700,700i%7CFira+Code:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Open Sans";--md-code-font:"Fira Code"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="teal">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#contributing-to-the-puntgun" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="puntgun" class="md-header__button md-logo" aria-label="puntgun" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M22 2s-7.64-.37-13.66 7.88C3.72 16.21 2 22 2 22l1.94-1c1.44-2.5 2.19-3.53 3.6-5 2.53.74 5.17.65 7.46-2-2-.56-3.6-.43-5.96-.19C11.69 12 13.5 11.6 16 12l1-2c-1.8-.34-3-.37-4.78.04C14.19 8.65 15.56 7.87 18 8l1.21-1.93c-1.56-.11-2.5.06-4.29.5 1.61-1.46 3.08-2.12 5.22-2.25 0 0 1.05-1.89 1.86-2.32Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            puntgun
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Contributing
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="teal"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/boholder/puntgun" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../.." class="md-tabs__link">
+      Home
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../configuration/tool-configuration/" class="md-tabs__link">
+        Configuration
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="./" class="md-tabs__link md-tabs__link--active">
+        Development
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="puntgun" class="md-nav__button md-logo" aria-label="puntgun" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M22 2s-7.64-.37-13.66 7.88C3.72 16.21 2 22 2 22l1.94-1c1.44-2.5 2.19-3.53 3.6-5 2.53.74 5.17.65 7.46-2-2-.56-3.6-.43-5.96-.19C11.69 12 13.5 11.6 16 12l1-2c-1.8-.34-3-.37-4.78.04C14.19 8.65 15.56 7.87 18 8l1.21-1.93c-1.56-.11-2.5.06-4.29.5 1.61-1.46 3.08-2.12 5.22-2.25 0 0 1.05-1.89 1.86-2.32Z"/></svg>
+
+    </a>
+    puntgun
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/boholder/puntgun" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Configuration" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Configuration
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/tool-configuration/" class="md-nav__link">
+        Tool Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/plan-configuration/" class="md-nav__link">
+        Plan Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/detailed-plan-configuration/" class="md-nav__link">
+        Detailed Plan Configuration
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          Development
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Development" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Development
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Contributing
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Contributing
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#programming-aspect" class="md-nav__link">
+    Programming aspect
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-programming-aspect" class="md-nav__link">
+    Non-programming aspect
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommended-contributing-approaches" class="md-nav__link">
+    Recommended contributing approaches
+  </a>
+  
+    <nav class="md-nav" aria-label="Recommended contributing approaches">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tell-us-what-you-intend-to-do-before-finishing-it" class="md-nav__link">
+    Tell us what you intend to do before finishing it
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pr-should-pass-lint-checks" class="md-nav__link">
+    PR should pass lint checks
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prepare-for-local-development" class="md-nav__link">
+    Prepare for local development
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scripts-and-tools-for-development" class="md-nav__link">
+    Scripts and tools for development
+  </a>
+  
+    <nav class="md-nav" aria-label="Scripts and tools for development">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#run-tests" class="md-nav__link">
+    Run tests
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linting" class="md-nav__link">
+    Linting
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#render-the-documentation-website" class="md-nav__link">
+    Render the documentation website
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../security-policy/" class="md-nav__link">
+        Security policy
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#programming-aspect" class="md-nav__link">
+    Programming aspect
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-programming-aspect" class="md-nav__link">
+    Non-programming aspect
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommended-contributing-approaches" class="md-nav__link">
+    Recommended contributing approaches
+  </a>
+  
+    <nav class="md-nav" aria-label="Recommended contributing approaches">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tell-us-what-you-intend-to-do-before-finishing-it" class="md-nav__link">
+    Tell us what you intend to do before finishing it
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pr-should-pass-lint-checks" class="md-nav__link">
+    PR should pass lint checks
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prepare-for-local-development" class="md-nav__link">
+    Prepare for local development
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scripts-and-tools-for-development" class="md-nav__link">
+    Scripts and tools for development
+  </a>
+  
+    <nav class="md-nav" aria-label="Scripts and tools for development">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#run-tests" class="md-nav__link">
+    Run tests
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linting" class="md-nav__link">
+    Linting
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#render-the-documentation-website" class="md-nav__link">
+    Render the documentation website
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+  <a href="https://github.com/boholder/puntgun/edit/main/docs/docs/development/contributing.md" title="Edit this page" class="md-content__button md-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+
+<h1 id="contributing-to-the-puntgun">Contributing to the puntgun<a class="headerlink" href="#contributing-to-the-puntgun" title="Permanent link">#</a></h1>
+<p>Thank you for considering making this tool better.</p>
+<p>You'll need a <a href="https://github.com/">GitHub account</a> to participate in contributing,
+which can be an obstacle, and I apologize for that.
+You can also <a href="mailto:bottleholder@anche.no">email me</a> (I generally check email once a week),
+but it is difficult for me personally to reply to everyone appropriately,
+so please consider this as a backup option only.</p>
+<p>There is no strict limit to how and what you can contribute, here are a few ways we can think of.</p>
+<h2 id="programming-aspect">Programming aspect<a class="headerlink" href="#programming-aspect" title="Permanent link">#</a></h2>
+<ul>
+<li>Improving unsatisfied code: There are some unsatisfactory pieces of logic in the code, they work, but they deserve to be better.
+  You can find them by <a href="https://github.com/search?q=%22IMPROVE%22+repo%3Aboholder%2Fpuntgun+in%3Afile&amp;type=code">searching for <strong>IMPROVE</strong> marks</a>
+  in the code.</li>
+<li>Join the discussion about or deal with <a href="https://github.com/boholder/puntgun/issues">unclosed issues</a>.</li>
+<li>Develop new features, new rules to this tool (and we recommend developing in the steps <a href="#prepare-for-local-development">described below</a>).</li>
+<li>Improve CI/CD process.</li>
+<li>Add more test cases.</li>
+</ul>
+<p>For local development, please read <a href="#prepare-for-local-development">this part</a>.
+For security and vulnerability reports, please read <a href="https://github.com/boholder/puntgun/security/policy">this documentation</a>.</p>
+<h2 id="non-programming-aspect">Non-programming aspect<a class="headerlink" href="#non-programming-aspect" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Improving <a href="https://github.com/boholder/puntgun/tree/main/docs/docs">documentation</a>:</p>
+<ul>
+<li>Make documentation easier to understand by changing expressions.</li>
+<li>Fixing syntax and typo errors in documentation.</li>
+<li>Add more necessary details for the user to know the specific behavior of the tool without having to read the code.</li>
+</ul>
+</li>
+<li>
+<p>Join <a href="https://github.com/boholder/puntgun/discussions">the community</a> on the GitHub:</p>
+<ul>
+<li>Help others by <a href="https://github.com/boholder/puntgun/discussions/categories/q-a">answering questions</a>.</li>
+<li><a href="https://github.com/boholder/puntgun/discussions/categories/feature-requests">Request or vote new features</a> (the more details the better!).</li>
+<li><a href="https://github.com/boholder/puntgun/discussions/categories/good-usage">Share</a> good plan configuration and automation usage.</li>
+</ul>
+</li>
+</ul>
+<h2 id="recommended-contributing-approaches">Recommended contributing approaches<a class="headerlink" href="#recommended-contributing-approaches" title="Permanent link">#</a></h2>
+<h3 id="tell-us-what-you-intend-to-do-before-finishing-it">Tell us what you intend to do before finishing it<a class="headerlink" href="#tell-us-what-you-intend-to-do-before-finishing-it" title="Permanent link">#</a></h3>
+<p>When you decide to make programming aspect contributions,
+we expect you to indicate in the corresponding issue or new issue that you intend to do this and how you intend to implement it,
+like <a href="https://blog.jetbrains.com/upsource/2017/01/18/code-review-as-a-gateway">this article</a>.
+Industry experience tells us that shift-left checks and discussions is good for software development,
+for example we can provide more relevant knowledge, project details and advice to help you do things better when we know what you want to do.</p>
+<p>Of course there is no mandatory requirement
+(compliments of <a href="http://www.catb.org/~esr/writings/cathedral-bazaar/">the freewheeling open source community</a>!),
+the code for this project is open source under <a href="https://github.com/boholder/puntgun/blob/main/LICENSE">the MIT license</a>,
+and you do not need to get anyone's permission to make changes to (your fork of) this project,
+<strong>you just need to make it work for your personal needs</strong>.
+If you feel that your changes will also benefit the upstream, you can submit a Pull Request to the upstream,
+and only then does the "contribution" begin.</p>
+<h3 id="pr-should-pass-lint-checks">PR should pass lint checks<a class="headerlink" href="#pr-should-pass-lint-checks" title="Permanent link">#</a></h3>
+<p>Remember to run <code>pdm run lint</code> and make sure all checks pass before creating Pull Request,
+<a href="https://github.com/boholder/puntgun/blob/main/.github/workflows/test.yml">the CI</a> will fail if any lint tool complains.</p>
+<h2 id="prepare-for-local-development">Prepare for local development<a class="headerlink" href="#prepare-for-local-development" title="Permanent link">#</a></h2>
+<p>If you are not familiar with how to clone a project and submit a pull request using GitHub,
+please read <a href="https://docs.github.com/en/get-started/quickstart/contributing-to-projects">this documentation from GitHub official</a>.</p>
+<p>This project requires Python version <strong>3.10</strong>,
+please <a href="https://www.python.org/downloads/">download a new one</a> or upgrade your existing Python's version.</p>
+<p>(Sorry to be abrupt, but... <a href="https://github.com/pypa/pipx"><strong>pipx</strong></a> is an excellent tool for managing executable python libraries,
+you may want to use it instead of <strong>pip</strong> for installing pypi-based executable tools.
+Almost all tools used in the project can be happily installed in this convenient way,
+though they will be well cared by other managing tools, so you need not manually install them while you using scripts.
+If you install them with <strong>pipx</strong> in addition to venv and <strong>PDM</strong>, you can use them anywhere, that is convenient.)</p>
+<p>This project uses the <a href="https://pdm.fming.dev/latest/"><strong>PDM</strong></a> as package managing tool,
+if you are not skilled enough to use other package management tools to
+be compatible with the <strong>PDM</strong> configuration (scripts defined in <code>pyproject.toml</code>, etc.),
+<a href="https://pdm.fming.dev/latest/#recommended-installation-method">install the <strong>PDM</strong></a>.</p>
+<p>PDM will <a href="https://pdm.fming.dev/latest/usage/venv/">detect and reuses</a> the virtualenv python environment under the project directory,
+so you can write code with your PDM-not-supported IDEs (PyCharm for example) in virtualenv style,
+while using PDM truly managing everything via terminal.</p>
+<p>Now simply install all dependencies with <code>pdm install</code>.
+All set, now you can play with the code or get your hands dirty to make things happen.</p>
+<h2 id="scripts-and-tools-for-development">Scripts and tools for development<a class="headerlink" href="#scripts-and-tools-for-development" title="Permanent link">#</a></h2>
+<p>All development scripts are defined under <code>[tool.pdm.scripts]</code> section in <code>pyproject.toml</code>.</p>
+<h3 id="run-tests">Run tests<a class="headerlink" href="#run-tests" title="Permanent link">#</a></h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>pdm run <span class="nb">test</span>
+</code></pre></div></td></tr></table></div>
+<p>This project uses <a href="https://docs.pytest.org/en/7.1.x/"><strong>pytest</strong></a> as the unit testing framework,
+which will be installed with development dependencies.
+Test cases are written under <code>./tests</code> directory with <code>test_</code> prefix.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>pdm run coverage
+</code></pre></div></td></tr></table></div>
+<p>This script will run the test suite with <strong>pytest</strong> while
+generating a html format coverage report with <a href="https://coverage.readthedocs.io"><strong>coverage.py</strong></a>.</p>
+<h3 id="linting">Linting<a class="headerlink" href="#linting" title="Permanent link">#</a></h3>
+<blockquote>
+<p><strong>Warning</strong>
+Running this script will <strong>actually change the code</strong>, make sure commit your code before running.</p>
+</blockquote>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>pdm run lint
+</code></pre></div></td></tr></table></div>
+<p>This project uses <a href="https://pre-commit.com/#intro"><strong>pre-commit</strong></a> for <a href="https://en.wikipedia.org/wiki/Lint_(software)">linting</a>,
+it will help us to manage other linting tools.
+Check <code>.pre-commit-config.yaml</code> under root directory to see pre-commit hooks configuration.
+Currently, this project uses:</p>
+<ul>
+<li><a href="https://black.readthedocs.io/en/stable/"><strong>black</strong></a> for code style automatic formatting.</li>
+<li><a href="https://pycqa.github.io/isort/"><strong>isort</strong></a> for import statements sorting.</li>
+<li><a href="https://github.com/codespell-project/codespell"><strong>codespell</strong></a> for typo checking.</li>
+<li><a href="https://flake8.pycqa.org/en/latest/index.html"><strong>flake8</strong></a> for common Python programming problem checking.</li>
+<li><a href="https://mypy.readthedocs.io/en/stable/"><strong>mypy</strong></a> for static type hint scanning.</li>
+</ul>
+<h3 id="render-the-documentation-website">Render the documentation website<a class="headerlink" href="#render-the-documentation-website" title="Permanent link">#</a></h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>pdm run doc
+</code></pre></div></td></tr></table></div>
+<p>This project uses <a href="https://www.mkdocs.org/getting-started/"><strong>MkDocs</strong></a> as documentation website framework,
+with <a href="https://squidfunk.github.io/mkdocs-material/getting-started/#getting-started"><strong>Material for MkDocs</strong></a> as website theme.
+They will also be installed with development dependencies.
+Documentation source is written in Markdown format, under <code>./docs</code> directory.</p>
+
+
+
+
+              
+            </article>
+            
+          </div>
+        </div>
+        
+          <a href="#" class="md-top md-icon" data-md-component="top" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+            Back to top
+          </a>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../../configuration/detailed-plan-configuration/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Detailed Plan Configuration" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Detailed Plan Configuration
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../security-policy/" class="md-footer__link md-footer__link--next" aria-label="Next: Security policy" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Security policy
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2022 <a href="https://boholder.github.io/en-us/about/">BoHolder</a>
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.top", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections"], "search": "../../assets/javascripts/workers/search.ecf98df9.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.9c69f0bc.min.js"></script>
+      
+    
+  </body>
+</html>

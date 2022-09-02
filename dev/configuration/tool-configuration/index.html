@@ -1,0 +1,948 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.4.2">
+    
+    
+      
+        <title>Tool Configuration - puntgun</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.69437709.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.cbb835fc.min.css">
+        
+      
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700,700i%7CFira+Code:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Open Sans";--md-code-font:"Fira Code"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="teal">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#tool-configuration" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="puntgun" class="md-header__button md-logo" aria-label="puntgun" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M22 2s-7.64-.37-13.66 7.88C3.72 16.21 2 22 2 22l1.94-1c1.44-2.5 2.19-3.53 3.6-5 2.53.74 5.17.65 7.46-2-2-.56-3.6-.43-5.96-.19C11.69 12 13.5 11.6 16 12l1-2c-1.8-.34-3-.37-4.78.04C14.19 8.65 15.56 7.87 18 8l1.21-1.93c-1.56-.11-2.5.06-4.29.5 1.61-1.46 3.08-2.12 5.22-2.25 0 0 1.05-1.89 1.86-2.32Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            puntgun
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Tool Configuration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="teal"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/boholder/puntgun" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../.." class="md-tabs__link">
+      Home
+    </a>
+  </li>
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="./" class="md-tabs__link md-tabs__link--active">
+        Configuration
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../development/contributing/" class="md-tabs__link">
+        Development
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="puntgun" class="md-nav__button md-logo" aria-label="puntgun" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M22 2s-7.64-.37-13.66 7.88C3.72 16.21 2 22 2 22l1.94-1c1.44-2.5 2.19-3.53 3.6-5 2.53.74 5.17.65 7.46-2-2-.56-3.6-.43-5.96-.19C11.69 12 13.5 11.6 16 12l1-2c-1.8-.34-3-.37-4.78.04C14.19 8.65 15.56 7.87 18 8l1.21-1.93c-1.56-.11-2.5.06-4.29.5 1.61-1.46 3.08-2.12 5.22-2.25 0 0 1.05-1.89 1.86-2.32Z"/></svg>
+
+    </a>
+    puntgun
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/boholder/puntgun" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Configuration" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Configuration
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Tool Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Tool Configuration
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#loading-priority-precedence" class="md-nav__link">
+    Loading Priority (Precedence)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setting-via-configuration-file" class="md-nav__link">
+    Setting Via Configuration File
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setting-via-environment-variable" class="md-nav__link">
+    Setting Via Environment Variable
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setting-via-command-line-argument" class="md-nav__link">
+    Setting Via Command Line Argument
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#secrets" class="md-nav__link">
+    Secrets
+  </a>
+  
+    <nav class="md-nav" aria-label="Secrets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#registering-a-twitter-api-credential" class="md-nav__link">
+    Registering A Twitter API Credential
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#let-the-tool-manages-secrets" class="md-nav__link">
+    Let The Tool Manages Secrets
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setting-secrets-via-other-methods-for-automation" class="md-nav__link">
+    Setting Secrets Via Other Methods For Automation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plan-configuration/" class="md-nav__link">
+        Plan Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../detailed-plan-configuration/" class="md-nav__link">
+        Detailed Plan Configuration
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          Development
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Development" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Development
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/contributing/" class="md-nav__link">
+        Contributing
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/security-policy/" class="md-nav__link">
+        Security policy
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#loading-priority-precedence" class="md-nav__link">
+    Loading Priority (Precedence)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setting-via-configuration-file" class="md-nav__link">
+    Setting Via Configuration File
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setting-via-environment-variable" class="md-nav__link">
+    Setting Via Environment Variable
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setting-via-command-line-argument" class="md-nav__link">
+    Setting Via Command Line Argument
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#secrets" class="md-nav__link">
+    Secrets
+  </a>
+  
+    <nav class="md-nav" aria-label="Secrets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#registering-a-twitter-api-credential" class="md-nav__link">
+    Registering A Twitter API Credential
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#let-the-tool-manages-secrets" class="md-nav__link">
+    Let The Tool Manages Secrets
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setting-secrets-via-other-methods-for-automation" class="md-nav__link">
+    Setting Secrets Via Other Methods For Automation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+  <a href="https://github.com/boholder/puntgun/edit/main/docs/docs/configuration/tool-configuration.md" title="Edit this page" class="md-content__button md-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+
+<h1 id="tool-configuration">Tool Configuration<a class="headerlink" href="#tool-configuration" title="Permanent link">#</a></h1>
+<p>This page is describing configurations of the tool itself.
+For all available plan configurations, please check <a href="../plan-configuration/">the plan configuration documentation page</a>.
+There are two types of tool configuration:
+most of them can be configured in global configuration file or set via environment variable,
+but some special configurations can only be passed through command line argument.</p>
+<p>The tool is using the <a href="https://www.dynaconf.com/">Dynaconf</a> as the configuration parsing library.</p>
+<h2 id="loading-priority-precedence">Loading Priority (Precedence)<a class="headerlink" href="#loading-priority-precedence" title="Permanent link">#</a></h2>
+<p>The tool will choose the tool configurations in the following order:</p>
+<ol>
+<li>Command line arguments &amp; Environment variables[<a href="https://www.dynaconf.com/envvars/">ref</a>].</li>
+<li>User written plan configuration files.</li>
+<li>Global settings file and secrets file.</li>
+<li>Default values set inside program.</li>
+</ol>
+<h2 id="setting-via-configuration-file">Setting Via Configuration File<a class="headerlink" href="#setting-via-configuration-file" title="Permanent link">#</a></h2>
+<p>You can use <a href="https://www.dynaconf.com/settings_files/#supported-formats">different supported formats</a>
+like .yaml, .toml, .ini, .json. In this page we'll use yaml format.</p>
+<p>The name of one setting option is also the key in configuration file,
+and you can <a href="#setting-via-environment-variable">set an environment variable</a> for it.</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>log_level</code></td>
+<td>info</td>
+<td><a href="https://loguru.readthedocs.io/en/stable/api/logger.html#levels">Log level</a> of the log file and stderr</td>
+</tr>
+<tr>
+<td><code>log_rotation</code></td>
+<td>100MB</td>
+<td><a href="https://loguru.readthedocs.io/en/stable/api/logger.html#file">Change log files writing method</a> (when to split a new file)</td>
+</tr>
+<tr>
+<td><code>block_following</code></td>
+<td>false</td>
+<td>Whether to block users that you're following</td>
+</tr>
+<tr>
+<td><code>block_follower</code></td>
+<td>true</td>
+<td>Whether to block users that following you</td>
+</tr>
+<tr>
+<td><code>read_password_from_stdin</code></td>
+<td>false</td>
+<td>Instead of ask user input the password (for loading private key file) through terminal</td>
+</tr>
+</tbody>
+</table>
+<p>You can <a href="https://github.com/search?q=%22settings.get%22+%22plans%22+repo%3Aboholder%2Fpuntgun+in%3Afile&amp;type=code">search</a>
+how particular configuration is used in source code if you are interested.</p>
+<h2 id="setting-via-environment-variable">Setting Via Environment Variable<a class="headerlink" href="#setting-via-environment-variable" title="Permanent link">#</a></h2>
+<p>You can set the tool configurations via <a href="https://www.dynaconf.com/envvars/">setting environment variables</a>,
+with the prefix <code>BULLET_</code> followed by upper case of the name,
+in which you can build automated processes.
+This is quite useful and simple when setting up secrets.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code># setting in configuration file (yaml)
+caliber: 20 ga.
+
+# variable in environment (unix-like os style)
+export BULLET_CALIBER=&quot;20 ga.&quot;
+</code></pre></div></td></tr></table></div>
+<h2 id="setting-via-command-line-argument">Setting Via Command Line Argument<a class="headerlink" href="#setting-via-command-line-argument" title="Permanent link">#</a></h2>
+<p>There are some "one-off" configurations
+(value may be different in each execution, so not suitable for the global scope).</p>
+<p>The tool will use <code>--secrets_file</code> and <code>--private_key_file</code> to manage secrets in a safe way,
+<a href="#let-the-tool-manages-secrets">here</a> is more detailed introduction.</p>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--config_path</code></td>
+<td><a href="https://en.wikipedia.org/wiki/Home_directory"><code>&lt;home directory&gt;</code></a>/.puntgun</td>
+<td>Path of various configuration files the tool needs</td>
+</tr>
+<tr>
+<td><code>--plan_file</code></td>
+<td><code>&lt;config path&gt;</code>/plan.yml</td>
+<td><a href="">Plan configuration file</a> you'd like to execute</td>
+</tr>
+<tr>
+<td><code>--settings_file</code></td>
+<td><code>&lt;config path&gt;</code>/settings.yml</td>
+<td>Global tool settings that will apply to every execution</td>
+</tr>
+<tr>
+<td><code>--private_key_file</code></td>
+<td><code>&lt;config path&gt;</code>/.puntgun_rsa4096</td>
+<td>Tool generated password protected private key</td>
+</tr>
+<tr>
+<td><code>--secrets_file</code></td>
+<td><code>&lt;config path&gt;</code>/.secrets.yml</td>
+<td>Tool generated ciphertext or user written plain text file contains <a href="#secrets">secrets</a></td>
+</tr>
+<tr>
+<td><code>--report_file</code></td>
+<td><code>&lt;config path&gt;</code>/reports/<code>&lt;plan_file&gt;</code>_<code>&lt;time&gt;</code>_report.json</td>
+<td>Expect path of the tool generated execution report</td>
+</tr>
+</tbody>
+</table>
+<h2 id="secrets">Secrets<a class="headerlink" href="#secrets" title="Permanent link">#</a></h2>
+<p>Secrets are strings that need to be kept well,
+and you should treat them as you would your Twitter account's password.
+Anyone who has them can manipulate your Twitter account at will just like they have your password.</p>
+<p>We need four (two pairs of) secrets to make the tool work:</p>
+<ol>
+<li>
+<p>A pair of Twitter Developer API usage credential for querying Twitter APIs,
+   configuration name: <code>ak</code> &amp; <code>aks</code>, stands for <strong>A</strong>pi <strong>K</strong>ey secrets pair key and key <strong>S</strong>ecrets.
+   We'll <a href="#registering-a-twitter-api-credential">get them from Twitter Dev Platform</a>.</p>
+</li>
+<li>
+<p>An access token pair that indicate your consent for API key above to operate your account,
+   configuration name: <code>at</code> &amp; <code>ats</code>, stands for <strong>A</strong>ccess <strong>T</strong>oken pair key and key <strong>S</strong>ecrets.
+   We can't get them until first run the tool.</p>
+</li>
+</ol>
+<h3 id="registering-a-twitter-api-credential">Registering A Twitter API Credential<a class="headerlink" href="#registering-a-twitter-api-credential" title="Permanent link">#</a></h3>
+<p>When the tool is first launched there is an interactive guide procedure
+instructing you on how to register and save your credentials.
+If you want to register one right away, keep reading, if not, skip this paragraph.</p>
+<p>For registering a credential, first you need a Twitter account (you already have one I guess),
+and you need to bind a phone number with that account. You can do unbind after get the credential,
+and the credential will remain valid.
+But Twitter already saved a new line of record about your phone inside the user table,
+now it's up to you whether you want to continue or not.</p>
+<p>Follow the instruction below:</p>
+<ol>
+<li>
+<p>Register the credential ("register an app" Twitter says so) on <a href="https://developer.twitter.com/en">developer.twitter.com</a>.</p>
+</li>
+<li>
+<p>Turn on "OAuth 1.0a" in your App settings:</p>
+<ol>
+<li>Set the App permissions to "Read and write".</li>
+<li>Set the callback, website URL to "https://twitter.com" for passing the website's validation check.
+   (We'll use the <a href="https://developer.twitter.com/en/docs/authentication/oauth-1-0a/pin-based-oauth">pin-based auth method</a>,
+   so we needn't really deploy a server for receiving Twitter's callback.)</li>
+</ol>
+</li>
+</ol>
+<p>All set, now you can directly paste them into the tool.
+You must run the tool at least once to authorize this tool
+with your Twitter account to get access token pair,
+then you can <a href="">dump secrets</a> and set all these four secrets for automatically running the tool.</p>
+<h3 id="let-the-tool-manages-secrets">Let The Tool Manages Secrets<a class="headerlink" href="#let-the-tool-manages-secrets" title="Permanent link">#</a></h3>
+<p>The tool will help you manage secrets by default, and interactive with you via terminal
+(command line interface) while running to operate them.
+In short, you create a new password and keep it, the password protects the <code>&lt;private_key_file&gt;</code>,
+the private key protects four secret values in <code>&lt;secrets_file&gt;</code>.
+You keep the password, let the tool arrange rest things for you.
+Keep reading if you interest about details or skip if you don't.</p>
+<p>First we talk about secrets saving. If the tool can't find some secrets in environment variables,
+it will ask you to input secrets through terminal, then save all secrets into an encrypted file
+(named as <code>&lt;secrets_file&gt;</code>), sort of like put them into a chest and lock the chest.
+No one can figure out the secret values even they can read the <code>&lt;secrets_file&gt;</code>,
+there are just meaningless ciphertext, no plain text.</p>
+<p>Stay in simple, for encrypting that <code>&lt;secrets_file&gt;</code>, we'll need a private key (another secret value),
+the tool will automatically generate one for you.
+This private key (with the public key it generates) can act as both "key" and "lock" of the <code>&lt;secrets_file&gt;</code> "chest".
+We can't remember, and it's inconvenient to re-input this long value,
+so we need to save this value down to a file,
+or we'll lose it after reboot the computer like your poor office files,
+so here is the second file - <code>&lt;private_key_file&gt;</code>.</p>
+<p>It may disappoint you but, for saving the private key into the <code>&lt;private_key_file&gt;</code>
+we need another password (passphrase) to protect the dumped value,
+this time it's short and human-readable just like other normal passwords,
+it's created and inputted by you, and you should remember it for future use.</p>
+<p>Make sense? Loading secrets when restart the tool afterwards is in plain reversed order.
+You enter the password (through terminal), the tool load the private key,
+use the private key load secrets, done.</p>
+<p>For more security concern, read <a href="https://github.com/boholder/puntgun#details-about-secrets-encryption-and-usage">this paragraph</a>.</p>
+<h3 id="setting-secrets-via-other-methods-for-automation">Setting Secrets Via Other Methods For Automation<a class="headerlink" href="#setting-secrets-via-other-methods-for-automation" title="Permanent link">#</a></h3>
+<p>The tool's "require-input-password-to-decrypt-secrets" interaction behavior will block the program.
+So here are some other ways to set secrets for integrating this tool into automating process.
+You'll provide plain text format secret values with these methods,
+so we'd like to remind you to keep secrets safe from bad guys.</p>
+<p>Four secrets in total: <code>ak</code>, <code>aks</code>, <code>at</code>, <code>ats</code>, you <strong>must</strong> provide both four secrets
+or the tool will still ask you for remains. You can provide <code>ak</code>, <code>aks</code> and <code>at</code>, <code>ats</code>
+via different approach if you want.</p>
+<ol>
+<li>
+<p>You can indicate a file path with <code>--secrets_file</code> command line argument when starting the tool,
+   in which contains secrets configured like other normal configuration options.
+   (You can even directly write these secrets in you plan file and the tool still can load them,
+   but that's dangerous and not recommended.)</p>
+</li>
+<li>
+<p>You can <a href="#setting-via-environment-variable">set environment variables</a> for them.</p>
+</li>
+<li>
+<p>You can pass your private key file's password through <em><a href="https://en.wikipedia.org/wiki/Standard_streams">stdin</a></em>,
+   the tool will read the password from <em>stdin</em> instead of ask password interactively
+   when the <code>read_password_from_stdin</code> tool setting is set to <code>true</code>.</p>
+</li>
+</ol>
+
+
+
+
+              
+            </article>
+            
+          </div>
+        </div>
+        
+          <a href="#" class="md-top md-icon" data-md-component="top" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+            Back to top
+          </a>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../.." class="md-footer__link md-footer__link--prev" aria-label="Previous: Home" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Home
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../plan-configuration/" class="md-footer__link md-footer__link--next" aria-label="Next: Plan Configuration" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Plan Configuration
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2022 <a href="https://boholder.github.io/en-us/about/">BoHolder</a>
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.top", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections"], "search": "../../assets/javascripts/workers/search.ecf98df9.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.9c69f0bc.min.js"></script>
+      
+    
+  </body>
+</html>
