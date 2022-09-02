@@ -16,7 +16,8 @@ There is no strict limit to how and what you can contribute, here are a few ways
   You can find them by [searching for **IMPROVE** marks](https://github.com/search?q=%22IMPROVE%22+repo%3Aboholder%2Fpuntgun+in%3Afile&type=code)
   in the code.
 * Join the discussion about or deal with [unclosed issues](https://github.com/boholder/puntgun/issues).
-* Develop new features, new rules to this tool (and we recommend developing in the steps [described below](#prepare-for-local-development)).
+* Develop [new features](https://github.com/boholder/puntgun/discussions/categories/feature-requests)
+  to this tool (and we recommend developing in the steps [described below](#prepare-for-local-development)).
 * Improve CI/CD process.
 * Add more test cases.
 
