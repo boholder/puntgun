@@ -93,11 +93,9 @@ For reference, here are some common cases with treatments:
 
 ## Prepare for local development
 
+This project requires Python version **3.10** or above.
 If you are not familiar with how to clone a project and submit a Pull Request using GitHub,
 please read [this documentation from GitHub official](https://docs.github.com/en/get-started/quickstart/contributing-to-projects).
-
-This project requires Python version **3.10**,
-please [download a new one](https://www.python.org/downloads/) or upgrade your existing Python's version.
 
 (Sorry to be abrupt, but... [**pipx**](https://github.com/pypa/pipx) is an excellent tool for managing executable python libraries,
 you may want to use it instead of **pip** for installing pypi-based executable tools.

@@ -45,11 +45,11 @@ plans:
     that:
       # who has less than ten followers
       - follower:
-            less_than: 10
+          less_than: 10
       # or has more than one hundred million following
       # why so big? just for prevent making it really works.
       - following:
-            more_than: 100000000
+          more_than: 100000000
     do:
       # block them
       - block: {}

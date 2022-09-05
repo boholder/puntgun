@@ -128,7 +128,7 @@ def plaintext_secrets(output: str, private_key: str, _secrets: str) -> None:
 
 @gen.command(context_settings=CONTEXT_SETTINGS)
 @click.option("-o", "--output-path", default=str(cfg.config_path), show_default=True, help="Path of generated files.")
-def config(output_path: str) -> None:
+def example(output_path: str) -> None:
     """Generate example configuration files."""
     command.Gen.config(output_path)
 

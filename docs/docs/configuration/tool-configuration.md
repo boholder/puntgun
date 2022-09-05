@@ -53,8 +53,7 @@ export BULLET_CALIBER="20 ga."
 
 ## Setting Via Command Line Argument
 
-There are some "one-off" configurations
-(value may be different in each execution, so not suitable for the global scope).
+There are some "one-off" configurations (value may be different in each execution, so not suitable for the global scope).
 
 The tool will use `--secrets_file` and `--private_key_file` to manage secrets in a safe way,
 [here](#let-the-tool-manages-secrets) is more detailed introduction.
@@ -106,7 +105,8 @@ Follow the instruction below:
        (We'll use the [pin-based auth method](https://developer.twitter.com/en/docs/authentication/oauth-1-0a/pin-based-oauth),
        so we needn't really deploy a server for receiving Twitter's callback.)
 
-All set, now you can directly paste them into the tool.
+All set, now you can directly paste them into the tool, run `puntgun gen secrets` to configurate secrets.
+
 You must run the tool at least once to authorize this tool
 with your Twitter account to get access token pair,
 then you can [dump secrets]() and set all these four secrets for automatically running the tool.
