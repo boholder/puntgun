@@ -33,6 +33,8 @@ jobs:
           pdm install -dG doc
 
       - name: Build doc and upload to gh-pages branch
+        # ${tag%.*} Only concern major.minor version,
+        # documentation updates with patches will be updated into one minor version.
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"

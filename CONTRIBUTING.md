@@ -59,9 +59,41 @@ and only then does the "contribution" begin.
 Remember to run `pdm run lint` and make sure all checks pass before creating Pull Request,
 [the CI](https://github.com/boholder/puntgun/blob/main/.github/workflows/test.yml) will fail if any lint tool complains.
 
+### Remember to write changelog
+
+There is a [`CHANGELOG.md`](https://github.com/boholder/puntgun/blob/main/CHANGELOG.md) file
+under the project root directory that is used to record changes,
+please modify this file correspondingly when you commit the Pull Request.
+The contents of this file will be copied by release CI to the GitHub Release when the version is released.
+The maintainer will manually check the change logs before the release,
+so there is no need to get too hung up on the details of change log writing.
+
+Summarize your change in an imperative or descriptive sentence 
+(just like a commit message: `Fix... [#issue-number]`, `follower - new user filter rule for...`),
+and try to keep it both short and specific, with specificity taking precedence.
+Check the [Change Log](https://github.com/boholder/puntgun/blob/main/CHANGELOG.md) file for more examples.
+
+The Change Log has the following categories (create if current release does not have the category titles you need):
+
+* `Features`: New rules, new command line options... what users can sense
+* `Removals`: Removals or deprecations, what users can sense
+* `Improvements`: Code refactors, better error handling... changes on existing code, CI, tests...
+* `Bug Fixes`: Newly closed `bug` issues
+* `Documentation`: Documentation updates
+* `Dependencies`: Changes to dependencies
+* `Miscellany`: Changes that don't fit any of the other categories
+
+Although uncommon, there are cases where one change involves multiple categories,
+in these cases multiple change logs can be written correspondingly.
+For reference, here are some common cases with treatments:
+
+* **Modifying documentation while modifying code**: Omitting `Documentation` change log
+* **Modified dependencies while modifying code**: Write both code modification and `Dependencies` change logs
+* **Modifying existing code while adding new features**: Write both `Features` and `Improvements` change logs
+
 ## Prepare for local development
 
-If you are not familiar with how to clone a project and submit a pull request using GitHub,
+If you are not familiar with how to clone a project and submit a Pull Request using GitHub,
 please read [this documentation from GitHub official](https://docs.github.com/en/get-started/quickstart/contributing-to-projects).
 
 This project requires Python version **3.10**,
