@@ -28,30 +28,7 @@ jobs:
       - name: Run lint check
         run: pdm run lint
 
-  test-on-win-mac:
-    needs: lint-check
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ windows-latest, macos-latest ]
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.default-python }}
-
-      - name: Install test dependencies
-        run: |
-          python3 -m pip install -U pdm
-          pdm install -G test
-
-      - name: Run pytest
-        run: pdm run python -m pytest tests
-
-
-  test-and-gen-coverage-on-linux:
+  test-and-gen-coverage:
     needs: lint-check
     runs-on: ubuntu-latest
     steps:
@@ -80,7 +57,7 @@ jobs:
           flag-name: GitHub Action TEST
 
   upload-coverage-to-coveralls:
-    needs: test-and-gen-coverage-on-linux
+    needs: test-and-gen-coverage
     runs-on: ubuntu-latest
     steps:
       - name: Coveralls Finished
