@@ -24,11 +24,16 @@ class InvalidConfigurationError(ValueError):
     without be caught by loguru and print a lot of meaningless dialog stack trace to stderr
     (it will make the user confused).
     """
-
     pass
 
 
-@logger.catch(onerror=lambda _: sys.exit(1))
+def on_unexpected_error(e):
+    logger.error(e)
+    Recorder.write_report_tail()
+    sys.exit(1)
+
+
+@logger.catch(onerror=on_unexpected_error)
 def start() -> None:
     # Warm up? Initialization?
     # Load secrets and create singleton client instance before parsing and executing plans.
