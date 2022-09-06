@@ -17,7 +17,7 @@ The tool will choose the tool configurations in the following order:
 3. Global settings file and secrets file.
 4. Default values set inside program.
 
-## Setting Via Configuration File
+## Setting via Configuration File
 
 You can use [different supported formats](https://www.dynaconf.com/settings_files/#supported-formats)
 like .yaml, .toml, .ini, .json. In this page we'll use yaml format.
@@ -36,7 +36,7 @@ and you can [set an environment variable](#setting-via-environment-variable) for
 You can [search](https://github.com/search?q=%22settings.get%22+%22plans%22+repo%3Aboholder%2Fpuntgun+in%3Afile&type=code)
 how particular configuration is used in source code if you are interested.
 
-## Setting Via Environment Variable
+## Setting via Environment Variable
 
 You can set the tool configurations via [setting environment variables](https://www.dynaconf.com/envvars/),
 with the prefix `BULLET_` followed by upper case of the name,
@@ -51,7 +51,7 @@ caliber: 20 ga.
 export BULLET_CALIBER="20 ga."
 ```
 
-## Setting Via Command Line Argument
+## Setting via Command Line Argument
 
 There are some "one-off" configurations (value may be different in each execution, so not suitable for the global scope).
 
@@ -83,7 +83,7 @@ We need four (two pairs of) secrets to make the tool work:
    configuration name: `at` & `ats`, stands for **A**ccess **T**oken pair key and key **S**ecrets.
    We can't get them until first run the tool.
 
-### Registering A Twitter API Credential
+### Registering a Twitter API Credential
 
 When the tool is first launched there is an interactive guide procedure
 instructing you on how to register and save your credentials.
@@ -111,7 +111,7 @@ You must run the tool at least once to authorize this tool
 with your Twitter account to get access token pair,
 then you can [dump secrets]() and set all these four secrets for automatically running the tool.
 
-### Let The Tool Manages Secrets
+### Let the Tool Manages Secrets
 
 The tool will help you manage secrets by default, and interactive with you via terminal
 (command line interface) while running to operate them.
@@ -145,7 +145,7 @@ use the private key load secrets, done.
 
 For more security concern, read [this paragraph](https://github.com/boholder/puntgun#details-about-secrets-encryption-and-usage).
 
-### Setting Secrets Via Other Methods For Automation
+### Setting Secrets via Other Methods for Automation
 
 The tool's "require-input-password-to-decrypt-secrets" interaction behavior will block the program.
 So here are some other ways to set secrets for integrating this tool into automating process.

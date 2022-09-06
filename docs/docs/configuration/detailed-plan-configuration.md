@@ -18,7 +18,7 @@ There are three available time formats for configuration:
 2. `2022-01-01` -> `datetime.date(2022, 1, 1)` (the time part is `00:00:00`)
 3. `2022-01-01T01:01:01Z` -> `datetime.datetime(2022, 1, 1, 1, 1, 1)`
 
-### Tips About Searching And Matching
+### Tips about Searching and Matching
 
 For more information about Twitter search queries, please refer to [the official documentation](https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-recent).
 
