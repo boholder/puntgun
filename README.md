@@ -14,8 +14,9 @@
 [![pypi version badge](https://img.shields.io/pypi/v/puntgun)](https://pypi.org/project/puntgun/)
 [![pypi python version badge](https://img.shields.io/pypi/pyversions/puntgun)](https://pypi.org/project/puntgun/)
 
-> **Warning**
-> This tool is not available yet, it will be soon!
+You can use this tool to do some boring Twitter account management
+(such as automatically select and block users from a source like a tweet's likes, your follower...),
+then you can free up your time for other things.
 
 This tool was originally conceived as a configurable automatic Twitter account blocker.
 What could be a better name for it than the [**Punt Gun**](https://en.wikipedia.org/wiki/Punt_gun),
@@ -23,10 +24,6 @@ a special hunting weapon used to kill a large number of waterfowl in one shot.
 But that type of gun is a huge threat to the natural environment,
 and fortunately this tool only inherits the meaning of its origin,
 even to the benefit of the platform environment (or at least to its users).
-
-You can use this tool to do some boring Twitter account management
-(such as automatically select and block users from a source like a tweet's likes, your follower...),
-so you can free up your time for other things.
 
 ## Installation
 
@@ -92,9 +89,11 @@ with your Twitter account and then using your Twitter account to authorize this 
 
 ### Limitation of the Twitter Developer API
 
-Note that as this tool's performance is depending on the complexity of configuration you set,
-it is also subject to the limitations of the Twitter Developer API because [your api query volume is not unlimited](https://developer.twitter.com/en/docs/twitter-api/getting-started/about-twitter-api),
-meanwhile the Twitter Dev API [have rate limits](https://developer.twitter.com/en/docs/twitter-api/rate-limits) with different permissions on different endpoints.
+First, this tool's performance is depending on the complexity of plan configuration you set which you can control.
+And what you can't control is that your total API query volume [is limited](https://developer.twitter.com/en/docs/twitter-api/getting-started/about-twitter-api) by Twitter,
+meanwhile the API [have different rate limits](https://developer.twitter.com/en/docs/twitter-api/rate-limits) with different permissions on different endpoints.
+These limits can sometimes be very impactful on execution speed, such as only fifty block API query is allowed for every fifteen minutes.
+
 What's more, you can only [search for last 7 days tweets](https://developer.twitter.com/en/docs/twitter-api/tweets/search/introduction)
 (using "search/recent" API) with Essential Twitter API permission, and query string length is limited up to 512.
 

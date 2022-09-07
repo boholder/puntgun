@@ -5,6 +5,8 @@ edit_uri: edit/main/docs/docs
 
 nav:
   - Home: index.md
+  - Usage:
+      - usage/report-file.md
   - Configuration:
       - configuration/tool-configuration.md
       - configuration/plan-configuration.md
@@ -12,8 +14,6 @@ nav:
   - Development:
       - development/contributing.md
       - development/security-policy.md
-  - Usage:
-      - usage/report-file.md
 
 theme:
   # https://squidfunk.github.io/mkdocs-material

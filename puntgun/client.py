@@ -67,10 +67,10 @@ class ResourceNotFoundError(TwitterApiError):
 
 class TwitterApiErrors(Exception, Recordable):
     """
-    This error raised when a Twitter Dev API query returns http status code 200,
+    This error is raised when a Twitter Dev API query returns http status code 200,
     but has an "errors" field in the response body,
     which indicates several "Partial error" occurs
-    and the result only contains what Twitter server can figured out.
+    and the result only contains what Twitter server can figure out.
 
     https://developer.twitter.com/en/support/twitter-api/error-troubleshooting#partial-errors
 
