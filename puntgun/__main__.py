@@ -99,6 +99,27 @@ def secrets(private_key: str, _secrets: str) -> None:
 
 @gen.command(context_settings=CONTEXT_SETTINGS)
 @click.option(
+    "--private-key",
+    default=str(cfg.pri_key_file),
+    show_default=True,
+    help="Original private key file which generated the secrets file.",
+)
+@click.option(
+    "--secrets",
+    "_secrets",
+    default=str(cfg.secrets_file),
+    show_default=True,
+    help="Original secrets file.",
+)
+def new_password(private_key: str, _secrets: str) -> None:
+    """
+    Change a new password, will re-generate private key file and secrets file.
+    """
+    commands.Gen.new_password(private_key_file=private_key, secrets_file=_secrets)
+
+
+@gen.command(context_settings=CONTEXT_SETTINGS)
+@click.option(
     "-o",
     "--output",
     default=str(cfg.config_path.joinpath(".secrets_plaintext.yml")),

@@ -49,6 +49,33 @@ class Gen(object):
         load_secrets_with_keyboard_interrupt_exit()
 
     @staticmethod
+    def new_password(private_key_file: str, secrets_file: str) -> None:
+        # TODO untested
+        def get_new_password() -> str:
+            new_pwd = ""
+            two_pwd_are_not_same = True
+
+            while two_pwd_are_not_same:
+                print("Now enter a new password.")
+                new_pwd = util.get_secret_from_terminal("New Password")
+                print("Re-enter the password for confirm.")
+                two_pwd_are_not_same = new_pwd != util.get_secret_from_terminal("Repeat Password")
+                if two_pwd_are_not_same:
+                    print("The two passwords are not same, start from the beginning.")
+
+            return new_pwd
+
+        config.reload_important_files(secrets_file=secrets_file, pri_key_file=private_key_file)
+        pri_key = encrypto.load_or_generate_private_key()
+
+        new_password = get_new_password()
+        encrypto.dump_private_key(pri_key, new_password, config.pri_key_file)
+
+        secrets = secret.load_or_request_all_secrets(pri_key)
+        secret.encrypt_and_save_secrets_into_file(pri_key.public_key(), **secrets)
+        print("Password change succeed, new private key file and secrets file are generated.")
+
+    @staticmethod
     def plain_secrets(output_file: str, private_key_file: str, secrets_file: str) -> None:
         config.reload_important_files(secrets_file=secrets_file, pri_key_file=private_key_file)
         secrets = load_secrets_with_keyboard_interrupt_exit()
@@ -73,9 +100,8 @@ class Gen(object):
         with open(example_plan_file, "w", encoding="utf-8") as f:
             f.write(example.plan_config)
 
-        print(
-            EXAMPLE_GENERATED.format(example_settings_file=example_settings_file, example_plan_file=example_plan_file)
-        )
+        print(EXAMPLE_GENERATED.format(example_settings_file=example_settings_file,
+                                       example_plan_file=example_plan_file))
 
 
 class Check(object):

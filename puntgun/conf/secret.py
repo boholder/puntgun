@@ -231,6 +231,7 @@ def encrypt_and_save_secrets_into_file(
     def transform(msg: str) -> str:
         return binascii.hexlify(encrypto.encrypt(public_key, msg)).decode("utf-8")
 
+    util.backup_if_exists(file_path)
     with open(file_path, "w", encoding="utf-8") as f:
         # if we do not add '\n' at the tail, all items are printed into one line
         f.writelines(f"{key}: {transform(value)}\n" for key, value in kwargs.items())
