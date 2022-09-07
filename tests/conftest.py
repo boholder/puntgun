@@ -3,7 +3,9 @@ import threading
 from unittest.mock import MagicMock, Mock
 
 import pytest
+from dynaconf import Dynaconf
 
+from conf import secret
 from puntgun.conf import encrypto
 from puntgun.rules.config_parser import ConfigParser
 
@@ -131,3 +133,18 @@ def mock_input(monkeypatch):
         monkeypatch.setattr("getpass.getpass", mock_func)
 
     return wrapper
+
+
+@pytest.fixture
+def mock_secrets_config_file(mock_private_key_file, monkeypatch, tmp_path, mock_input):
+    secrets_setting_file = tmp_path.joinpath("s.yml")
+    # load the private key for decrypt secrets
+    mock_input("pwd", "y")
+    # change the settings to load test configuration file
+    monkeypatch.setattr("puntgun.conf.config.secrets_file", secrets_setting_file)
+    monkeypatch.setattr("puntgun.conf.config.settings", Dynaconf(settings_files=secrets_setting_file))
+
+    def save_content_to_file(**kwargs):
+        secret.encrypt_and_save_secrets_into_file(mock_private_key_file[1].public_key(), secrets_setting_file, **kwargs)
+
+    return save_content_to_file

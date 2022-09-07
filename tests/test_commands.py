@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 
 from puntgun import commands
 from puntgun.commands import Gen
+from puntgun.conf import config, secret, encrypto
 
 
 def test_fire(monkeypatch):
@@ -39,14 +40,14 @@ def test_gen_plaintext_secrets_and_backup_original_file(monkeypatch, tmp_path):
     with open(output_file, "w", encoding="utf-8") as f:
         f.write("123")
 
-    Gen.plain_secrets(output_file=output_file, private_key_file="", secrets_file="")
+    Gen.plain_secrets(output_file=str(output_file), private_key_file="", secrets_file="")
 
     assert output_file.read_text(encoding="utf-8") == "a: 1\nb: 2\n"
     assert Path(str(output_file) + ".bak").read_text(encoding="utf-8") == "123"
 
 
 def test_gen_example_config_files(tmp_path):
-    Gen.config(tmp_path)
+    Gen.config(str(tmp_path))
     # will generate two config files
     generated_files = os.listdir(tmp_path)
     assert len(generated_files) == 2
@@ -54,3 +55,15 @@ def test_gen_example_config_files(tmp_path):
         assert file.endswith(".yml")
         file = tmp_path.joinpath(file)
         assert file.is_file()
+
+
+def test_gen_new_password(mock_secrets_config_file, mock_input):
+    # this command requires both private key file and secrets file already exist
+    mock_secrets_config_file(ak="ak", aks="aks", at="at", ats="ats")
+    # old password | new password, oops! second new password is wrong | new password * 2 again
+    mock_input("pwd", "y", "new_pwd", "y", "wrong_new_pwd", "y", "new_pwd", "y", "new_pwd", "y")
+    Gen.new_password(config.pri_key_file, config.secrets_file)
+    # try to decrypt test secret with new password
+    mock_input("new_pwd", "y")
+    actual = secret.load_or_request_all_secrets(encrypto.load_or_generate_private_key())
+    assert actual == {"ak": "ak", "aks": "aks", "at": "at", "ats": "ats"}

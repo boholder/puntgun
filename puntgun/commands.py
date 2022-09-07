@@ -50,7 +50,6 @@ class Gen(object):
 
     @staticmethod
     def new_password(private_key_file: str, secrets_file: str) -> None:
-        # TODO untested
         def get_new_password() -> str:
             new_pwd = ""
             two_pwd_are_not_same = True
