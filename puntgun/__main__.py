@@ -1,6 +1,6 @@
 import click
 
-from puntgun import command
+from puntgun import commands
 from puntgun.conf import config as cfg
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -55,8 +55,8 @@ def cli() -> None:
     default=str(cfg.secrets_file),
     show_default=True,
     help="Ciphertext or plaintext file that contains required secrets, "
-    "ciphertext secrets file should be paired with the correct private key file "
-    "which was used to encrypt it before.",
+         "ciphertext secrets file should be paired with the correct private key file "
+         "which was used to encrypt it before.",
 )
 @click.option(
     "--private-key",
@@ -66,7 +66,7 @@ def cli() -> None:
 )
 def fire(_plan: str, report: str, settings: str, config_path: str, _secrets: str, private_key: str) -> None:
     """Start the tool with plans."""
-    command.fire(_plan, report, settings, config_path, _secrets, private_key)
+    commands.fire(_plan, report, settings, config_path, _secrets, private_key)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
@@ -94,7 +94,7 @@ def secrets(private_key: str, _secrets: str) -> None:
     Let the tool guides you to register and configurate necessary secrets,
     and safely keeps them into secrets file for future use.
     """
-    command.Gen.secrets(private_key_file=private_key, secrets_file=_secrets)
+    commands.Gen.secrets(private_key_file=private_key, secrets_file=_secrets)
 
 
 @gen.command(context_settings=CONTEXT_SETTINGS)
@@ -123,14 +123,14 @@ def plaintext_secrets(output: str, private_key: str, _secrets: str) -> None:
     Extract secrets from present secrets file and save them into a file in plaintext format.
     Please protect the generated file as carefully as ou would a password.
     """
-    command.Gen.plain_secrets(output, private_key, _secrets)
+    commands.Gen.plain_secrets(output, private_key, _secrets)
 
 
 @gen.command(context_settings=CONTEXT_SETTINGS)
 @click.option("-o", "--output-path", default=str(cfg.config_path), show_default=True, help="Path of generated files.")
 def example(output_path: str) -> None:
     """Generate example configuration files."""
-    command.Gen.config(output_path)
+    commands.Gen.config(output_path)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
@@ -150,7 +150,7 @@ def check() -> None:
 )
 def plan(_plan: str) -> None:
     """Validate syntax of plan configuration file."""
-    command.Check.plan(_plan)
+    commands.Check.plan(_plan)
 
 
 cli.add_command(fire)

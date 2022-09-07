@@ -2,8 +2,8 @@ import os
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from puntgun import command
-from puntgun.command import Gen
+from puntgun import commands
+from puntgun.commands import Gen
 
 
 def test_fire(monkeypatch):
@@ -14,7 +14,7 @@ def test_fire(monkeypatch):
     mock_reload_important_files_func = MagicMock()
     monkeypatch.setattr("puntgun.conf.config.reload_important_files", mock_reload_important_files_func)
 
-    command.fire("pf", "rf", "sf", "cf", "scf", "pkf")
+    commands.fire("pf", "rf", "sf", "cf", "scf", "pkf")
 
     mock_runner_start_func.assert_called_once()
 
