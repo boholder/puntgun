@@ -32,9 +32,6 @@ class Record(object):
     Record wrapper for a recordable object for format uniformity.
     """
 
-    type: str
-    data: dict
-
     def __init__(self, type: str, data: dict):
         self.type = type
         self.data = data

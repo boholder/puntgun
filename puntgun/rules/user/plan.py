@@ -21,14 +21,9 @@ from puntgun.rules.user.source_rules import UserSourceRule
 
 
 class UserPlanResult(Recordable):
-    plan_id: int
-    user: User
-    filtering_result: RuleResult
-    action_results: List[RuleResult]
-
-    def __init__(self, plan_id: int, user: User, filtering_result: RuleResult, action_results: List[RuleResult]):
+    def __init__(self, plan_id: int, target: User, filtering_result: RuleResult, action_results: List[RuleResult]):
         self.plan_id = plan_id
-        self.user = user
+        self.target = target
         self.filtering_result = filtering_result
         self.action_results = action_results
 
@@ -42,7 +37,7 @@ class UserPlanResult(Recordable):
             type="user_plan_result",
             data={
                 "plan_id": self.plan_id,
-                "user": {"id": self.user.id, "username": self.user.username},
+                "target": {"id": self.target.id, "username": self.target.username},
                 "decisive_filter_rule": {
                     "keyword": self.filtering_result.rule.keyword(),
                     "value": str(self.filtering_result.rule),
@@ -55,12 +50,12 @@ class UserPlanResult(Recordable):
 
     @staticmethod
     def parse_from_record(record: Record) -> "UserPlanResult":
-        user: dict = record.data.get("user", {})
+        user: dict = record.data.get("target", {})
         filter_rule_record = record.data.get("decisive_filter_rule", {})
         action_rule_results: list = record.data.get("action_rule_results", [])
         return UserPlanResult(
             plan_id=record.data.get("plan_id", 0),
-            user=User(id=user.get("id"), username=user.get("username")),
+            target=User(id=user.get("id"), username=user.get("username")),
             # Trying to rebuild rule instances from record,
             # but always result in config parsing errors and fake rule instance return values.
             filtering_result=RuleResult.true(
@@ -138,7 +133,7 @@ class UserPlan(Plan):
             # Convert results into a DTO instance
             op.map(
                 lambda zipped: UserPlanResult(
-                    plan_id=self.id, user=zipped[0][0], filtering_result=zipped[0][1], action_results=zipped[1]
+                    plan_id=self.id, target=zipped[0][0], filtering_result=zipped[0][1], action_results=zipped[1]
                 )
             )
         )

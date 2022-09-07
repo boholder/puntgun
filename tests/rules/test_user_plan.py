@@ -25,7 +25,7 @@ class TRule(UserActionRule, UserFilterRule):
 class TestUserPlanResult:
     result = UserPlanResult(
         plan_id=123,
-        user=User(id=1, username="uname"),
+        target=User(id=1, username="uname"),
         filtering_result=RuleResult.true(TRule(field_a="a")),
         action_results=[RuleResult.true(TRule(field_a="b"))],
     )
@@ -34,7 +34,7 @@ class TestUserPlanResult:
         type="user_plan_result",
         data={
             "plan_id": 123,
-            "user": {"id": 1, "username": "uname"},
+            "target": {"id": 1, "username": "uname"},
             "decisive_filter_rule": {"keyword": "ptr", "value": "field_a='a'"},
             "action_rule_results": [{"keyword": "ptr", "value": "field_a='b'", "done": True}],
         },
@@ -47,7 +47,7 @@ class TestUserPlanResult:
         actual = UserPlanResult.parse_from_record(self.record)
         expect = self.result
         assert actual.plan_id == expect.plan_id
-        assert actual.user == expect.user
+        assert actual.target == expect.target
         # consider is success if we can build action rule instance from record
         assert type(actual.action_results[0].rule) == TRule
 

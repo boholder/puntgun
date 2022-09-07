@@ -68,7 +68,7 @@ The contents of this file will be copied by release CI to the GitHub Release whe
 The maintainer will manually check the change logs before the release,
 so there is no need to get too hung up on the details of change log writing.
 
-Summarize your change in an imperative or descriptive sentence 
+Summarize your change in an imperative or descriptive sentence
 (just like a commit message: `Fix... [#issue-number]`, `follower - new user filter rule for...`),
 and try to keep it both short and specific, with specificity taking precedence.
 Check the [Change Log](https://github.com/boholder/puntgun/blob/main/CHANGELOG.md) file for more examples.
@@ -155,6 +155,10 @@ Currently, this project uses:
 * [**codespell**](https://github.com/codespell-project/codespell) for typo checking.
 * [**flake8**](https://flake8.pycqa.org/en/latest/index.html) for common Python programming problem checking.
 * [**mypy**](https://mypy.readthedocs.io/en/stable/) for static type hint scanning.
+
+As we all know, the rigid linting results sometimes does not make sense or have false positives,
+if your changes encounter unreasonable linting results,
+feel free to modify the configuration of the corresponding tool.
 
 ### Render the documentation website
 
