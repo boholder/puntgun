@@ -12,6 +12,8 @@ nav:
   - Development:
       - development/contributing.md
       - development/security-policy.md
+  - Usage:
+      - usage/report-file.md
 
 theme:
   # https://squidfunk.github.io/mkdocs-material
@@ -44,7 +46,6 @@ theme:
 
   # https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/
   features:
-    - navigation.top
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.sections
