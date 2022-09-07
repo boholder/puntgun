@@ -53,10 +53,10 @@ class TestRecorder:
     """These test cases are tightly linked to the implementation."""
 
     def test_load_report_correct_format(self):
-        self.assert_report_load_result('{"records":[{},{"name":"p"},{}]}')
+        self.assert_report_load_result('{"records":[{"name":"p"},{}]}')
 
     def test_load_report_no_report_tail(self):
-        self.assert_report_load_result('{"records":[{},{"name":"p"},')
+        self.assert_report_load_result('{"records":[{"name":"p"},')
 
     @staticmethod
     def assert_report_load_result(report_content: str):
@@ -79,7 +79,7 @@ class TestRecorder:
         assert actual["generate_time"] == MOCK_TIME_NOW.isoformat()
         assert actual["plan_configuration"] == [{"p": 123}]
         assert actual["plan_ids"] == [{"name": "a", "id": 0}, {"name": "b", "id": 1}]
-        assert actual["records"] == [{}, {}]
+        assert actual["records"] == [{}]
 
     def test_write_multiple_records(self, mock_record_logger):
         Recorder.write_report_header([])

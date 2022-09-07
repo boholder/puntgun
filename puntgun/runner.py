@@ -27,8 +27,7 @@ class InvalidConfigurationError(ValueError):
     pass
 
 
-def on_unexpected_error(e):
-    logger.error(e)
+def on_unexpected_error(_):
     Recorder.write_report_tail()
     sys.exit(1)
 

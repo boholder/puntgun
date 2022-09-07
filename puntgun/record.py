@@ -76,7 +76,6 @@ class Recordable(object):
 
 
 COMMA = ",".encode("utf-8")
-PLACEHOLDER_ITEM = "{},".encode("utf-8")
 
 # 1. an empty list item (an empty map) for pairing one comma character behind the last plan item
 # 2. one square bracket for closing the "plans" list
@@ -113,7 +112,7 @@ class Recorder(object):
         """
 
         head = {
-            "reference_documentation": "",  # TODO doc link
+            "reference_documentation": "https://boholder.github.io/puntgun/usage/report-file",
             # For version based branch logic in report-based "undo" operation.
             # (you have different available actions at different version,
             # which may require different "undo" process.)
@@ -127,7 +126,7 @@ class Recorder(object):
             "records": [],
         }
 
-        Recorder._write(orjson.dumps(head, option=orjson.OPT_INDENT_2)[:-3] + PLACEHOLDER_ITEM)
+        Recorder._write(orjson.dumps(head, option=orjson.OPT_INDENT_2)[:-3])
 
     @staticmethod
     def write_report_tail() -> None:
@@ -167,8 +166,8 @@ def load_report(file_content: bytes) -> dict:
             result = orjson.loads(case())
 
             # remove additional empty items added by this class when writing report.
-            # "records" list's first and last item is empty item.
-            result["records"] = result["records"][1:-1]
+            # "records" list's last item is empty item.
+            result["records"] = result["records"][:-1]
 
             return result
         except orjson.JSONDecodeError as e:
