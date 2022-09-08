@@ -45,13 +45,14 @@ python -m pip install -U puntgun
 
 ## Usage
 
-This tool is a cross-platform command line tool, which means you need to use it in your [Windows Command-line shell](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/windows-commands#command-line-shells)
+For users unfamiliar with the command line interface, this tool is a cross-platform command line tool,
+which means you need to use it in your [Windows Command-line shell](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/windows-commands#command-line-shells)
 or [Apple Mac Terminal](https://support.apple.com/guide/terminal/execute-commands-and-run-tools-apdb66b5242-0d18-49fc-9c47-a2498b7c91d5/mac)
-or any other terminal (every Unix/Linux user knows how to open a terminal, right?).
+or any other terminal.
 
 First you need a "Twitter Dev OAuth App API" to enable the tool, with this we can request the developer APIs provided by Twitter.
 Run the command below to let the tool interactively guide you register one on Twitter platform for free.
-For more information, read [the documentation](https://boholder.github.io/puntgun/configuration/tool-configuration#secrets).
+For more information, read [documentation about available commands](https://boholder.github.io/puntgun/usage/commands).
 
 ```shell
 puntgun gen secrets
