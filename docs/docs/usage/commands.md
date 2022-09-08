@@ -73,8 +73,8 @@ If you want to use the command line interface to perform other operations not me
 please make use of the search engine with keyword
 "<your terminal(e.g. cmd, mac terminal)> <expected operation(switch directory)>".
 
-Assuming that you can run the puntgun tool in the terminal, That is, when you type `puntgun` and enter,
-you will see the terminal print out the logo with the help information.
+Assuming that you can run the puntgun in the terminal, that is, when you type `puntgun` and enter,
+you will see the terminal print out the logo with help information.
 
 ```shell
 > puntgun
@@ -87,7 +87,7 @@ Options: ...
 Commands: ...
 ```
 
-If the terminal reports an error like `puntgun not found`,
+If the terminal responses an error like `puntgun not found`,
 you can search for that error (key concept: [PATH environment variable](https://superuser.com/a/284351))
 to find the cause and resolve or reinstall the tool.
 
