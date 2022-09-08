@@ -27,8 +27,14 @@ class InvalidConfigurationError(ValueError):
     pass
 
 
+def print_log_file_and_report_file_position():
+    print(f"Log File: {config.log_file}")
+    print(f"Report File: {config.report_file}")
+
+
 def on_unexpected_error(_):
     Recorder.write_report_tail()
+    print_log_file_and_report_file_position()
     sys.exit(1)
 
 

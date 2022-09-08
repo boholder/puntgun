@@ -24,6 +24,7 @@ def fire(plan: str, report: str, settings: str, config_path: str, secrets: str, 
 
     try:
         runner.start()
+        runner.print_log_file_and_report_file_position()
     except KeyboardInterrupt:
         logger.bind(o=True).info("The tool is stopped by the keyboard.")
         exit(1)
@@ -69,14 +70,17 @@ class Gen(object):
 
         new_password = get_new_password()
         encrypto.dump_private_key(pri_key, new_password, config.pri_key_file)
-
-        secrets = secret.load_or_request_all_secrets(pri_key)
-        secret.encrypt_and_save_secrets_into_file(pri_key.public_key(), **secrets)
-        print("Password change succeed, new private key file and secrets file are generated.")
+        print("Password change succeed, new private key file has been generated.")
 
     @staticmethod
     def plain_secrets(output_file: str, private_key_file: str, secrets_file: str) -> None:
         config.reload_important_files(secrets_file=secrets_file, pri_key_file=private_key_file)
+
+        print("Attention! This command will generate an unprotected plaintext secret value file.")
+        print("Enter [secrets] to confirm that you are ready to protect it well on your own.")
+        if util.get_input_from_terminal("Confirm") != "secrets":
+            return
+
         secrets = load_secrets_with_keyboard_interrupt_exit()
 
         # this path will only be used here, so we needn't add it to config module.
