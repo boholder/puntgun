@@ -127,7 +127,7 @@ Make sense? Loading secrets when restart the tool afterwards is in plain reverse
 You enter the password (through terminal), the tool load the private key,
 use the private key load secrets, done.
 
-For more security concern, read [this paragraph](https://github.com/boholder/puntgun#details-about-secrets-encryption-and-usage).
+For more security concern, read [this paragraph](https://boholder.github.io/puntgun#details-about-secrets-encryption-and-usage).
 
 ### Setting Secrets via Other Methods for Automation
 

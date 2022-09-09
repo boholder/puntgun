@@ -71,7 +71,7 @@ This part is for users unfamiliar with the command line interface.
 
 If you want to use the command line interface to perform other operations not mentioned,
 please make use of the search engine with keyword
-"<your terminal(e.g. cmd, mac terminal)> <expected operation(switch directory)>".
+"your terminal(e.g. cmd, mac terminal) expected operation(switch directory)".
 
 Assuming that you can run the puntgun in the terminal, that is, when you type `puntgun` and enter,
 you will see the terminal print out the logo with help information.

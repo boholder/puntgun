@@ -6,8 +6,8 @@ edit_uri: edit/main/docs/docs
 nav:
   - Home: index.md
   - Usage:
-      - usage/report-file.md
       - usage/commands.md
+      - usage/report-file.md
   - Configuration:
       - configuration/tool-configuration.md
       - configuration/plan-configuration.md
