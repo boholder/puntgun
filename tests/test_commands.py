@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 from puntgun import commands
 from puntgun.commands import Gen
-from puntgun.conf import config, secret, encrypto
+from puntgun.conf import config, encrypto, secret
 
 
 def test_fire(monkeypatch):

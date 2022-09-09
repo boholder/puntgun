@@ -103,8 +103,9 @@ class Gen(object):
         with open(example_plan_file, "w", encoding="utf-8") as f:
             f.write(example.plan_config)
 
-        print(EXAMPLE_GENERATED.format(example_settings_file=example_settings_file,
-                                       example_plan_file=example_plan_file))
+        print(
+            EXAMPLE_GENERATED.format(example_settings_file=example_settings_file, example_plan_file=example_plan_file)
+        )
 
 
 class Check(object):

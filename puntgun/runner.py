@@ -4,7 +4,7 @@ Constructing plans, executing plans, collecting and recording plan results...
 """
 import multiprocessing
 import sys
-from typing import List
+from typing import Any, List
 
 import reactivex as rx
 from loguru import logger
@@ -24,15 +24,16 @@ class InvalidConfigurationError(ValueError):
     without be caught by loguru and print a lot of meaningless dialog stack trace to stderr
     (it will make the user confused).
     """
+
     pass
 
 
-def print_log_file_and_report_file_position():
+def print_log_file_and_report_file_position() -> None:
     print(f"Log File: {config.log_file}")
     print(f"Report File: {config.report_file}")
 
 
-def on_unexpected_error(_):
+def on_unexpected_error(_: Any) -> None:
     Recorder.write_report_tail()
     print_log_file_and_report_file_position()
     sys.exit(1)

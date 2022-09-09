@@ -55,8 +55,8 @@ def cli() -> None:
     default=str(cfg.secrets_file),
     show_default=True,
     help="Ciphertext or plaintext file that contains required secrets, "
-         "ciphertext secrets file should be paired with the correct private key file "
-         "which was used to encrypt it before.",
+    "ciphertext secrets file should be paired with the correct private key file "
+    "which was used to encrypt it before.",
 )
 @click.option(
     "--private-key",

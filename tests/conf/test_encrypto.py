@@ -19,8 +19,9 @@ def test_all_cryptographic_methods(generated_key_file):
     assert "text" == p
 
 
-def test_load_or_generate_private_key_file(mock_private_key_file, mock_configuration, monkeypatch, mock_input,
-                                           tmp_path):
+def test_load_or_generate_private_key_file(
+    mock_private_key_file, mock_configuration, monkeypatch, mock_input, tmp_path
+):
     # 1. load private key file with correct password interactively
     # enter password to load private key
     mock_input("wrong password", "y", "wrong again", "y", "wrong again", "y", "pwd", "y")
@@ -52,8 +53,8 @@ def test_load_or_generate_private_key_file(mock_private_key_file, mock_configura
     # now test all three branches results
     encrypt_text = encrypto.encrypt(mock_private_key.public_key(), "text")
     assert (
-            "text"
-            == encrypto.decrypt(actual_key_input, encrypt_text)
-            == encrypto.decrypt(actual_key_stdin, encrypt_text)
-            == encrypto.decrypt(actual_key_generated, encrypt_text)
+        "text"
+        == encrypto.decrypt(actual_key_input, encrypt_text)
+        == encrypto.decrypt(actual_key_stdin, encrypt_text)
+        == encrypto.decrypt(actual_key_generated, encrypt_text)
     )

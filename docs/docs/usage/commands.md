@@ -100,7 +100,7 @@ This tool contains multi-level subcommands, and you can execute them like this:
 puntgun gen example
 ```
 
-You can check the build-in help information by adding `--help` argument behind any command,
+You can check the built-in help information by adding `--help` argument behind any command,
 the command will not be executed, instead the help information about this command will be printed out.
 
 ```shell

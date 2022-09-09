@@ -5,8 +5,7 @@ from unittest.mock import MagicMock, Mock
 import pytest
 from dynaconf import Dynaconf
 
-from conf import secret
-from puntgun.conf import encrypto
+from puntgun.conf import encrypto, secret
 from puntgun.rules.config_parser import ConfigParser
 
 
