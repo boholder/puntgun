@@ -5,7 +5,7 @@ from loguru import logger
 from reactivex import Observable
 from reactivex import operators as op
 
-from puntgun.client import NeedClient
+from puntgun.client import NeedClientMixin
 from puntgun.rules import FromConfig
 from puntgun.rules.data import User
 
@@ -34,7 +34,7 @@ class UserSourceRule(FromConfig):
         """"""
 
 
-class NameUserSourceRule(UserSourceRule, NeedClient):
+class NameUserSourceRule(UserSourceRule, NeedClientMixin):
     """
     Queries Twitter client with provided usernames.
     The "username" is that "@foobar" one, Twitter calls it "handle".
@@ -64,7 +64,7 @@ class NameUserSourceRule(UserSourceRule, NeedClient):
         return cls.parse_obj(conf)
 
 
-class IdUserSourceRule(UserSourceRule, NeedClient):
+class IdUserSourceRule(UserSourceRule, NeedClientMixin):
     """
     Queries Twitter client with provided user IDs.
     You can find someone's user id when logining to Twitter

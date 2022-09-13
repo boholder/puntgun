@@ -6,7 +6,7 @@ import reactivex as rx
 from reactivex import operators as op
 from rules.data import RuleResult
 
-from puntgun.client import NeedClient
+from puntgun.client import NeedClientMixin
 from puntgun.rules.config_parser import ConfigParser
 from puntgun.rules.data import User
 from puntgun.rules.user.action_rules import UserActionRule
@@ -65,7 +65,7 @@ class TImmediateFilterRule(UserFilterRule):
         return self.will_return
 
 
-class TSlowFilterRuleTrue(UserFilterRule, NeedClient):
+class TSlowFilterRuleTrue(UserFilterRule, NeedClientMixin):
     _keyword = "srt"
     will_return: bool
     wait: int

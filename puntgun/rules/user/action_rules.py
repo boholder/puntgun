@@ -2,7 +2,7 @@ from typing import ClassVar
 
 from rules.data import RuleResult
 
-from puntgun.client import NeedClient
+from puntgun.client import NeedClientMixin
 from puntgun.rules import FromConfig
 from puntgun.rules.data import User
 
@@ -21,7 +21,7 @@ class UserActionRule(FromConfig):
         """
 
 
-class BlockUserActionRule(UserActionRule, NeedClient):
+class BlockUserActionRule(UserActionRule, NeedClientMixin):
     """
     Block the given user.
     TODO untested, no field in manual?

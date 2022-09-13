@@ -15,7 +15,7 @@ from reactivex import Observable
 from reactivex import operators as op
 from rules.data import RuleResult
 
-from puntgun.client import NeedClient
+from puntgun.client import NeedClientMixin
 from puntgun.rules.config_parser import ConfigParser
 from puntgun.rules.data import User
 from puntgun.rules.user.action_rules import UserActionRule
@@ -55,8 +55,8 @@ class UserFilterRuleSet(BaseModel):
     @staticmethod
     def divide_and_construct(cls: Type["UserFilterRuleSet"], rules: List[UserFilterRule]) -> "UserFilterRuleSet":
         return cls(
-            slow_rules=[r for r in rules if isinstance(r, NeedClient)],
-            immediate_rules=[r for r in rules if not isinstance(r, NeedClient)],
+            slow_rules=[r for r in rules if isinstance(r, NeedClientMixin)],
+            immediate_rules=[r for r in rules if not isinstance(r, NeedClientMixin)],
         )
 
 
@@ -72,7 +72,7 @@ def execution_wrapper(u: User, rule: UserFilterRule | UserActionRule) -> Callabl
     return run_the_rule
 
 
-class UserFilterRuleAllOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
+class UserFilterRuleAllOfSet(UserFilterRuleSet, UserFilterRule, NeedClientMixin):
     """
     Run immediate rules first, then slow rules.
     If getting any False result while running, short-circuiting return False
@@ -106,7 +106,7 @@ class UserFilterRuleAllOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
         )
 
 
-class UserFilterRuleAnyOfSet(UserFilterRuleSet, UserFilterRule, NeedClient):
+class UserFilterRuleAnyOfSet(UserFilterRuleSet, UserFilterRule, NeedClientMixin):
     """
     Similar like :class:`UserFilterRuleAllOfSet`,
     but looking for the first True result for short-circuiting.

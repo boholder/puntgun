@@ -454,7 +454,7 @@ class Client(object):
         return [resp_to_tweet(d) for d in resp.data]
 
 
-class NeedClient(object):
+class NeedClientMixin(object):
     """
     Some rules need a :class:`Client` to call for getting extra information.
     This class provides a lazy loading client field (call Client.singleton()).
