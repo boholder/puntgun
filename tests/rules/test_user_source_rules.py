@@ -8,7 +8,7 @@ from reactivex.internal import SequenceContainsNoElementsError
 
 from puntgun import client
 from puntgun.rules.config_parser import ConfigParser
-from puntgun.rules.user import User
+from puntgun.rules.data import User
 from puntgun.rules.user.source_rules import NameUserSourceRule, UserSourceRule
 
 

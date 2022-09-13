@@ -1,8 +1,10 @@
 from typing import ClassVar
 
+from rules.data import RuleResult
+
 from puntgun.client import NeedClient
-from puntgun.rules import FromConfig, RuleResult
-from puntgun.rules.user import User
+from puntgun.rules import FromConfig
+from puntgun.rules.data import User
 
 
 class UserActionRule(FromConfig):

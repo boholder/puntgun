@@ -13,7 +13,7 @@ from puntgun.client import (
     TwitterClientError,
 )
 from puntgun.record import Record
-from puntgun.rules.user import User
+from puntgun.rules.data import User
 
 
 class TestTwitterApiErrors:
@@ -21,7 +21,7 @@ class TestTwitterApiErrors:
     def errors(self):
         return TwitterApiErrors(
             query_func_name="func",
-            query_params=(1, 2, 3),
+            query_params={"a": 1},
             resp_errors=[
                 {
                     "value": "v",
@@ -46,7 +46,7 @@ class TestTwitterApiErrors:
         # check direct fields
         assert record.type == "twitter_api_errors"
         assert record.data.get("query_func_name") == parsed_errors.query_func_name == "func"
-        assert record.data.get("query_params") == parsed_errors.query_params == (1, 2, 3)
+        assert record.data.get("query_params") == parsed_errors.query_params == {"a": 1}
         assert len(record.data.get("errors")) == len(parsed_errors) == 1
 
         # check inner single api error

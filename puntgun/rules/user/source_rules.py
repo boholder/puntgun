@@ -7,7 +7,7 @@ from reactivex import operators as op
 
 from puntgun.client import NeedClient
 from puntgun.rules import FromConfig
-from puntgun.rules.user import User
+from puntgun.rules.data import User
 
 
 def handle_errors(func: Callable[..., rx.Observable]) -> Callable[..., rx.Observable]:

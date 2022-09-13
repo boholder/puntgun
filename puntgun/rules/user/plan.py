@@ -4,12 +4,13 @@ import reactivex as rx
 from loguru import logger
 from reactivex import Observable
 from reactivex import operators as op
+from rules.data import RuleResult
 
 from puntgun import rules
 from puntgun.record import Record, Recordable
-from puntgun.rules import Plan, RuleResult
+from puntgun.rules import Plan
 from puntgun.rules.config_parser import ConfigParser
-from puntgun.rules.user import User
+from puntgun.rules.data import User
 from puntgun.rules.user.action_rules import UserActionRule
 from puntgun.rules.user.filter_rules import UserFilterRule
 from puntgun.rules.user.rule_sets import (

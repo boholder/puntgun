@@ -4,14 +4,14 @@ import itertools
 import pydantic
 import pytest
 from hamcrest import all_of, assert_that, contains_string
+from rules.data import RuleResult
 
 from puntgun import rules
 from puntgun.rules import (
     FromConfig,
-    NumericRangeFilterRule,
+    NumericRangeCheckingMixin,
     Plan,
-    RuleResult,
-    TemporalRangeFilterRule,
+    TemporalRangeCheckingMixin,
 )
 from puntgun.rules.config_parser import ConfigParser
 
@@ -105,7 +105,7 @@ class TestConflictCheckFunction:
 class TestNumericRangeFilterRule:
     @pytest.fixture
     def rule(self):
-        return lambda conf: NumericRangeFilterRule.parse_obj(conf)
+        return lambda conf: NumericRangeCheckingMixin.parse_obj(conf)
 
     def test_no_field_configured_will_raise_exception(self, rule):
         with pytest.raises(pydantic.ValidationError) as e:
@@ -140,7 +140,7 @@ class TestNumericRangeFilterRule:
 class TestTemporalRangeFilterRule:
     @pytest.fixture
     def rule(self):
-        return lambda conf: TemporalRangeFilterRule.parse_obj(conf)
+        return lambda conf: TemporalRangeCheckingMixin.parse_obj(conf)
 
     def test_no_field_configured_will_raise_exception(self, rule):
         with pytest.raises(pydantic.ValidationError) as e:

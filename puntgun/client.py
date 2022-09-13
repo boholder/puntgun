@@ -7,8 +7,7 @@ from tweepy import Response
 
 from puntgun.conf import config, encrypto, secret
 from puntgun.record import Record, Recordable, Recorder
-from puntgun.rules.tweet import Tweet
-from puntgun.rules.user import User
+from puntgun.rules.data import Tweet, User
 
 
 class TwitterClientError(Exception):

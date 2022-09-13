@@ -3,14 +3,14 @@ import re
 from typing import ClassVar
 
 from reactivex import Observable
+from rules.data import RuleResult
 
 from puntgun.rules import (
     FromConfig,
-    NumericRangeFilterRule,
-    RuleResult,
-    TemporalRangeFilterRule,
+    NumericRangeCheckingMixin,
+    TemporalRangeCheckingMixin,
 )
-from puntgun.rules.user import User
+from puntgun.rules.data import User
 
 
 class UserFilterRule(FromConfig):
@@ -41,7 +41,7 @@ class PlaceHolderUserFilterRule(UserFilterRule):
         return RuleResult.true(self)
 
 
-class FollowerUserFilterRule(NumericRangeFilterRule, UserFilterRule):
+class FollowerUserFilterRule(NumericRangeCheckingMixin, UserFilterRule):
     """Check user's follower count."""
 
     _keyword: ClassVar[str] = "follower"
@@ -58,7 +58,7 @@ class ShortenFollowerUserFilterRule(UserFilterRule):
         return FollowerUserFilterRule(less_than=conf[cls._keyword])
 
 
-class FollowingUserFilterRule(NumericRangeFilterRule, UserFilterRule):
+class FollowingUserFilterRule(NumericRangeCheckingMixin, UserFilterRule):
     """Check user's following count."""
 
     _keyword: ClassVar[str] = "following"
@@ -75,7 +75,7 @@ class ShortenFollowingUserFilterRule(UserFilterRule):
         return FollowingUserFilterRule(more_than=conf[cls._keyword])
 
 
-class CreatedUserFilterRule(TemporalRangeFilterRule, UserFilterRule):
+class CreatedUserFilterRule(TemporalRangeCheckingMixin, UserFilterRule):
     """Check user (account) creating date."""
 
     _keyword: ClassVar[str] = "created"
@@ -122,7 +122,7 @@ class TextMatchUserFilterRule(UserFilterRule):
         )
 
 
-class FollowingCountRatioUserFilterRule(NumericRangeFilterRule, UserFilterRule):
+class FollowingCountRatioUserFilterRule(NumericRangeCheckingMixin, UserFilterRule):
     _keyword: ClassVar[str] = "following_count_ratio"
 
     def __call__(self, user: User) -> RuleResult:
@@ -137,7 +137,7 @@ class FollowingCountRatioLessThanUserFilterRule(UserFilterRule):
         return FollowingCountRatioUserFilterRule(less_than=conf[cls._keyword])
 
 
-class TweetCountUserFilterRule(NumericRangeFilterRule, UserFilterRule):
+class TweetCountUserFilterRule(NumericRangeCheckingMixin, UserFilterRule):
     _keyword: ClassVar[str] = "tweet_count"
 
     def __call__(self, user: User) -> RuleResult:

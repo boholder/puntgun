@@ -11,7 +11,7 @@ import pytest
 from dynaconf import Dynaconf
 
 from puntgun.rules.config_parser import ConfigParser
-from puntgun.rules.user import User
+from puntgun.rules.data import User
 from puntgun.rules.user.filter_rules import TextMatchUserFilterRule, UserFilterRule
 
 

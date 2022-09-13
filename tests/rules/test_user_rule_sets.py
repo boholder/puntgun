@@ -4,11 +4,11 @@ from typing import List, Optional
 import pytest
 import reactivex as rx
 from reactivex import operators as op
+from rules.data import RuleResult
 
 from puntgun.client import NeedClient
-from puntgun.rules import RuleResult
 from puntgun.rules.config_parser import ConfigParser
-from puntgun.rules.user import User
+from puntgun.rules.data import User
 from puntgun.rules.user.action_rules import UserActionRule
 from puntgun.rules.user.filter_rules import UserFilterRule
 from puntgun.rules.user.rule_sets import (

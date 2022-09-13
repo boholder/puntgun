@@ -4,7 +4,7 @@ I'm using this file as util module for rule stuff.
 import datetime
 import itertools
 import sys
-from typing import Any, ClassVar, List
+from typing import ClassVar, List
 
 from pydantic import BaseModel, Field, root_validator
 from reactivex import Observable
@@ -79,48 +79,6 @@ class Plan(FromConfig):
         raise NotImplementedError
 
 
-class RuleResult(object):
-    """
-    It's a special wrapper as filter/action rules' execution result.
-    After a rule's execution, it returns an instance of this class instead of directly return the boolean value,
-    zipping the rule instance itself with its boolean type filtering/operation result into one.
-
-    It's for constructing execution report that need to tell
-    WHICH filter rule is triggered or WHICH action rule is successfully executed.
-
-    Rather than using tuple structure,
-    we can simplify the logic by using bool(<result>) to get the boolean result
-    (python will automatically do that for us)
-    without extract/map the tuple before processing, so we can change lesser present code.
-    """
-
-    rule: FromConfig
-    result: bool
-
-    def __init__(self, rule: FromConfig, result: bool):
-        self.rule = rule
-        self.result = result
-
-    def __bool__(self) -> bool:
-        return self.result
-
-    def __eq__(self, other: Any) -> bool:
-        if isinstance(other, type(self)):
-            rule_equal = self.rule == other.rule
-            result_equal = self.result == other.result
-            return rule_equal and result_equal
-        else:
-            return False
-
-    @staticmethod
-    def true(rule: FromConfig) -> "RuleResult":
-        return RuleResult(rule, True)
-
-    @staticmethod
-    def false(rule: FromConfig) -> "RuleResult":
-        return RuleResult(rule, False)
-
-
 def validate_required_fields_exist(rule_keyword: str, conf: dict, required_field_names: List[str]) -> None:
     """
     Custom configuration parsing process
@@ -171,7 +129,7 @@ class FieldsRequired(BaseModel):
         return values
 
 
-class NumericRangeFilterRule(FromConfig, FieldsRequired):
+class NumericRangeCheckingMixin(FromConfig, FieldsRequired):
     """
     A filter rule delegating agent that
     checks if-within-a-range (min < v < max) of a numeric value.
@@ -192,7 +150,7 @@ class NumericRangeFilterRule(FromConfig, FieldsRequired):
         return self.more_than < num < self.less_than
 
 
-class TemporalRangeFilterRule(FromConfig, FieldsRequired):
+class TemporalRangeCheckingMixin(FromConfig, FieldsRequired):
     """
     Temporal value version of within-range checking agent.
     """
