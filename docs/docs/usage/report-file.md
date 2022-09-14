@@ -37,12 +37,11 @@ except for the records field, which is continuously expanded at runtime.
 }
 ```
 
-> **Note**
-> If the tool exits normally, **the last item of `records` is empty**.
->
-> It's a trade-off. JSON does not allow a comma to exist after the last item in the list,
-> and the writing of the records file is delegated to the logger library
-> (can not manually gain write access to report file and remove the extra comma).
+!!! note
+    If the tool exits normally, **the last item of `records` is empty**.
+    It's a trade-off. JSON does not allow a comma to exist after the last item in the list,
+    and the writing of the records file is delegated to the logger library
+    (can not manually gain write access to report file and remove the extra comma).
 
 ### Plan Id
 

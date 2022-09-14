@@ -14,6 +14,7 @@ nav:
       - configuration/detailed-plan-configuration.md
   - Development:
       - development/contributing.md
+      - development/custom-rules.md
       - development/security-policy.md
 
 theme:

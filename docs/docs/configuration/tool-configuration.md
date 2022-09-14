@@ -33,7 +33,7 @@ and you can [set an environment variable](#setting-via-environment-variable) for
 | `block_follower`           | true    | Whether to block users that following you                                                                                  |
 | `read_password_from_stdin` | false   | Instead of ask user input the password (for loading private key file) through terminal                                     |
 
-You can [search](https://github.com/search?q=%22settings.get%22+%22plans%22+repo%3Aboholder%2Fpuntgun+in%3Afile&type=code)
+You can [search](https://github.com/search?q=%22settings.get%22+repo%3Aboholder%2Fpuntgun+in%3Afile&type=code)
 how particular configuration is used in source code if you are interested.
 
 ## Setting via Environment Variable
