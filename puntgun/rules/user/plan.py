@@ -58,12 +58,15 @@ class UserPlanResult(Recordable):
             plan_id=record.data.get("plan_id", 0),
             target=User(id=user.get("id"), username=user.get("username")),
             # Trying to rebuild rule instances from record,
-            # but always result in config parsing errors and fake rule instance return values.
+            # but always result in config parsing errors and fake rule instance return values
+            # if that filter rule does not accept zero-field-initialization
+            # (passing {"keyword":{}} to constructor).
             filtering_result=RuleResult.true(
                 ConfigParser.parse({filter_rule_record.get("keyword"): {}}, UserFilterRule)
             ),
-            # Make sure every action rule can accept zero init arg, TODO write test for all action rules
-            # we depend on their type to perform undo operation.
+            # But we depend on action rules to find reverse action rules and perform undo operation,
+            # so we need to make sure that all action rules can accept zero-field-initialization.
+            # We even have written a test case for this.
             action_results=[
                 RuleResult(rule=ConfigParser.parse({r.get("keyword"): {}}, UserActionRule), result=r.get("done"))
                 for r in action_rule_results

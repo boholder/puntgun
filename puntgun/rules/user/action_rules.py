@@ -22,16 +22,9 @@ class UserActionRule(FromConfig):
 
 
 class BlockUserActionRule(UserActionRule, NeedClientMixin):
-    """
-    Block the given user.
-    TODO untested, no field in manual?
-    """
+    """Block the given user."""
 
     _keyword: ClassVar[str] = "block"
 
     def __call__(self, user: User) -> RuleResult:
         return RuleResult(self, self.client.block_user_by_id(user.id))
-
-    @classmethod
-    def parse_from_config(cls, conf: dict) -> "BlockUserActionRule":
-        return BlockUserActionRule()

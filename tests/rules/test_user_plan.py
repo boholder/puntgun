@@ -1,3 +1,6 @@
+import inspect
+import sys
+
 import pytest
 import reactivex as rx
 from hamcrest import all_of, assert_that, contains_string
@@ -189,3 +192,13 @@ class TestUserPlan:
         # test user with id=1 is thrown away and won't be applied actions
         # and users that id=0,2 are remained
         assert user_plan_result_checker.call_count == 2
+
+
+def test_init_all_user_action_rules_without_fields():
+    """
+    Make sure that all action rules can accept zero-field-initialization.
+    """
+    all_classes = inspect.getmembers(sys.modules["puntgun.rules.user.action_rules"], inspect.isclass)
+    for r in [r for (_, r) in all_classes if issubclass(r, UserActionRule)]:
+        # expect not raise errors
+        r.parse_from_config({r.keyword(): {}})
