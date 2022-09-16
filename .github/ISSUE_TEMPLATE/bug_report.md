@@ -27,7 +27,7 @@ https://github.com/boholder/puntgun/issues?q=enter+your+keyword
 - [ ] I have searched the Internet, documentation, issue tracker and Q&A... still can not find the answer.
 - [ ] But there are similar or relative issues exist: <!-- issue numbers: e.g. #1 #2 -->
 
-## Steps to reproduce (how you used this tool)
+## Steps to Reproduce (how you used this tool)
 
 <!--
 The minimized example of how to reproduce the bug.
@@ -41,13 +41,13 @@ If you can tell that a particular user or tweet information returned by Twitter 
 is causing the error, please paste its id or the entire information structure.
 -->
 
-## Expected behavior
+## Expected Behavior
 
 <!--What you expected to happen-->
 
 Runs to completion without error.
 
-## Actual behavior
+## Actual Behavior
 
 <!--What you actually see-->
 

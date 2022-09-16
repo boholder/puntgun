@@ -12,11 +12,11 @@ This documentation about contributing and local developing may help you:
 https://github.com/boholder/puntgun/blob/main/CONTRIBUTING.md
 -->
 
-## Problem or goal
+## Problem or Goal
 
 <!--What problems you are going to solve or what goals you are going to accomplish-->
 
-## Solution planning
+## Solution Planning
 
 <!--
 Describe how you plan to do this, or ask us questions about it.
