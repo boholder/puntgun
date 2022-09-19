@@ -86,3 +86,11 @@ class IdUserSourceRule(UserSourceRule, NeedClientMixin):
     @classmethod
     def parse_from_config(cls, conf: dict) -> "IdUserSourceRule":
         return cls.parse_obj(conf)
+
+
+class MyFollowerUserSourceRule(UserSourceRule, NeedClientMixin):
+    """Take users from current account's followers."""
+
+    _keyword = "my_follower"
+    ids: List[int]
+

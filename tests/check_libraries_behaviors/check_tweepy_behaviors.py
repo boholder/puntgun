@@ -60,4 +60,5 @@ def get_tweet():
     print(tweets)
 
 
-get_tweet()
+# get_tweet()
+get_follower_list()
