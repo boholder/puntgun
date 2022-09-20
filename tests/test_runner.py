@@ -8,7 +8,7 @@ from reactivex import operators as op
 
 from puntgun import runner
 from puntgun.record import Record, Recordable, load_report
-from puntgun.rules import FromConfig, Plan
+from puntgun.rules.base import FromConfig, Plan
 from puntgun.rules.config_parser import ConfigParser
 
 

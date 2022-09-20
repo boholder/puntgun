@@ -24,7 +24,7 @@ import orjson
 from loguru import logger
 
 from puntgun.conf import config
-from puntgun.rules import Plan
+from puntgun.rules.base import Plan
 
 
 class Record(object):

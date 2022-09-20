@@ -1,4 +1,4 @@
-from typing import Any, Callable, ClassVar, List
+from typing import ClassVar, List
 
 import reactivex as rx
 from loguru import logger
@@ -6,19 +6,8 @@ from reactivex import Observable
 from reactivex import operators as op
 
 from puntgun.client import NeedClientMixin
-from puntgun.rules import FromConfig
+from puntgun.rules.base import FromConfig
 from puntgun.rules.data import User
-
-
-def handle_errors(func: Callable[..., rx.Observable]) -> Callable[..., rx.Observable]:
-    def log_and_throw(e: Exception, _: Any) -> rx.Observable:
-        logger.error("An exception is thrown from source rules and stops the pipeline.")
-        return rx.throw(e)
-
-    def wrapper(*args: Any, **kwargs: Any) -> rx.Observable:
-        return func(*args, **kwargs).pipe(op.catch(log_and_throw))
-
-    return wrapper
 
 
 class UserSourceRule(FromConfig):
@@ -44,7 +33,6 @@ class NameUserSourceRule(UserSourceRule, NeedClientMixin):
     _keyword: ClassVar[str] = "names"
     names: List[str]
 
-    @handle_errors
     def __call__(self) -> rx.Observable:
         return rx.from_iterable(self.names).pipe(
             # Some Twitter API limits the number of usernames
@@ -74,7 +62,6 @@ class IdUserSourceRule(UserSourceRule, NeedClientMixin):
     _keyword: ClassVar[str] = "ids"
     ids: List[int | str]
 
-    @handle_errors
     def __call__(self) -> rx.Observable:
         return rx.from_iterable(self.ids).pipe(
             # this api also allows to query 100 users at once.
@@ -92,5 +79,10 @@ class MyFollowerUserSourceRule(UserSourceRule, NeedClientMixin):
     """Take users from current account's followers."""
 
     _keyword = "my_follower"
-    ids: List[int]
+    # last (newest) N followers
+    last: int
+    #
+    before: str
 
+    def __call__(self) -> rx.Observable:
+        pass

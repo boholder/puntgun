@@ -4,16 +4,17 @@ import itertools
 import pydantic
 import pytest
 from hamcrest import all_of, assert_that, contains_string
-from rules.data import RuleResult
 
 from puntgun import rules
-from puntgun.rules import (
+from puntgun.rules.base import (
     FromConfig,
     NumericRangeCheckingMixin,
     Plan,
     TemporalRangeCheckingMixin,
+    validate_fields_conflict,
 )
 from puntgun.rules.config_parser import ConfigParser
+from puntgun.rules.data import RuleResult
 
 
 class TestRuleType:
@@ -71,7 +72,7 @@ class TestConflictCheckFunction:
         # the field "e" isn't configured in "values", so it shouldn't show in error message.
         conflict_field_groups = [["a", "b", "e"], ["c"], ["d"]]
         with pytest.raises(ValueError) as e:
-            rules.validate_fields_conflict(values, conflict_field_groups)
+            validate_fields_conflict(values, conflict_field_groups)
 
         assert_that(
             str(e).replace(" ", ""),
@@ -88,7 +89,7 @@ class TestConflictCheckFunction:
         # the field "e" isn't configured in "values", so it shouldn't show in error message.
         conflict_field_groups = [["a", "b", "e"], ["c", "d"]]
         with pytest.raises(ValueError) as e:
-            rules.validate_fields_conflict(values, conflict_field_groups)
+            validate_fields_conflict(values, conflict_field_groups)
 
         assert_that(
             str(e).replace(" ", ""), all_of(contains_string("conflict"), contains_string("(['a','b'],['c','d'])"))
@@ -97,7 +98,7 @@ class TestConflictCheckFunction:
     def test_no_conflict(self):
         values = {"a": 1, "b": 2}
         conflict_field_groups = [["a", "b"], ["c"]]
-        rules.validate_fields_conflict(values, conflict_field_groups)
+        validate_fields_conflict(values, conflict_field_groups)
         # values not change
         assert values == {"a": 1, "b": 2}
 

@@ -8,7 +8,7 @@ from reactivex import operators as op
 from rules.data import RuleResult
 
 from puntgun.record import Record
-from puntgun.rules import Plan
+from puntgun.rules.base import Plan
 from puntgun.rules.config_parser import ConfigParser
 from puntgun.rules.data import User
 from puntgun.rules.user.action_rules import UserActionRule

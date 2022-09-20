@@ -5,7 +5,7 @@ from typing import Any, List, Type, TypeVar
 from loguru import logger
 from pydantic import ValidationError
 
-from puntgun.rules import FromConfig
+from puntgun.rules.base import FromConfig
 
 
 def import_rule_classes() -> None:

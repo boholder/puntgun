@@ -1,7 +1,7 @@
 from typing import ClassVar
 
 from puntgun.client import NeedClientMixin
-from puntgun.rules import FromConfig
+from puntgun.rules.base import FromConfig
 from puntgun.rules.data import RuleResult, User
 
 

@@ -5,7 +5,7 @@ from typing import ClassVar
 from reactivex import Observable
 from rules.data import RuleResult
 
-from puntgun.rules import (
+from puntgun.rules.base import (
     FromConfig,
     NumericRangeCheckingMixin,
     TemporalRangeCheckingMixin,

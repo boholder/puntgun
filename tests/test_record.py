@@ -6,7 +6,7 @@ import pytest
 from reactivex import Observable
 
 from puntgun.record import Record, Recordable, Recorder, load_report
-from puntgun.rules import Plan
+from puntgun.rules.base import Plan
 
 
 class TestRecord:

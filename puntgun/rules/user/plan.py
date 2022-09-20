@@ -6,9 +6,8 @@ from reactivex import Observable
 from reactivex import operators as op
 from rules.data import RuleResult
 
-from puntgun import rules
 from puntgun.record import Record, Recordable
-from puntgun.rules import Plan
+from puntgun.rules.base import Plan, validate_required_fields_exist
 from puntgun.rules.config_parser import ConfigParser
 from puntgun.rules.data import User
 from puntgun.rules.user.action_rules import UserActionRule
@@ -93,7 +92,7 @@ class UserPlan(Plan):
         # we won't directly extract values from configuration and assign them to fields,
         # so custom validation is needed
         # as we can't use pydantic library's validating function on fields.
-        rules.validate_required_fields_exist(cls._keyword, conf, ["from", "do"])
+        validate_required_fields_exist(cls._keyword, conf, ["from", "do"])
 
         # need at least one default filter rule to keep plan execution functionally
         if "that" not in conf:

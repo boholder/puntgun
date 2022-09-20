@@ -6,7 +6,8 @@ from datetime import datetime
 from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, validator
-from puntgun.rules import FromConfig
+
+from puntgun.rules.base import FromConfig
 
 default_time = datetime.utcnow()
 

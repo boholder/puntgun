@@ -14,7 +14,7 @@ from reactivex.scheduler import ThreadPoolScheduler
 from puntgun.client import Client
 from puntgun.conf import config
 from puntgun.record import Recordable, Recorder
-from puntgun.rules import Plan
+from puntgun.rules.base import Plan
 from puntgun.rules.config_parser import ConfigParser
 
 
