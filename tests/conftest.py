@@ -72,6 +72,7 @@ def user_id_sequence_checker():
 
         # let test cases to verify the consumer is really running
         check_result.call_count = call_count
+        check_result.called_user_ids = called_user_ids
 
     return check_result
 

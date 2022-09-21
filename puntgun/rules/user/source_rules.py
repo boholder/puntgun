@@ -1,4 +1,5 @@
-from typing import ClassVar, List
+import itertools
+from typing import ClassVar, List, Optional
 
 import reactivex as rx
 from loguru import logger
@@ -6,7 +7,7 @@ from reactivex import Observable
 from reactivex import operators as op
 
 from puntgun.client import NeedClientMixin
-from puntgun.rules.base import FromConfig
+from puntgun.rules.base import FromConfig, validate_fields_conflict
 from puntgun.rules.data import User
 
 
@@ -33,14 +34,14 @@ class NameUserSourceRule(UserSourceRule, NeedClientMixin):
     _keyword: ClassVar[str] = "names"
     names: List[str]
 
-    def __call__(self) -> rx.Observable:
+    def __call__(self) -> rx.Observable[User]:
         return rx.from_iterable(self.names).pipe(
             # Some Twitter API limits the number of usernames
             # in a single request up to 100 like this one.
             # At least we needn't query one by one.
             op.buffer_with_count(100),
             # log for debug
-            op.do(rx.Observer(on_next=lambda users: logger.debug("Buffered user names: {}", users))),
+            op.do(rx.Observer(on_next=lambda users: logger.debug("Batch of usernames to client: {}", users))),
             op.map(self.client.get_users_by_usernames),
             op.flat_map(lambda x: x),
             op.do(rx.Observer(on_next=lambda u: logger.debug("User from client: {}", u))),
@@ -62,12 +63,14 @@ class IdUserSourceRule(UserSourceRule, NeedClientMixin):
     _keyword: ClassVar[str] = "ids"
     ids: List[int | str]
 
-    def __call__(self) -> rx.Observable:
+    def __call__(self) -> rx.Observable[User]:
         return rx.from_iterable(self.ids).pipe(
             # this api also allows to query 100 users at once.
             op.buffer_with_count(100),
+            op.do(rx.Observer(on_next=lambda ids: logger.debug("Batch of user ids to client: {}", ids))),
             op.map(self.client.get_users_by_ids),
             op.flat_map(lambda x: x),
+            op.do(rx.Observer(on_next=lambda u: logger.debug("User from client: {}", u))),
         )
 
     @classmethod
@@ -78,11 +81,44 @@ class IdUserSourceRule(UserSourceRule, NeedClientMixin):
 class MyFollowerUserSourceRule(UserSourceRule, NeedClientMixin):
     """Take users from current account's followers."""
 
-    _keyword = "my_follower"
+    _keyword = "my_followers"
     # last (newest) N followers
-    last: int
-    #
-    before: str
+    last: Optional[int]
+    # first (oldest) N followers
+    first: Optional[int]
+    # new followers after someone (@username)
+    after_user: Optional[str]
 
-    def __call__(self) -> rx.Observable:
-        pass
+    @classmethod
+    def parse_from_config(cls, conf: dict) -> "FromConfig":
+        fields = conf.get(cls._keyword)
+        validate_fields_conflict(fields, [["last"], ["first"], ["after_user"]])
+        return cls.parse_obj(fields)
+
+    def __call__(self) -> rx.Observable[User]:
+        followers = self.client.cached_follower()
+        has_field_configured = self.last or self.first or self.after_user
+        if has_field_configured:
+            return rx.from_iterable(self._take_part_of_followers(followers))
+        else:
+            # if no field, return all followers
+            return rx.from_iterable(followers)
+
+    def _take_part_of_followers(self, followers: List[User]) -> List[User]:
+        if self.last:
+            # the follower API response puts newer followers on list head.
+            return followers[: self.last]
+        elif self.first:
+            return followers[-self.first :]
+        else:
+            # find given follower
+            peak = next(filter(lambda u: u.username == self.after_user, followers), None)
+            if peak is None:
+                logger.warning(
+                    "Could not find given follower username [{}] in current followers, "
+                    "will skip this follower user source rule.",
+                    self.after_user,
+                )
+                return []
+            else:
+                return list(itertools.takewhile(lambda u: u.id != peak.id, followers))

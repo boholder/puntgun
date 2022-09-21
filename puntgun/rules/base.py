@@ -93,6 +93,11 @@ def validate_required_fields_exist(rule_keyword: str, conf: dict, required_field
 
 
 def validate_fields_conflict(values: dict, field_groups: List[List[str]]) -> None:
+    """
+    :param values: configuration dictionary
+    :param field_groups: no conflict inside each group
+    :return:
+    """
     # only fields that are configured will be count in.
     for i in range(len(field_groups)):
         field_groups[i] = [f for f in field_groups[i] if values.get(f)]
@@ -113,12 +118,17 @@ def validate_fields_conflict(values: dict, field_groups: List[List[str]]) -> Non
 
     if len(conflicts) > 0:
         raise ValueError(
-            f"Configured fields have conflicts, you should chose one group of fields "
-            f"to configurate in each conflict: {conflicts}"
+            f"Configured fields have conflicts, "
+            f"you should select one group of fields to resolve each conflict: {conflicts}"
         )
 
 
 class FieldsRequired(BaseModel):
+    """
+    To patch for the fact that pydantic does not validate required fields that
+    have default values (for avoiding invalid "data states").
+    """
+
     @root_validator(pre=True)
     def there_should_be_fields(cls, values: dict) -> dict:
         if len(values) == 0:

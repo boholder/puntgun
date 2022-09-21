@@ -54,12 +54,12 @@ class TestRuleResult:
 
 
 class TestPlan:
-    def test_incremental_id(self):
+    def test_incremental_id(self, monkeypatch):
         class P(Plan):
             pass
 
         # avoid other test cases affection, reset the counter
-        rules.plan_id_iter = itertools.count()
+        monkeypatch.setattr(rules.base, "plan_id_iter", itertools.count())
 
         assert P(name="").id == 0
         assert P(name="").id == 1
@@ -101,6 +101,10 @@ class TestConflictCheckFunction:
         validate_fields_conflict(values, conflict_field_groups)
         # values not change
         assert values == {"a": 1, "b": 2}
+
+    def test_no_field_so_no_conflict(self):
+        conflict_field_groups = [["a"], ["c"]]
+        validate_fields_conflict({}, conflict_field_groups)
 
 
 class TestNumericRangeFilterRule:
