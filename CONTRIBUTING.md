@@ -2,7 +2,7 @@
 
 Thank you for considering making this tool better.
 
-You'll need a [GitHub account](https://github.com/) to participate in contributing,
+You'll need a [GitHub account](https://github.com/) to participate in contribution,
 which can be an obstacle, and I apologize for that.
 You can also [email me](mailto:bottleholder@anche.no) (I generally check email once a week),
 but it is difficult for me personally to reply to everyone appropriately,
@@ -12,7 +12,7 @@ There is no strict limit to how and what you can contribute, here are a few ways
 
 ## Programming aspect
 
-* Improving unsatisfied code: There are some unsatisfactory pieces of logic in the code, they work, but they deserve to be better.
+* Improving unsatisfied code: There are some unsatisfactory code pieces, they work, but they deserve to be better.
   You can find them by [searching for **IMPROVE** marks](https://github.com/search?q=%22IMPROVE%22+repo%3Aboholder%2Fpuntgun+in%3Afile&type=code)
   in the code.
 * Join the discussion about or deal with [unclosed issues](https://github.com/boholder/puntgun/issues).
@@ -52,11 +52,11 @@ the code for this project is open source under [the MIT license](https://github.
 and you do not need to get anyone's permission to make changes to (your fork of) this project,
 **you just need to make it work for your personal needs**.
 If you feel that your changes will also benefit the upstream, you can submit a Pull Request to the upstream,
-and only then does the "contribution" begin.
+and only then does the "contributing" begin.
 
-### PR should pass lint checks
+### PR should pass lint checks and unit test suite
 
-Remember to run `pdm run lint` and make sure all checks pass before creating Pull Request,
+Remember to run `pdm run lint` and `pdm run test` to make sure all checks pass before creating Pull Request,
 [the CI](https://github.com/boholder/puntgun/blob/main/.github/workflows/test.yml) will fail if any lint tool complains.
 
 ### Remember to write changelog
