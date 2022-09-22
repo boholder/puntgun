@@ -56,9 +56,24 @@ def get_follower_list():
 def get_tweet():
     c = Client.singleton()
     # TwitterDev's tweet
-    tweets = c.get_tweets_by_ids(["1561805413103853570", "1542891693044912128"])
+    tweets = c.get_tweets_by_ids(
+        [
+            # media photo
+            "1561805413103853570",
+            # media video
+            "1542891693044912128",
+            # quote retweet
+            "1562922967134539778",
+            # poll (vote)
+            "1571311257323708427",
+            # reply
+            "1559638635934371841",
+            # directly retweet
+            # (will not contain the info about user who did the retweet action)
+            "1549477965381206017",
+        ]
+    )
     print(tweets)
 
 
-# get_tweet()
-get_follower_list()
+get_tweet()

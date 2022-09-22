@@ -247,7 +247,7 @@ class Client(object):
         # tweepy 4.10.0 changed return structure of tweepy.Client.get_me()
         # it's different from tweepy.Client.get_user()'s return structure
         # it's not the "data: [my_data]", but "data: my_data"
-        self.me = User.from_response(self.clt.get_me().data, "")
+        self.me = User.from_response(self.clt.get_me().data)
         self.id = self.me.id
         self.name = self.me.name
 
@@ -292,19 +292,13 @@ class Client(object):
         if not resp.data:
             return []
 
-        pinned_tweets = resp.includes.get("tweets", [])
+        pinned_tweets = [Tweet.from_response(d) for d in resp.includes.get("tweets", [])]
 
         def map_one(data: dict) -> User:
             """Build one user instance"""
-
             # find this user's pinned tweet
-            # Twitter's response doesn't guarantee the order of pinned tweets,
-            # because there are users who don't have pinned tweets:
-            # resp.data: [u1(has), u2(hasn't), u3(has)]
-            # resp.includes.tweets: [u1_pinned_tweet, u3_pinned_tweet]
-            pinned_tweet = [t for t in pinned_tweets if t["id"] == data["pinned_tweet_id"]]
-            pinned_tweet_text = pinned_tweet[0]["text"] if pinned_tweet else ""
-            return User.from_response(data, pinned_tweet_text)
+            pinned_tweet = next(filter(lambda t: t.id == data.get("pinned_tweet_id"), pinned_tweets), Tweet())
+            return User.from_response(data, pinned_tweet)
 
         return [map_one(d) for d in resp.data]
 
@@ -378,7 +372,7 @@ class Client(object):
 
     @staticmethod
     def _paged_api_querier(
-            clt_func: Callable[..., Response], params: dict, pagination_token: str = None
+        clt_func: Callable[..., Response], params: dict, pagination_token: str = None
     ) -> tweepy.Response:
         """
         A recursion style generator that continue querying next page until hit the end.
@@ -436,13 +430,48 @@ class Client(object):
     @staticmethod
     def _resp_to_tweet(resp: tweepy.Response) -> List[Tweet]:
         """Build a list of :class:`Tweet` instances from one response."""
-        # TODO unfinished
         if not resp.data:
             return []
 
+        # get data in "includes" field
+        # these items can be found by searching "includes." on official doc
+        authors = [User.from_response(d) for d in resp.includes.get("users", [])]
+        places = resp.includes.get("places", [])
+        mediums = resp.includes.get("media", [])
+        polls = resp.includes.get("polls", [])
+        tweets = [Tweet.from_response(d) for d in resp.includes.get("tweets", [])]
+
         def map_one(data: dict) -> Tweet:
             """Build one tweet instance"""
-            return Tweet(data)
+
+            # IMPROVE: Each attribute's translating logic is slightly different from others,
+            # so I can't reduce the code length by reusing a template function.
+            author = next(filter(lambda u: u.id == data["author_id"], authors), User())
+
+            if data["geo"] is not None:
+                place: dict = next(filter(lambda p: p["place_id"] == data["geo"]["place_id"], places), {})
+            else:
+                place = {}
+
+            attachments_data = data["attachments"] if data["attachments"] is not None else {}
+
+            if "media_keys" in attachments_data:
+                tweet_mediums = list(filter(lambda m: m["media_key"] in data["attachments"]["media_keys"], mediums))
+            else:
+                tweet_mediums = []
+
+            if "poll_ids" in attachments_data:
+                tweet_polls = list(filter(lambda p: p["id"] in data["attachments"]["poll_ids"], polls))
+            else:
+                tweet_polls = []
+
+            if data["referenced_tweets"] is not None:
+                referenced_tweet_ids = [t["id"] for t in data["referenced_tweets"]]
+                referenced_tweets = list(filter(lambda t: t.id in referenced_tweet_ids, tweets))
+            else:
+                referenced_tweets = []
+
+            return Tweet.from_response(data, author, tweet_mediums, tweet_polls, place, referenced_tweets)
 
         return [map_one(d) for d in resp.data]
 

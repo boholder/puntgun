@@ -37,7 +37,7 @@ class Record(object):
         self.data = data
 
     def to_json(self) -> bytes:
-        """Translate this record into a yaml-list-item format string"""
+        """Transform this record into a yaml-list-item format string"""
         return orjson.dumps({"type": self.type, "data": self.data})
 
     @staticmethod
