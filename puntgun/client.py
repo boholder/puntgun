@@ -33,21 +33,14 @@ class TwitterApiError(Exception):
     @staticmethod
     def from_response(resp_error: dict) -> "TwitterApiError":
         # build an accurate error type according to the response content
-        for subclass in TwitterApiError.__subclasses__():
-            if subclass.title == resp_error.get("title"):
-                return subclass(
-                    title=resp_error.get("title", ""),
-                    # when parsing from Twitter API response, key is 'type'
-                    # when parsing from :class:`Record` instance, key is 'ref_url'
-                    ref_url=resp_error.get("type", resp_error.get("ref_url", "")),
-                    detail=resp_error.get("detail", ""),
-                    parameter=resp_error.get("parameter", ""),
-                    value=resp_error.get("value", ""),
-                )
+        singleton_iter = (c for c in TwitterApiError.__subclasses__() if c.title == resp_error.get("title"))
+        # if we haven't written a subclass for given error, return the generic error (in default value way)
+        error_type = next(singleton_iter, TwitterApiError)
 
-        # if we haven't written a subclass for given error, return generic error
-        return TwitterApiError(
+        return error_type(
             title=resp_error.get("title", ""),
+            # when parsing from Twitter API response, key is 'type'
+            # when parsing from :class:`Record` instance, key is 'ref_url'
             ref_url=resp_error.get("type", resp_error.get("ref_url", "")),
             detail=resp_error.get("detail", ""),
             parameter=resp_error.get("parameter", ""),
@@ -301,7 +294,7 @@ class Client(object):
 
         pinned_tweets = resp.includes.get("tweets", [])
 
-        def resp_to_user(data: dict) -> User:
+        def map_one(data: dict) -> User:
             """Build one user instance"""
 
             # find this user's pinned tweet
@@ -313,7 +306,7 @@ class Client(object):
             pinned_tweet_text = pinned_tweet[0]["text"] if pinned_tweet else ""
             return User.from_response(data, pinned_tweet_text)
 
-        return [resp_to_user(d) for d in resp.data]
+        return [map_one(d) for d in resp.data]
 
     def get_blocked(self) -> List[User]:
         """
@@ -385,7 +378,7 @@ class Client(object):
 
     @staticmethod
     def _paged_api_querier(
-        clt_func: Callable[..., Response], params: dict, pagination_token: str = None
+            clt_func: Callable[..., Response], params: dict, pagination_token: str = None
     ) -> tweepy.Response:
         """
         A recursion style generator that continue querying next page until hit the end.
@@ -447,11 +440,11 @@ class Client(object):
         if not resp.data:
             return []
 
-        def resp_to_tweet(data: dict) -> Tweet:
+        def map_one(data: dict) -> Tweet:
             """Build one tweet instance"""
             return Tweet(data)
 
-        return [resp_to_tweet(d) for d in resp.data]
+        return [map_one(d) for d in resp.data]
 
 
 class NeedClientMixin(object):

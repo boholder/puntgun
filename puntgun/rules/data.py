@@ -15,14 +15,7 @@ default_time = datetime.utcnow()
 class User(BaseModel):
     """
     DTO, one instance represents one user(Twitter account)'s basic information.
-
-    The attributes are a subset of the fields in the Twitter user info query API response,
-    I only pick those can be used in judgment.
-    You can easily guess the meaning of the attributes by their name.
-
     https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-id
-
-    This class is highly affect by return values of :class:`tweepy.Client`.
     """
 
     # Any field can be None for avoiding validation error raising
@@ -70,15 +63,11 @@ class User(BaseModel):
 
     @staticmethod
     def from_response(resp_data: dict, pinned_tweet_text: str) -> "User":
-        # tweepy 4.10.0 changed return structure of tweepy.Client.get_me()
-        # lacking most of the response field, helps enhancement of this constructor.
-
         # there may be no such user exist corresponding to the given id or username
         # in this case, the response.data = None
         if not resp_data:
             return User()
 
-        # has this field and is not none
         public_metrics = resp_data["public_metrics"] if ("public_metrics" in resp_data) else {}
 
         return User(
