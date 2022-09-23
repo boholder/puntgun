@@ -62,7 +62,7 @@ def get_tweet():
             "1561805413103853570",
             # media video
             "1542891693044912128",
-            # quote retweet
+            # quote tweet
             "1562922967134539778",
             # poll (vote)
             "1571311257323708427",
@@ -76,4 +76,14 @@ def get_tweet():
     print(tweets)
 
 
-get_tweet()
+def get_liking_users_of_tweet():
+    users = Client.singleton().get_users_who_like_tweet("1542891693044912128")
+    print(users)
+
+
+def get_retweet_tweet():
+    users = Client.singleton().get_users_who_retweet_tweet("1542891693044912128")
+    print(users)
+
+
+get_retweet_tweet()

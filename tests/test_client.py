@@ -11,7 +11,7 @@ from puntgun.client import (
     ResourceNotFoundError,
     TwitterApiErrors,
     TwitterClientError,
-    paging_api_iter,
+    paged_api_iter,
     response_to_users,
 )
 from puntgun.record import Record
@@ -59,6 +59,202 @@ class TestTwitterApiErrors:
         assert error.get("title") == p_error.title == "test api error"
         assert error.get("parameter") == p_error.parameter == "p"
         assert error.get("ref_url") == p_error.ref_url == "t"
+
+
+class TestUserQuerying:
+    """
+    For now, I figure out there are three kinds of rules data in response (responded by Twitter(tweepy.Client)):
+        1. rules who has pinned tweet, rules data in "data" field, pinned tweet in "includes.tweets" field
+        2. rules who don't have pinned tweet, only rules data in "data" field
+        3. rules do not exist (returned in "errors" field)
+
+    The test cases are simulating these situations, test data are from real responses.
+    There are some cases also test the constructing and default value replacing logic of :class:`User`.
+
+    We'll test both `get_by_username` and `get_by_id` methods, they are too similar.
+
+    get by id: https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users
+
+    get by username: https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-by
+    """
+
+    def test_response_translating(self, normal_user_response):
+        assert_normal_user(response_to_users(normal_user_response)[0])
+
+    def test_tweepy_exception_handling(self, mock_tweepy_client):
+        mock_tweepy_client.get_users = MagicMock(side_effect=tweepy.errors.TweepyException("inner"))
+        with pytest.raises(TwitterClientError) as e:
+            Client(mock_tweepy_client).get_users_by_usernames(["whatever"])
+        assert_that(str(e), contains_string("client"))
+        assert_that(str(e.value.__cause__), contains_string("inner"))
+
+    def test_get_normal_user(self, normal_user_response, mock_user_getting_tweepy_client):
+        assert_normal_user(
+            Client(mock_user_getting_tweepy_client(normal_user_response)).get_users_by_usernames(["whatever"])[0]
+        )
+
+        assert_normal_user(Client(mock_user_getting_tweepy_client(normal_user_response)).get_users_by_ids([1])[0])
+
+    def test_get_no_pinned_tweet_user(self, no_pinned_tweet_user_response, mock_user_getting_tweepy_client):
+        assert_no_pinned_tweet_user(
+            Client(mock_user_getting_tweepy_client(no_pinned_tweet_user_response)).get_users_by_usernames(["whatever"])[
+                0
+            ]
+        )
+
+        assert_no_pinned_tweet_user(
+            Client(mock_user_getting_tweepy_client(no_pinned_tweet_user_response)).get_users_by_ids([1])[0]
+        )
+
+    def test_get_not_exist_user(self, not_exist_user_response, mock_user_getting_tweepy_client, monkeypatch):
+        # check get by username method
+        mock_recorder = MagicMock()
+        monkeypatch.setattr("puntgun.record.Recorder.record", mock_recorder)
+        Client(mock_user_getting_tweepy_client(not_exist_user_response)).get_users_by_usernames(["whatever"])
+        # recorder received api error
+        assert_user_not_exist_error(mock_recorder)
+
+        # check get by id method
+        mock_recorder.reset_mock()
+        Client(mock_user_getting_tweepy_client(not_exist_user_response)).get_users_by_ids([1])
+        assert_user_not_exist_error(mock_recorder)
+
+    def test_get_all_users(self, mixed_response, mock_user_getting_tweepy_client, monkeypatch):
+        # check get by username method
+        mock_recorder = MagicMock()
+        monkeypatch.setattr("puntgun.record.Recorder.record", mock_recorder)
+        users = Client(mock_user_getting_tweepy_client(mixed_response)).get_users_by_usernames(["whatever"])
+        assert_normal_user(users[0])
+        assert_no_pinned_tweet_user(users[1])
+        assert_user_not_exist_error(mock_recorder)
+
+        # check get by id method
+        mock_recorder.reset_mock()
+        users = Client(mock_user_getting_tweepy_client(mixed_response)).get_users_by_ids([1])
+        assert_normal_user(users[0])
+        assert_no_pinned_tweet_user(users[1])
+        assert_user_not_exist_error(mock_recorder)
+
+    def test_pass_more_than_100_users_will_raise_error(self, normal_user_response, mock_user_getting_tweepy_client):
+        with pytest.raises(ValueError) as e:
+            Client(mock_user_getting_tweepy_client(normal_user_response)).get_users_by_ids(["1"] * 101)
+        assert_that(str(e), contains_string("100"))
+
+        with pytest.raises(ValueError) as e:
+            Client(mock_user_getting_tweepy_client(normal_user_response)).get_users_by_ids([1] * 101)
+        assert_that(str(e), contains_string("100"))
+
+
+class TestPagedApiIter:
+    def test_paged_api_querier(self):
+        mock_clt_func = MagicMock(
+            side_effect=[
+                response_with(meta={"next_token": 0}, data=[{"k": 0}]),
+                response_with(meta={"next_token": 1}, data=[{"k": 1}]),
+                # the last one does not have next_token
+                response_with(data=[{"k": 2}]),
+            ]
+        )
+        actual = list(paged_api_iter(mock_clt_func, {"a": "b"}))
+
+        assert mock_clt_func.call_count == 3
+        # test return values
+        for i in range(3):
+            assert actual[i].data[0]["k"] == i
+        # test invoking args
+        for i in range(1, 3):
+            assert mock_clt_func.call_args_list[i] == mock.call(max_results=1000, a="b", pagination_token=i - 1)
+
+    def test_paged_api_querier_with_one_page(self):
+        mock_clt_func = MagicMock(return_value=response_with(data=[{"k": 0}]))
+        actual = list(paged_api_iter(mock_clt_func, {}))
+        assert actual[0].data[0]["k"] == 0
+
+
+class TestPagedUserApi:
+    def test_get_blocked(self, mock_tweepy_client):
+        # the client will transform the {"id": 0} into User(id=0)
+        mock_tweepy_client.get_blocked = MagicMock(
+            side_effect=[response_with(meta={"next_token": 0}, data=[{"id": 0}]), response_with(data=[{"id": 1}])]
+        )
+        mock_tweepy_client.get_blocked.__name__ = "mock_get_blocked_func"
+
+        id_list = Client(mock_tweepy_client).cached_blocked_id_list()
+
+        for i in range(2):
+            # check user id
+            assert id_list[i] == i
+
+    def test_get_following(self, mock_tweepy_client):
+        mock_tweepy_client.get_users_following = MagicMock(
+            side_effect=[response_with(meta={"next_token": 0}, data=[{"id": 0}]), response_with(data=[{"id": 1}])]
+        )
+        mock_tweepy_client.get_users_following.__name__ = "mock_get_users_following_func"
+        id_list = Client(mock_tweepy_client).cached_following_id_list()
+        for i in range(2):
+            assert id_list[i] == i
+
+    def test_get_follower(self, mock_tweepy_client):
+        mock_tweepy_client.get_users_followers = MagicMock(
+            side_effect=[response_with(meta={"next_token": 0}, data=[{"id": 0}]), response_with(data=[{"id": 1}])]
+        )
+        mock_tweepy_client.get_users_followers.__name__ = "mock_get_users_followers_func"
+        id_list = Client(mock_tweepy_client).cached_follower_id_list()
+        for i in range(2):
+            assert id_list[i] == i
+
+    def test_get_users_who_like_tweet(self, mock_tweepy_client):
+        mock_tweepy_client.get_liking_users = MagicMock(
+            side_effect=[response_with(meta={"next_token": 0}, data=[{"id": 0}]), response_with(data=[{"id": 1}])]
+        )
+        mock_tweepy_client.get_liking_users.__name__ = "mock_get_users_who_like_tweet_func"
+        users = Client(mock_tweepy_client).get_users_who_like_tweet(123)
+        for i in range(2):
+            assert users[i].id == i
+
+    def test_get_users_who_retweet_tweet(self, mock_tweepy_client):
+        mock_tweepy_client.get_retweeters = MagicMock(
+            side_effect=[response_with(meta={"next_token": 0}, data=[{"id": 0}]), response_with(data=[{"id": 1}])]
+        )
+        mock_tweepy_client.get_retweeters.__name__ = "mock_get_users_who_retweet_tweet_func"
+        users = Client(mock_tweepy_client).get_users_who_retweet_tweet(123)
+        for i in range(2):
+            assert users[i].id == i
+
+
+class TestUserBlocking:
+    def test_api_response_success(self, mock_tweepy_client):
+        mock_tweepy_client.block = MagicMock(return_value=response_with({"blocking": True}))
+        assert Client(mock_tweepy_client).block_user_by_id(123)
+
+    def test_api_response_fail(self, mock_tweepy_client):
+        mock_tweepy_client.block = MagicMock(return_value=response_with({"blocking": False}))
+        assert not Client(mock_tweepy_client).block_user_by_id(123)
+
+    def test_already_blocked(self, mock_tweepy_client):
+        # mock already blocked user 0
+        mock_tweepy_client.get_blocked = MagicMock(return_value=response_with(data=[{"id": 0}]))
+        mock_tweepy_client.get_blocked.__name__ = "mock_get_blocked_func"
+
+        assert Client(mock_tweepy_client).block_user_by_id(0)
+
+    def test_not_block_following(self, mock_tweepy_client, mock_configuration):
+        # mock user 0 is follower
+        mock_tweepy_client.get_users_following = MagicMock(return_value=response_with(data=[{"id": 0}]))
+        mock_tweepy_client.get_users_following.__name__ = "mock_get_users_following_func"
+        # set config
+        mock_configuration({"block_following": False})
+
+        assert not Client(mock_tweepy_client).block_user_by_id(0)
+
+    def test_not_block_follower(self, mock_tweepy_client, mock_configuration):
+        # mock user 0 is follower
+        mock_tweepy_client.get_users_followers = MagicMock(return_value=response_with(data=[{"id": 0}]))
+        mock_tweepy_client.get_users_followers.__name__ = "mock_get_users_followers_func"
+        # set config
+        mock_configuration({"block_follower": False})
+
+        assert not Client(mock_tweepy_client).block_user_by_id(0)
 
 
 create_time = datetime.utcnow()
@@ -203,180 +399,3 @@ def assert_user_not_exist_error(mock_recorder):
     assert_that(error.value, is_("ErrorUser"))
     assert_that(error.detail, is_("Could not find rules with username: [ErrorUser]."))
     assert_that(error.ref_url, is_("https://api.twitter.com/2/problems/resource-not-found"))
-
-
-class TestUserQuerying:
-    """
-    For now, I figure out there are three kinds of rules data in response (responded by Twitter(tweepy.Client)):
-        1. rules who has pinned tweet, rules data in "data" field, pinned tweet in "includes.tweets" field
-        2. rules who don't have pinned tweet, only rules data in "data" field
-        3. rules do not exist (returned in "errors" field)
-
-    The test cases are simulating these situations, test data are from real responses.
-    There are some cases also test the constructing and default value replacing logic of :class:`User`.
-
-    We'll test both `get_by_username` and `get_by_id` methods, they are too similar.
-
-    get by id: https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users
-
-    get by username: https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-by
-    """
-
-    def test_response_translating(self, normal_user_response):
-        assert_normal_user(response_to_users(normal_user_response)[0])
-
-    def test_tweepy_exception_handling(self, mock_tweepy_client):
-        mock_tweepy_client.get_users = MagicMock(side_effect=tweepy.errors.TweepyException("inner"))
-        with pytest.raises(TwitterClientError) as e:
-            Client(mock_tweepy_client).get_users_by_usernames(["whatever"])
-        assert_that(str(e), contains_string("client"))
-        assert_that(str(e.value.__cause__), contains_string("inner"))
-
-    def test_get_normal_user(self, normal_user_response, mock_user_getting_tweepy_client):
-        assert_normal_user(
-            Client(mock_user_getting_tweepy_client(normal_user_response)).get_users_by_usernames(["whatever"])[0]
-        )
-
-        assert_normal_user(Client(mock_user_getting_tweepy_client(normal_user_response)).get_users_by_ids([1])[0])
-
-    def test_get_no_pinned_tweet_user(self, no_pinned_tweet_user_response, mock_user_getting_tweepy_client):
-        assert_no_pinned_tweet_user(
-            Client(mock_user_getting_tweepy_client(no_pinned_tweet_user_response)).get_users_by_usernames(["whatever"])[
-                0
-            ]
-        )
-
-        assert_no_pinned_tweet_user(
-            Client(mock_user_getting_tweepy_client(no_pinned_tweet_user_response)).get_users_by_ids([1])[0]
-        )
-
-    def test_get_not_exist_user(self, not_exist_user_response, mock_user_getting_tweepy_client, monkeypatch):
-        # check get by username method
-        mock_recorder = MagicMock()
-        monkeypatch.setattr("puntgun.record.Recorder.record", mock_recorder)
-        Client(mock_user_getting_tweepy_client(not_exist_user_response)).get_users_by_usernames(["whatever"])
-        # recorder received api error
-        assert_user_not_exist_error(mock_recorder)
-
-        # check get by id method
-        mock_recorder.reset_mock()
-        Client(mock_user_getting_tweepy_client(not_exist_user_response)).get_users_by_ids([1])
-        assert_user_not_exist_error(mock_recorder)
-
-    def test_get_all_users(self, mixed_response, mock_user_getting_tweepy_client, monkeypatch):
-        # check get by username method
-        mock_recorder = MagicMock()
-        monkeypatch.setattr("puntgun.record.Recorder.record", mock_recorder)
-        users = Client(mock_user_getting_tweepy_client(mixed_response)).get_users_by_usernames(["whatever"])
-        assert_normal_user(users[0])
-        assert_no_pinned_tweet_user(users[1])
-        assert_user_not_exist_error(mock_recorder)
-
-        # check get by id method
-        mock_recorder.reset_mock()
-        users = Client(mock_user_getting_tweepy_client(mixed_response)).get_users_by_ids([1])
-        assert_normal_user(users[0])
-        assert_no_pinned_tweet_user(users[1])
-        assert_user_not_exist_error(mock_recorder)
-
-    def test_pass_more_than_100_users_will_raise_error(self, normal_user_response, mock_user_getting_tweepy_client):
-        with pytest.raises(ValueError) as e:
-            Client(mock_user_getting_tweepy_client(normal_user_response)).get_users_by_ids(["1"] * 101)
-        assert_that(str(e), contains_string("100"))
-
-        with pytest.raises(ValueError) as e:
-            Client(mock_user_getting_tweepy_client(normal_user_response)).get_users_by_ids([1] * 101)
-        assert_that(str(e), contains_string("100"))
-
-
-class TestPagedApiQuerier:
-    def test_paged_api_querier(self):
-        mock_clt_func = MagicMock(
-            side_effect=[
-                response_with(meta={"next_token": 0}, data=[{"k": 0}]),
-                response_with(meta={"next_token": 1}, data=[{"k": 1}]),
-                # the last one does not have next_token
-                response_with(data=[{"k": 2}]),
-            ]
-        )
-        actual = list(paging_api_iter(mock_clt_func, {"a": "b"}))
-
-        assert mock_clt_func.call_count == 3
-        # test return values
-        for i in range(3):
-            assert actual[i].data[0]["k"] == i
-        # test invoking args
-        for i in range(1, 3):
-            assert mock_clt_func.call_args_list[i] == mock.call(max_results=1000, a="b", pagination_token=i - 1)
-
-    def test_paged_api_querier_with_one_page(self):
-        mock_clt_func = MagicMock(return_value=response_with(data=[{"k": 0}]))
-        actual = list(paging_api_iter(mock_clt_func, {}))
-        assert actual[0].data[0]["k"] == 0
-
-
-class TestUserPagedApi:
-    def test_get_blocked(self, mock_tweepy_client):
-        mock_tweepy_client.get_blocked = MagicMock(
-            side_effect=[response_with(meta={"next_token": 0}, data=[{"id": 0}]), response_with(data=[{"id": 1}])]
-        )
-        mock_tweepy_client.get_blocked.__name__ = "mock_get_blocked_func"
-
-        id_list = Client(mock_tweepy_client).cached_blocked_id_list()
-
-        for i in range(2):
-            # check user id
-            assert id_list[i] == i
-
-    def test_get_following(self, mock_tweepy_client):
-        mock_tweepy_client.get_users_following = MagicMock(
-            side_effect=[response_with(meta={"next_token": 0}, data=[{"id": 0}]), response_with(data=[{"id": 1}])]
-        )
-        mock_tweepy_client.get_users_following.__name__ = "mock_get_users_following_func"
-        id_list = Client(mock_tweepy_client).cached_following_id_list()
-        for i in range(2):
-            assert id_list[i] == i
-
-    def test_get_follower(self, mock_tweepy_client):
-        mock_tweepy_client.get_users_followers = MagicMock(
-            side_effect=[response_with(meta={"next_token": 0}, data=[{"id": 0}]), response_with(data=[{"id": 1}])]
-        )
-        mock_tweepy_client.get_users_followers.__name__ = "mock_get_users_followers_func"
-        id_list = Client(mock_tweepy_client).cached_follower_id_list()
-        for i in range(2):
-            assert id_list[i] == i
-
-
-class TestUserBlocking:
-    def test_api_response_success(self, mock_tweepy_client):
-        mock_tweepy_client.block = MagicMock(return_value=response_with({"blocking": True}))
-        assert Client(mock_tweepy_client).block_user_by_id(123)
-
-    def test_api_response_fail(self, mock_tweepy_client):
-        mock_tweepy_client.block = MagicMock(return_value=response_with({"blocking": False}))
-        assert not Client(mock_tweepy_client).block_user_by_id(123)
-
-    def test_already_blocked(self, mock_tweepy_client):
-        # mock already blocked user 0
-        mock_tweepy_client.get_blocked = MagicMock(return_value=response_with(data=[{"id": 0}]))
-        mock_tweepy_client.get_blocked.__name__ = "mock_get_blocked_func"
-
-        assert Client(mock_tweepy_client).block_user_by_id(0)
-
-    def test_not_block_following(self, mock_tweepy_client, mock_configuration):
-        # mock user 0 is follower
-        mock_tweepy_client.get_users_following = MagicMock(return_value=response_with(data=[{"id": 0}]))
-        mock_tweepy_client.get_users_following.__name__ = "mock_get_users_following_func"
-        # set config
-        mock_configuration({"block_following": False})
-
-        assert not Client(mock_tweepy_client).block_user_by_id(0)
-
-    def test_not_block_follower(self, mock_tweepy_client, mock_configuration):
-        # mock user 0 is follower
-        mock_tweepy_client.get_users_followers = MagicMock(return_value=response_with(data=[{"id": 0}]))
-        mock_tweepy_client.get_users_followers.__name__ = "mock_get_users_followers_func"
-        # set config
-        mock_configuration({"block_follower": False})
-
-        assert not Client(mock_tweepy_client).block_user_by_id(0)

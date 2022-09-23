@@ -158,7 +158,7 @@ USER_API_FIELDS = [
 ]
 
 # Not authorized to access 'non_public_metrics', 'organic_metrics', 'promoted_metrics'
-# with free-registered Essential class token
+# with free-registered Essential level token
 TWEET_API_FIELDS = [
     "attachments",
     "author_id",
@@ -235,6 +235,13 @@ class Client(object):
       * https://developer.twitter.com/en/docs/twitter-api/rate-limits
       * It's so sweet that tweepy has inner retry logic for resumable 429 Too Many Request status code.
         https://github.com/tweepy/tweepy/blob/master/tweepy/client.py#L102-L114
+
+    IMPROVE: Change to tweepy.AsyncClient for better performance.
+    It will change a lot of things and require some effort to
+    make the rxpy works with Python async mechanism,
+    but we still should do it ASAP.
+    Leaving all threads busy waiting for Twitter API rate limits sounds terrible.
+    https://docs.tweepy.org/en/stable/asyncclient.html
     """
 
     def __init__(self, tweepy_client: tweepy.Client):
@@ -292,7 +299,7 @@ class Client(object):
         **rate limit: 15 / 15 min**
         https://developer.twitter.com/en/docs/twitter-api/users/blocks/api-reference/get-users-blocking
         """
-        return query_paging_user_api(self.clt.get_blocked)
+        return query_paged_user_api(self.clt.get_blocked)
 
     @functools.lru_cache(maxsize=1)
     def cached_blocked(self) -> List[User]:
@@ -314,7 +321,7 @@ class Client(object):
         **rate limit: 15 / 15 min**
         https://developer.twitter.com/en/docs/twitter-api/users/follows/api-reference/get-users-id-following
         """
-        return query_paging_user_api(self.clt.get_users_following, id=user_id)
+        return query_paged_user_api(self.clt.get_users_following, id=user_id)
 
     @functools.lru_cache(maxsize=1)
     def cached_following(self) -> List[User]:
@@ -330,7 +337,7 @@ class Client(object):
         **rate limit: 15 / 15 min**
         https://developer.twitter.com/en/docs/twitter-api/users/follows/api-reference/get-users-id-followers
         """
-        return query_paging_user_api(self.clt.get_users_followers, id=user_id)
+        return query_paged_user_api(self.clt.get_users_followers, id=user_id)
 
     @functools.lru_cache(maxsize=1)
     def cached_follower(self) -> List[User]:
@@ -371,11 +378,28 @@ class Client(object):
         Query tweets information.
         **rate limit: 900 / 15 min**
         https://developer.twitter.com/en/docs/twitter-api/tweets/lookup/api-reference/get-tweets
+        TODO untested
         """
         if len(ids) > 100:
             raise ValueError("at most 100 tweet ids per request")
 
         return response_to_tweets(self.clt.get_tweets(ids=ids, **TWEET_API_PARAMS))
+
+    def get_users_who_like_tweet(self, tweet_id: int | str) -> List[User]:
+        """
+        Get a Tweet’s liking users (who liked this tweet).
+        **rate limit: 75 / 15 min**
+        https://developer.twitter.com/en/docs/twitter-api/tweets/likes/api-reference/get-tweets-id-liking_users
+        """
+        return query_paged_user_api(self.clt.get_liking_users, max_results=100, id=tweet_id)
+
+    def get_users_who_retweet_tweet(self, tweet_id: int | str) -> List[User]:
+        """
+        Get users who have retweeted a Tweet.
+        **rate limit: 75 / 15 min**
+        https://developer.twitter.com/en/docs/twitter-api/tweets/retweets/api-reference/get-tweets-id-retweeted_by
+        """
+        return query_paged_user_api(self.clt.get_retweeters, max_results=100, id=tweet_id)
 
 
 def response_to_users(resp: tweepy.Response) -> List[User]:
@@ -442,20 +466,7 @@ def response_to_tweets(resp: tweepy.Response) -> List[Tweet]:
     return [map_one(d) for d in resp.data]
 
 
-def paging_api_iter(clt_func: Callable[..., Response], params: dict, pagination_token: str = None) -> tweepy.Response:
-    """
-    A recursion style generator that continue querying next page until hit the end.
-    https://stackoverflow.com/questions/8991840/recursion-using-yield
-    """
-    response = clt_func(max_results=1000, pagination_token=pagination_token, **params)
-    yield response
-
-    # if is called again, query next page
-    if hasattr(response, "meta") and "next_token" in response.meta:
-        yield from paging_api_iter(clt_func, params, response.meta["next_token"])
-
-
-def query_paging_user_api(clt_func: Callable[..., Response], **kwargs: Any) -> List[User]:
+def query_paged_user_api(clt_func: Callable[..., Response], max_results: int = 1000, **kwargs: Any) -> List[User]:
     # mix two part of params into one dict
     params = {}
     for k, v in USER_API_PARAMS.items():
@@ -465,9 +476,24 @@ def query_paging_user_api(clt_func: Callable[..., Response], **kwargs: Any) -> L
             params[k] = v
 
     # use list() to query all pages
-    responses = list(paging_api_iter(clt_func, params))
+    responses = list(paged_api_iter(clt_func, params, max_results))
     # and return all users in responses as one list
     return functools.reduce(lambda a, b: a + b, [response_to_users(r) for r in responses], [])
+
+
+def paged_api_iter(
+    clt_func: Callable[..., Response], params: dict, max_results: int = 1000, pagination_token: str = None
+) -> tweepy.Response:
+    """
+    A recursion style generator that continue querying next page until hit the end.
+    https://stackoverflow.com/questions/8991840/recursion-using-yield
+    """
+    response = clt_func(max_results=max_results, pagination_token=pagination_token, **params)
+    yield response
+
+    # if is called again, query next page
+    if hasattr(response, "meta") and "next_token" in response.meta:
+        yield from paged_api_iter(clt_func, params, max_results, response.meta["next_token"])
 
 
 class NeedClientMixin(object):

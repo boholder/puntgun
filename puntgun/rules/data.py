@@ -157,7 +157,7 @@ class Tweet(BaseModel):
     # Example:
     # [{"type":<type (str)>,"id":<tweet id (int)>}...]
     #
-    # Types have been found: "quoted" (quote retweet), "replied_to"
+    # Types have been found: "quoted" (quote tweet), "replied_to"
     referenced_tweets: Optional[List[Dict[str, Any]]] = []
 
     # Transform referenced_tweets into a convenient dictionary,
