@@ -11,6 +11,8 @@ from puntgun.client import (
     ResourceNotFoundError,
     TwitterApiErrors,
     TwitterClientError,
+    paging_api_iter,
+    response_to_users,
 )
 from puntgun.record import Record
 from puntgun.rules.data import User
@@ -221,7 +223,7 @@ class TestUserQuerying:
     """
 
     def test_response_translating(self, normal_user_response):
-        assert_normal_user(Client._resp_to_user(normal_user_response)[0])
+        assert_normal_user(response_to_users(normal_user_response)[0])
 
     def test_tweepy_exception_handling(self, mock_tweepy_client):
         mock_tweepy_client.get_users = MagicMock(side_effect=tweepy.errors.TweepyException("inner"))
@@ -297,7 +299,7 @@ class TestPagedApiQuerier:
                 response_with(data=[{"k": 2}]),
             ]
         )
-        actual = list(Client._paged_api_querier(mock_clt_func, {"a": "b"}))
+        actual = list(paging_api_iter(mock_clt_func, {"a": "b"}))
 
         assert mock_clt_func.call_count == 3
         # test return values
@@ -309,7 +311,7 @@ class TestPagedApiQuerier:
 
     def test_paged_api_querier_with_one_page(self):
         mock_clt_func = MagicMock(return_value=response_with(data=[{"k": 0}]))
-        actual = list(Client._paged_api_querier(mock_clt_func, {}))
+        actual = list(paging_api_iter(mock_clt_func, {}))
         assert actual[0].data[0]["k"] == 0
 
 

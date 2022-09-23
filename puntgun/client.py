@@ -273,7 +273,7 @@ class Client(object):
         if len(names) > 100:
             raise ValueError("at most 100 usernames per request")
 
-        return self._resp_to_user(self.clt.get_users(usernames=names, **USER_API_PARAMS))
+        return response_to_users(self.clt.get_users(usernames=names, **USER_API_PARAMS))
 
     def get_users_by_ids(self, ids: List[int | str]) -> List[User]:
         """
@@ -284,23 +284,7 @@ class Client(object):
         if len(ids) > 100:
             raise ValueError("at most 100 user ids per request")
 
-        return self._resp_to_user(self.clt.get_users(ids=ids, **USER_API_PARAMS))
-
-    @staticmethod
-    def _resp_to_user(resp: tweepy.Response) -> List[User]:
-        """Build a list of :class:`User` instances from one response."""
-        if not resp.data:
-            return []
-
-        pinned_tweets = [Tweet.from_response(d) for d in resp.includes.get("tweets", [])]
-
-        def map_one(data: dict) -> User:
-            """Build one user instance"""
-            # find this user's pinned tweet
-            pinned_tweet = next(filter(lambda t: t.id == data.get("pinned_tweet_id"), pinned_tweets), Tweet())
-            return User.from_response(data, pinned_tweet)
-
-        return [map_one(d) for d in resp.data]
+        return response_to_users(self.clt.get_users(ids=ids, **USER_API_PARAMS))
 
     def get_blocked(self) -> List[User]:
         """
@@ -308,7 +292,7 @@ class Client(object):
         **rate limit: 15 / 15 min**
         https://developer.twitter.com/en/docs/twitter-api/users/blocks/api-reference/get-users-blocking
         """
-        return self._get_paged_user_api_response_list(self.clt.get_blocked)
+        return query_paging_user_api(self.clt.get_blocked)
 
     @functools.lru_cache(maxsize=1)
     def cached_blocked(self) -> List[User]:
@@ -330,7 +314,7 @@ class Client(object):
         **rate limit: 15 / 15 min**
         https://developer.twitter.com/en/docs/twitter-api/users/follows/api-reference/get-users-id-following
         """
-        return self._get_paged_user_api_response_list(self.clt.get_users_following, id=user_id)
+        return query_paging_user_api(self.clt.get_users_following, id=user_id)
 
     @functools.lru_cache(maxsize=1)
     def cached_following(self) -> List[User]:
@@ -346,7 +330,7 @@ class Client(object):
         **rate limit: 15 / 15 min**
         https://developer.twitter.com/en/docs/twitter-api/users/follows/api-reference/get-users-id-followers
         """
-        return self._get_paged_user_api_response_list(self.clt.get_users_followers, id=user_id)
+        return query_paging_user_api(self.clt.get_users_followers, id=user_id)
 
     @functools.lru_cache(maxsize=1)
     def cached_follower(self) -> List[User]:
@@ -356,43 +340,9 @@ class Client(object):
     def cached_follower_id_list(self) -> List[int]:
         return [u.id for u in self.cached_follower()]
 
-    def _get_paged_user_api_response_list(self, clt_func: Callable[..., Response], **kwargs: Any) -> List[User]:
-        # mix two part of params into one dict
-        params = {}
-        for k, v in USER_API_PARAMS.items():
-            params[k] = v
-        if kwargs:
-            for k, v in kwargs.items():
-                params[k] = v
-
-        # use list() to query all pages
-        responses = list(self._paged_api_querier(clt_func, params))
-        # and return all users in responses as one list
-        return functools.reduce(lambda a, b: a + b, [self._resp_to_user(r) for r in responses], [])
-
-    @staticmethod
-    def _paged_api_querier(
-        clt_func: Callable[..., Response], params: dict, pagination_token: str = None
-    ) -> tweepy.Response:
-        """
-        A recursion style generator that continue querying next page until hit the end.
-        https://stackoverflow.com/questions/8991840/recursion-using-yield
-        """
-        response = clt_func(max_results=1000, pagination_token=pagination_token, **params)
-        yield response
-
-        # if is called again, query next page
-        if hasattr(response, "meta") and "next_token" in response.meta:
-            yield from Client._paged_api_querier(clt_func, params, response.meta["next_token"])
-
     def block_user_by_id(self, target_user_id: int | str) -> bool:
         """
         Block given user on current account.
-
-        The rate limit is pretty slow,
-        and I think this is the bottleneck of whole pipeline if you don't use complex rules.
-        Sadly, the former block list CSV import method is no longer available.
-
         **rate limit: 50 / 15 min**
         https://help.twitter.com/en/using-twitter/advanced-twitter-block-options
         https://developer.twitter.com/en/docs/twitter-api/users/blocks/api-reference/post-users-user_id-blocking
@@ -403,12 +353,12 @@ class Client(object):
             logger.info(f"User[id={target_user_id}] has already been blocked.")
             return True
 
-        # not block your follower
+        # do not block your follower
         if (not config.settings.get("block_follower", True)) and target_user_id in self.cached_follower_id_list():
             logger.info(f"User[id={target_user_id}] is follower, not block base on config.")
             return False
 
-        # not block your following
+        # do not block your following
         if (not config.settings.get("block_following", False)) and target_user_id in self.cached_following_id_list():
             logger.info(f"User[id={target_user_id}] is following, not block base on config.")
             return False
@@ -425,55 +375,99 @@ class Client(object):
         if len(ids) > 100:
             raise ValueError("at most 100 tweet ids per request")
 
-        return self._resp_to_tweet(self.clt.get_tweets(ids=ids, **TWEET_API_PARAMS))
+        return response_to_tweets(self.clt.get_tweets(ids=ids, **TWEET_API_PARAMS))
 
-    @staticmethod
-    def _resp_to_tweet(resp: tweepy.Response) -> List[Tweet]:
-        """Build a list of :class:`Tweet` instances from one response."""
-        if not resp.data:
-            return []
 
-        # get data in "includes" field
-        # these items can be found by searching "includes." on official doc
-        authors = [User.from_response(d) for d in resp.includes.get("users", [])]
-        places = resp.includes.get("places", [])
-        mediums = resp.includes.get("media", [])
-        polls = resp.includes.get("polls", [])
-        tweets = [Tweet.from_response(d) for d in resp.includes.get("tweets", [])]
+def response_to_users(resp: tweepy.Response) -> List[User]:
+    """Build a list of :class:`User` instances from one response."""
+    if not resp.data:
+        return []
 
-        def map_one(data: dict) -> Tweet:
-            """Build one tweet instance"""
+    pinned_tweets = [Tweet.from_response(d) for d in resp.includes.get("tweets", [])]
 
-            # IMPROVE: Each attribute's translating logic is slightly different from others,
-            # so I can't reduce the code length by reusing a template function.
-            author = next(filter(lambda u: u.id == data["author_id"], authors), User())
+    def map_one(data: dict) -> User:
+        """Build one user instance"""
+        # find this user's pinned tweet
+        pinned_tweet = next(filter(lambda t: t.id == data.get("pinned_tweet_id"), pinned_tweets), Tweet())
+        return User.from_response(data, pinned_tweet)
 
-            if data["geo"] is not None:
-                place: dict = next(filter(lambda p: p["place_id"] == data["geo"]["place_id"], places), {})
-            else:
-                place = {}
+    return [map_one(d) for d in resp.data]
 
-            attachments_data = data["attachments"] if data["attachments"] is not None else {}
 
-            if "media_keys" in attachments_data:
-                tweet_mediums = list(filter(lambda m: m["media_key"] in data["attachments"]["media_keys"], mediums))
-            else:
-                tweet_mediums = []
+def response_to_tweets(resp: tweepy.Response) -> List[Tweet]:
+    """Build a list of :class:`Tweet` instances from one response."""
+    if not resp.data:
+        return []
 
-            if "poll_ids" in attachments_data:
-                tweet_polls = list(filter(lambda p: p["id"] in data["attachments"]["poll_ids"], polls))
-            else:
-                tweet_polls = []
+    # get data in "includes" field
+    # these items can be found by searching "includes." on official doc
+    authors = [User.from_response(d) for d in resp.includes.get("users", [])]
+    places = resp.includes.get("places", [])
+    mediums = resp.includes.get("media", [])
+    polls = resp.includes.get("polls", [])
+    tweets = [Tweet.from_response(d) for d in resp.includes.get("tweets", [])]
 
-            if data["referenced_tweets"] is not None:
-                referenced_tweet_ids = [t["id"] for t in data["referenced_tweets"]]
-                referenced_tweets = list(filter(lambda t: t.id in referenced_tweet_ids, tweets))
-            else:
-                referenced_tweets = []
+    def map_one(data: dict) -> Tweet:
+        """Build one tweet instance"""
 
-            return Tweet.from_response(data, author, tweet_mediums, tweet_polls, place, referenced_tweets)
+        # IMPROVE: Each attribute's translating logic is slightly different from others,
+        # so I can't reduce the code length by reusing a template function.
+        author = next(filter(lambda u: u.id == data["author_id"], authors), User())
 
-        return [map_one(d) for d in resp.data]
+        if data["geo"] is not None:
+            place: dict = next(filter(lambda p: p["place_id"] == data["geo"]["place_id"], places), {})
+        else:
+            place = {}
+
+        attachments_data = data["attachments"] if data["attachments"] is not None else {}
+
+        if "media_keys" in attachments_data:
+            tweet_mediums = list(filter(lambda m: m["media_key"] in data["attachments"]["media_keys"], mediums))
+        else:
+            tweet_mediums = []
+
+        if "poll_ids" in attachments_data:
+            tweet_polls = list(filter(lambda p: p["id"] in data["attachments"]["poll_ids"], polls))
+        else:
+            tweet_polls = []
+
+        if data["referenced_tweets"] is not None:
+            referenced_tweet_ids = [t["id"] for t in data["referenced_tweets"]]
+            referenced_tweets = list(filter(lambda t: t.id in referenced_tweet_ids, tweets))
+        else:
+            referenced_tweets = []
+
+        return Tweet.from_response(data, author, tweet_mediums, tweet_polls, place, referenced_tweets)
+
+    return [map_one(d) for d in resp.data]
+
+
+def paging_api_iter(clt_func: Callable[..., Response], params: dict, pagination_token: str = None) -> tweepy.Response:
+    """
+    A recursion style generator that continue querying next page until hit the end.
+    https://stackoverflow.com/questions/8991840/recursion-using-yield
+    """
+    response = clt_func(max_results=1000, pagination_token=pagination_token, **params)
+    yield response
+
+    # if is called again, query next page
+    if hasattr(response, "meta") and "next_token" in response.meta:
+        yield from paging_api_iter(clt_func, params, response.meta["next_token"])
+
+
+def query_paging_user_api(clt_func: Callable[..., Response], **kwargs: Any) -> List[User]:
+    # mix two part of params into one dict
+    params = {}
+    for k, v in USER_API_PARAMS.items():
+        params[k] = v
+    if kwargs:
+        for k, v in kwargs.items():
+            params[k] = v
+
+    # use list() to query all pages
+    responses = list(paging_api_iter(clt_func, params))
+    # and return all users in responses as one list
+    return functools.reduce(lambda a, b: a + b, [response_to_users(r) for r in responses], [])
 
 
 class NeedClientMixin(object):
