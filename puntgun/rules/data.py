@@ -5,7 +5,7 @@ https://en.wikipedia.org/wiki/Data_transfer_object
 import sys
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Mapping, Optional
 
 from pydantic import BaseModel, validator
 
@@ -33,7 +33,7 @@ def update_user_class_ref() -> None:
 
 class User(BaseModel):
     """
-    DTO, one instance represents one user(Twitter account)'s basic information.
+    https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/user
     https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-id
     """
 
@@ -61,7 +61,7 @@ class User(BaseModel):
     withheld: Optional[Dict[str, Any]] = {}
 
     @staticmethod
-    def from_response(resp_data: dict, pinned_tweet: "Tweet" = None) -> "User":
+    def from_response(resp_data: Mapping, pinned_tweet: "Tweet" = None) -> "User":
         if not resp_data:
             return User()
 
@@ -70,6 +70,21 @@ class User(BaseModel):
             pinned_tweet = get_default_tweet_instance()
 
         public_metrics = resp_data["public_metrics"] if ("public_metrics" in resp_data) else {}
+
+        # Find the true user pinned url in "entities.url.urls[]" instead of using Twitter shorten url (t.co)
+        shorten_url = resp_data.get("url")
+        if shorten_url:
+            urls: List[dict] = resp_data.get("entities").get("url").get("urls")
+            # 1. tweepy.User (type of "resp_data") inherits "DataMapping" to gain the get() method,
+            # but we still need to use attribute-assignment way to update the value,
+            # and this makes the type hint of "resp_data" becomes "tweepy.User" (coupled with tweepy library).
+            #
+            # 2. This updating operation has side effect (changes the value).
+            #
+            # So we would better generate a new dictionary from the origin resp_data
+            # and change this dictionary instead.
+            resp_data = dict(resp_data)
+            resp_data["url"] = next(filter(lambda u: u.get("url") == shorten_url, urls)).get("expanded_url")
 
         return User(
             **resp_data,
@@ -117,19 +132,98 @@ class User(BaseModel):
         return bool(self.id)
 
 
+class Media(BaseModel):
+    """https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/media"""
+
+    media_key: Optional[str] = ""
+    type: Optional[str] = ""
+    url: Optional[str] = ""
+    duration_ms: Optional[int] = 0
+    height: Optional[int] = 0
+    width: Optional[int] = 0
+    alt_text: Optional[str] = ""
+    preview_image_url: Optional[str] = ""
+    public_metrics: Optional[dict] = {}
+    variants: Optional[list] = []
+
+
+class Poll(BaseModel):
+    """https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/poll"""
+
+    class Option(BaseModel):
+        position: Optional[int] = 0
+        label: Optional[str] = ""
+        votes: Optional[int] = 0
+
+    class Status(str, Enum):
+        OPEN = "open"
+        CLOSED = "closed"
+
+    id: Optional[str] = ""
+    options: Optional[List[Option]] = []
+    duration_minutes: Optional[int] = 0
+    end_datetime: Optional[datetime] = DEFAULT_TIME
+    voting_status: Optional[Status] = Status.CLOSED
+
+
+class Place(BaseModel):
+    """https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/place"""
+
+    id: Optional[str] = ""
+    name: Optional[str] = ""
+    full_name: Optional[str] = ""
+    place_type: Optional[str] = ""
+    # The identifiers of known place that contain the referenced place.
+    # (Do not know what it is)
+    contained_with: Optional[List[Any]] = []
+    country: Optional[str] = ""
+    country_code: Optional[str] = ""
+    geo: Optional[dict] = {}
+
+
+class ContextAnnotation(BaseModel):
+    """
+    It seems that Twitter use these annotations to tag tweet (text) content.
+    One annotation includes two part, "domain" for explaining the category
+    and "entity" for store the value.
+
+    Depending on what is observed in the sampling,
+    annotations may be repeated under the same tweet,
+    and sometimes no description field exists in any two parts.
+    """
+
+    class Domain(BaseModel):
+        id: Optional[str] = ""
+        name: Optional[str] = ""
+        description: Optional[str] = ""
+
+    class Entity(BaseModel):
+        id: Optional[str] = ""
+        name: Optional[str] = ""
+        description: Optional[str] = ""
+
+    domain: Domain
+    entity: Entity
+
+
+class ReplySettings(str, Enum):
+    EVERYONE = "everyone"
+    MENTIONED_USERS = "mentionedUsers"
+    FOLLOWING = "following"
+
+
 class Tweet(BaseModel):
     """
-    DTO, one instance represents one tweet's information.
     The field names aren't so straight like fields of User entity,
     so I pasted their descriptions from the official doc as comments.
 
+    https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/tweet
     https://developer.twitter.com/en/docs/twitter-api/tweets/lookup/api-reference/get-tweets-id
     """
 
     id: Optional[int] = 0
     # Author's user information
     author: Optional[User] = User()
-
     created_at: Optional[datetime] = DEFAULT_TIME
     possibly_sensitive: Optional[bool] = False
     text: Optional[str] = ""
@@ -137,6 +231,8 @@ class Tweet(BaseModel):
     reply_count: Optional[int] = 0
     like_count: Optional[int] = 0
     quote_count: Optional[int] = 0
+    reply_settings: Optional[ReplySettings] = ReplySettings.EVERYONE
+    context_annotations: Optional[List[ContextAnnotation]] = []
 
     # Contains withholding details for withheld content
     # copyright, country_codes, scope
@@ -173,10 +269,18 @@ class Tweet(BaseModel):
     attachments: Optional[dict] = {}
 
     # Media attachments' information, such as video, photo...
-    mediums: Optional[List[Any]] = []
+    mediums: Optional[List[Media]] = []
 
     # Poll attachments' information
-    polls: Optional[List[Any]] = []
+    polls: Optional[List[Poll]] = []
+
+    # Contains details about the location tagged by the user in this Tweet,
+    # if they specified one
+    # IMPROVE: can not find a sample tweet that contains this "geo" field
+    geo: Optional[Dict[str, Any]] = {}
+
+    # got this from "response.includes.places" via "geo.place_id"
+    place: Optional[Place] = Place()
 
     # Language of the Tweet, if detected by Twitter
     # Returned as a BCP47 language tag
@@ -189,54 +293,13 @@ class Tweet(BaseModel):
     # urls, hashtags, mentions, annotations (not the context annotation)...
     entities: Optional[Dict[str, Any]] = {}
 
-    # Contains details about the location tagged by the user in this Tweet,
-    # if they specified one
-    # IMPROVE: can not find a sample tweet that contains this "geo" field
-    geo: Optional[Dict[str, Any]] = {}
-
-    # got this from "response.includes.places" via "geo.place_id"
-    place: Optional[Dict[str, Any]] = {}
-
-    class ReplySettingsEnum(str, Enum):
-        EVERYONE = "everyone"
-        MENTIONED_USERS = "mentionedUsers"
-        FOLLOWING = "following"
-
-    reply_settings: Optional[ReplySettingsEnum] = ReplySettingsEnum.EVERYONE
-
-    class ConTextAnnotation(BaseModel):
-        """
-        It seems that Twitter use these annotations to tag tweet (text) content.
-        One annotation includes two part, "domain" for explaining the category
-        and "entity" for store the value.
-
-        Depending on what is observed in the sampling,
-        annotations may be repeated under the same tweet,
-        and sometimes no description field exists in any two parts.
-        """
-
-        class Domain(BaseModel):
-            id: str
-            name: str
-            description: Optional[str] = ""
-
-        class Entity(BaseModel):
-            id: str
-            name: str
-            description: Optional[str] = ""
-
-        domain: Domain
-        entity: Entity
-
-    context_annotations: Optional[List[ConTextAnnotation]] = []
-
     @staticmethod
     def from_response(
         resp_data: dict,
         author: User = None,
-        mediums: List[Any] = None,
-        polls: List[Any] = None,
-        place: Dict[str, Any] = None,
+        mediums: List[Media] = None,
+        polls: List[Poll] = None,
+        place: Place = None,
         referenced_tweets: List["Tweet"] = None,
     ) -> "Tweet":
         """Other params except first one are data in 'response.includes' field that belong to this tweet"""

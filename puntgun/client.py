@@ -7,7 +7,7 @@ from tweepy import Response
 
 from puntgun.conf import config, encrypto, secret
 from puntgun.record import Record, Recordable, Recorder
-from puntgun.rules.data import Tweet, User
+from puntgun.rules.data import Media, Place, Poll, Tweet, User
 
 
 class TwitterClientError(Exception):
@@ -378,7 +378,6 @@ class Client(object):
         Query tweets information.
         **rate limit: 900 / 15 min**
         https://developer.twitter.com/en/docs/twitter-api/tweets/lookup/api-reference/get-tweets
-        TODO untested
         """
         if len(ids) > 100:
             raise ValueError("at most 100 tweet ids per request")
@@ -423,43 +422,53 @@ def response_to_tweets(resp: tweepy.Response) -> List[Tweet]:
     if not resp.data:
         return []
 
-    # get data in "includes" field
+    # Get data in "includes" field and transform them into our data structures.
     # these items can be found by searching "includes." on official doc
     authors = [User.from_response(d) for d in resp.includes.get("users", [])]
-    places = resp.includes.get("places", [])
-    mediums = resp.includes.get("media", [])
-    polls = resp.includes.get("polls", [])
+    places = [Place(**d) for d in resp.includes.get("places", [])]
+    mediums = [Media(**d) for d in resp.includes.get("media", [])]
+    # Don't know why the tweepy.Poll.options field (list type)
+    # would prevent the dict() to the poll objects.
+    polls = [
+        Poll(
+            id=d.get("id"),
+            options=d.get("options"),
+            duration_minutes=d.get("duration_minutes"),
+            end_datetime=d.get("end_datetime"),
+            voting_status=d.get("voting_status"),
+        )
+        for d in resp.includes.get("polls", [])
+    ]
     tweets = [Tweet.from_response(d) for d in resp.includes.get("tweets", [])]
 
     def map_one(data: dict) -> Tweet:
         """Build one tweet instance"""
-
-        # IMPROVE: Each attribute's translating logic is slightly different from others,
-        # so I can't reduce the code length by reusing a template function.
         author = next(filter(lambda u: u.id == data["author_id"], authors), User())
-
-        if data["geo"] is not None:
-            place: dict = next(filter(lambda p: p["place_id"] == data["geo"]["place_id"], places), {})
-        else:
-            place = {}
-
         attachments_data = data["attachments"] if data["attachments"] is not None else {}
 
-        if "media_keys" in attachments_data:
-            tweet_mediums = list(filter(lambda m: m["media_key"] in data["attachments"]["media_keys"], mediums))
-        else:
-            tweet_mediums = []
+        tweet_mediums = (
+            list(filter(lambda m: m.media_key in data["attachments"]["media_keys"], mediums))
+            if "media_keys" in attachments_data
+            else []
+        )
 
-        if "poll_ids" in attachments_data:
-            tweet_polls = list(filter(lambda p: p["id"] in data["attachments"]["poll_ids"], polls))
-        else:
-            tweet_polls = []
+        tweet_polls = (
+            list(filter(lambda p: p.id in data["attachments"]["poll_ids"], polls))
+            if "poll_ids" in attachments_data
+            else []
+        )
 
-        if data["referenced_tweets"] is not None:
-            referenced_tweet_ids = [t["id"] for t in data["referenced_tweets"]]
-            referenced_tweets = list(filter(lambda t: t.id in referenced_tweet_ids, tweets))
-        else:
-            referenced_tweets = []
+        place: Place = (
+            next(filter(lambda p: p.id == data["geo"]["place_id"], places), Place())
+            if data["geo"] is not None
+            else Place()
+        )
+
+        referenced_tweets = (
+            list(filter(lambda t: t.id in [t["id"] for t in data["referenced_tweets"]], tweets))
+            if data["referenced_tweets"] is not None
+            else []
+        )
 
         return Tweet.from_response(data, author, tweet_mediums, tweet_polls, place, referenced_tweets)
 

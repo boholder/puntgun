@@ -18,6 +18,8 @@ from puntgun.rules.data import RuleResult
 
 
 class TestRuleType:
+    """Yes it should be put in global scope."""
+
     pass
 
 

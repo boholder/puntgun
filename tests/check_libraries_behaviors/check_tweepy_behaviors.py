@@ -1,6 +1,7 @@
 """
 Mainly testing Twitter APIs' response and tweepy's return values for development.
 """
+
 from puntgun.client import Client
 
 
@@ -53,7 +54,7 @@ def get_follower_list():
     print(users)
 
 
-def get_tweet():
+def get_tweets():
     c = Client.singleton()
     # TwitterDev's tweet
     tweets = c.get_tweets_by_ids(
@@ -71,8 +72,14 @@ def get_tweet():
             # directly retweet
             # (will not contain the info about user who did the retweet action)
             "1549477965381206017",
+            # with geo
+            # https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/place
+            "1136048014974423040",
         ]
     )
+    for t in tweets:
+        print(t.json())
+
     print(tweets)
 
 
@@ -86,4 +93,4 @@ def get_retweet_tweet():
     print(users)
 
 
-get_retweet_tweet()
+get_tweets()

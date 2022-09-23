@@ -1,10 +1,10 @@
-from datetime import datetime
+import datetime
 from unittest import mock
 from unittest.mock import MagicMock
 
 import pytest
 import tweepy
-from hamcrest import assert_that, contains_string, is_
+from hamcrest import assert_that, contains_string
 
 from puntgun.client import (
     Client,
@@ -12,10 +12,18 @@ from puntgun.client import (
     TwitterApiErrors,
     TwitterClientError,
     paged_api_iter,
+    response_to_tweets,
     response_to_users,
 )
 from puntgun.record import Record
-from puntgun.rules.data import User
+from puntgun.rules.data import (
+    ContextAnnotation,
+    Place,
+    Poll,
+    ReplySettings,
+    Tweet,
+    User,
+)
 
 
 class TestTwitterApiErrors:
@@ -63,22 +71,20 @@ class TestTwitterApiErrors:
 
 class TestUserQuerying:
     """
-    For now, I figure out there are three kinds of rules data in response (responded by Twitter(tweepy.Client)):
-        1. rules who has pinned tweet, rules data in "data" field, pinned tweet in "includes.tweets" field
-        2. rules who don't have pinned tweet, only rules data in "data" field
-        3. rules do not exist (returned in "errors" field)
+    For now, I figure out there are three kinds of users data in response (responded by Twitter(tweepy.Client)):
+        1. users who has pinned tweet, user data in "data" field, pinned tweet in "includes.tweets" field
+        2. users who don't have pinned tweet, only user data in "data" field
+        3. users do not exist (returned in "errors" field)
 
     The test cases are simulating these situations, test data are from real responses.
     There are some cases also test the constructing and default value replacing logic of :class:`User`.
-
-    We'll test both `get_by_username` and `get_by_id` methods, they are too similar.
+    We'll cover `get_by_username`, `get_by_id` methods and `User` class in these cases.
 
     get by id: https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users
-
     get by username: https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-by
     """
 
-    def test_response_translating(self, normal_user_response):
+    def test_response_transformation(self, normal_user_response):
         assert_normal_user(response_to_users(normal_user_response)[0])
 
     def test_tweepy_exception_handling(self, mock_tweepy_client):
@@ -92,7 +98,6 @@ class TestUserQuerying:
         assert_normal_user(
             Client(mock_user_getting_tweepy_client(normal_user_response)).get_users_by_usernames(["whatever"])[0]
         )
-
         assert_normal_user(Client(mock_user_getting_tweepy_client(normal_user_response)).get_users_by_ids([1])[0])
 
     def test_get_no_pinned_tweet_user(self, no_pinned_tweet_user_response, mock_user_getting_tweepy_client):
@@ -101,7 +106,6 @@ class TestUserQuerying:
                 0
             ]
         )
-
         assert_no_pinned_tweet_user(
             Client(mock_user_getting_tweepy_client(no_pinned_tweet_user_response)).get_users_by_ids([1])[0]
         )
@@ -257,8 +261,59 @@ class TestUserBlocking:
         assert not Client(mock_tweepy_client).block_user_by_id(0)
 
 
-create_time = datetime.utcnow()
-image_url = "https://example.com"
+class TestTweetQuerying:
+    """
+    The structural complexity and content diversity of Tweet entity is far exceeds that of User entity,
+    and I can not find all types of samples to verify the completeness of the code's special case handling.
+    I completed the development of Tweet DTO class (and Media, Poll, Place DTO classes which are contained in Tweet)
+    and the basic querying API by reading the official documentation
+    and observing a small number of samples (in check_tweepy_behaviors.py).
+
+    https://developer.twitter.com/en/docs/twitter-api/tweets/lookup/api-reference/get-tweets
+    """
+
+    def test_response_transformation(self, full_tweet_response):
+        assert_full_tweet(response_to_tweets(full_tweet_response)[0])
+
+    def test_get_basic_fields_tweet(self, mock_tweet_getting_tweepy_client, basic_tweet_response):
+        """Test if Tweet DTO can convert None values into default values."""
+        assert_basic_tweet(Client(mock_tweet_getting_tweepy_client(basic_tweet_response)).get_tweets_by_ids([1])[0])
+
+    def test_get_full_fields_tweet(self, mock_tweet_getting_tweepy_client, full_tweet_response):
+        """Test if Tweet DTO can handle optional information like location, attachments..."""
+        assert_full_tweet(Client(mock_tweet_getting_tweepy_client(full_tweet_response)).get_tweets_by_ids([1])[0])
+
+
+test_time = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
+test_url = "https://example.com"
+common_user_data = {
+    "profile_image_url": test_url,
+    "created_at": test_time.isoformat(),
+    "description": "hi",
+    "location": None,
+    "public_metrics": {"followers_count": 1, "following_count": 2, "tweet_count": 3, "listed_count": 4},
+    "protected": False,
+}
+
+normal_user_data = {
+    "id": 1,
+    "name": "Test User",
+    "username": "TestUser",
+    "pinned_tweet_id": 1,
+    "verified": True,
+    "url": test_url,
+    "entities": {"url": {"urls": [{"url": test_url, "expanded_url": "exp"}]}},
+}
+normal_user_data.update(common_user_data)
+
+no_pinned_tweet_user_data = {
+    "id": 2,
+    "name": "No Pinned Tweet User",
+    "username": "NoPinnedTweetUser",
+    "pinned_tweet_id": None,
+    "verified": False,
+}
+no_pinned_tweet_user_data.update(common_user_data)
 
 
 def response_with(data=None, includes=None, errors=None, meta=None):
@@ -291,44 +346,14 @@ def mock_user_getting_tweepy_client(mock_tweepy_client):
 @pytest.fixture
 def normal_user_response():
     return response_with(
-        data=[
-            {
-                "id": 1,
-                "name": "Test User",
-                "username": "TestUser",
-                "pinned_tweet_id": 1,
-                "profile_image_url": image_url,
-                "created_at": create_time,
-                "description": "hi",
-                "location": None,
-                "public_metrics": {"followers_count": 1, "following_count": 2, "tweet_count": 3, "listed_count": 4},
-                "protected": False,
-                "verified": True,
-            }
-        ],
+        data=[tweepy.User(normal_user_data)],
         includes={"tweets": [{"id": 1, "text": "pinned tweet"}]},
     )
 
 
 @pytest.fixture
 def no_pinned_tweet_user_response():
-    return response_with(
-        data=[
-            {
-                "id": 2,
-                "name": "No Pinned Tweet User",
-                "username": "NoPinnedTweetUser",
-                "pinned_tweet_id": None,
-                "profile_image_url": image_url,
-                "created_at": create_time,
-                "description": "hi",
-                "location": None,
-                "public_metrics": {"followers_count": 1, "following_count": 2, "tweet_count": 3, "listed_count": 4},
-                "protected": False,
-                "verified": False,
-            }
-        ]
-    )
+    return response_with(data=[tweepy.User(no_pinned_tweet_user_data)])
 
 
 @pytest.fixture
@@ -359,43 +384,242 @@ def mixed_response(normal_user_response, no_pinned_tweet_user_response, not_exis
 
 
 def assert_normal_user(user: User):
-    assert_that(user.id, is_(1))
-    assert_that(user.name, is_("Test User"))
-    assert_that(user.username, is_("TestUser"))
-    assert_that(user.pinned_tweet_id, is_(1))
-    assert_that(user.pinned_tweet_text, is_("pinned tweet"))
-    assert_that(user.verified, is_(True))
+    assert user.id == 1
+    assert user.name == "Test User"
+    assert user.username == "TestUser"
+    assert user.pinned_tweet_id == 1
+    assert user.pinned_tweet_text == "pinned tweet"
+    assert user.verified is True
     assert_common_user_fields(user)
+    assert user.url == "exp"
 
 
 def assert_no_pinned_tweet_user(user: User):
-    assert_that(user.id, is_(2))
-    assert_that(user.name, is_("No Pinned Tweet User"))
-    assert_that(user.username, is_("NoPinnedTweetUser"))
+    assert user.id == 2
+    assert user.name == "No Pinned Tweet User"
+    assert user.username == "NoPinnedTweetUser"
     # default set to 0
-    assert_that(user.pinned_tweet_id, is_(0))
-    assert_that(user.pinned_tweet_text, is_(""))
-    assert_that(user.verified, is_(False))
+    assert user.pinned_tweet_id == 0
+    assert user.pinned_tweet_text == ""
+    assert user.verified is False
     assert_common_user_fields(user)
 
 
 def assert_common_user_fields(user: User):
-    assert_that(user.profile_image_url, is_(image_url))
-    assert_that(user.created_at, is_(create_time))
-    assert_that(user.description, is_("hi"))
-    # default set to ''
-    assert_that(user.location, is_(""))
-    assert_that(user.followers_count, is_(1))
-    assert_that(user.following_count, is_(2))
-    assert_that(user.tweet_count, is_(3))
-    assert_that(user.protected, is_(False))
+    assert user.profile_image_url == test_url
+    assert user.created_at == test_time
+    assert user.description == "hi"
+    assert user.location == ""
+    assert user.followers_count == 1
+    assert user.following_count == 2
+    assert user.tweet_count == 3
+    assert user.protected is False
 
 
 def assert_user_not_exist_error(mock_recorder):
     error = mock_recorder.call_args_list[0][0][0][0]
     assert isinstance(error, ResourceNotFoundError)
-    assert_that(error.title, is_("Not Found Error"))
-    assert_that(error.parameter, is_("username"))
-    assert_that(error.value, is_("ErrorUser"))
-    assert_that(error.detail, is_("Could not find rules with username: [ErrorUser]."))
-    assert_that(error.ref_url, is_("https://api.twitter.com/2/problems/resource-not-found"))
+    assert error.title == "Not Found Error"
+    assert error.parameter == "username"
+    assert error.value == "ErrorUser"
+    assert error.detail == "Could not find rules with username: [ErrorUser]."
+    assert error.ref_url == "https://api.twitter.com/2/problems/resource-not-found"
+
+
+@pytest.fixture
+def mock_tweet_getting_tweepy_client(mock_tweepy_client):
+    def set_response(test_response_data):
+        mock_tweepy_client.get_tweets = MagicMock(return_value=test_response_data)
+        # the logic will get function's __name__ attribute when recording api errors
+        mock_tweepy_client.get_tweets.__name__ = "mock_get_tweets_func"
+        return mock_tweepy_client
+
+    return set_response
+
+
+common_tweet_data = {
+    "author_id": 1,
+    "created_at": test_time,
+    "possibly_sensitive": False,
+    "text": "text",
+    "public_metrics": {"retweet_count": 1, "reply_count": 1, "like_count": 1, "quote_count": 1},
+    "reply_settings": "following",
+    "conversation_id": 123,
+}
+basic_tweet_data = {
+    "id": 1,
+    "context_annotations": None,
+    "withheld": None,
+    "in_reply_to_user_id": None,
+    "referenced_tweets": None,
+    "source": None,
+    "attachments": None,
+    "geo": None,
+    "lang": None,
+    "entities": None,
+}
+basic_tweet_data.update(common_tweet_data)
+
+
+@pytest.fixture
+def basic_tweet_response():
+    return response_with(data=[basic_tweet_data], includes={"users": [normal_user_data]})
+
+
+@pytest.fixture
+def full_tweet_response():
+    data = {
+        "id": 2,
+        "context_annotations": [
+            {
+                "domain": {"id": "1", "name": "dn", "description": "dhi"},
+                "entity": {"id": "2", "name": "en", "description": "ehi"},
+            }
+        ],
+        "withheld": {"a": 123},
+        "in_reply_to_user_id": 2,
+        "referenced_tweets": [{"id": 1, "type": "quoted"}],
+        "source": "App",
+        "attachments": {"media_keys": ["1", "2"], "poll_ids": ["1"]},
+        "geo": {"place_id": "1"},
+        "lang": "en",
+        "entities": {"a": 123},
+    }
+    data.update(common_tweet_data)
+    return response_with(
+        data=[data],
+        includes={
+            "users": [normal_user_data],
+            "media": [
+                {
+                    "media_key": "1",
+                    "type": "photo",
+                    "alt_text": "alt",
+                    "height": 123,
+                    "width": 456,
+                    "duration_ms": None,
+                    "url": test_url,
+                },
+                {
+                    "media_key": "2",
+                    "type": "video",
+                    "alt_text": None,
+                    "height": 123,
+                    "width": 456,
+                    "duration_ms": 789,
+                    "preview_image_url": test_url,
+                    "public_metrics": {"view_count": 2901},
+                    "url": None,
+                },
+            ],
+            "tweets": [basic_tweet_data],
+            "polls": [
+                {
+                    "id": "1",
+                    "duration_minutes": 123,
+                    "end_datetime": test_time,
+                    "voting_status": "open",
+                    "options": [{"position": 1, "label": "A", "votes": 1}, {"position": 2, "label": "B", "votes": 2}],
+                }
+            ],
+            "places": [
+                {
+                    "geo": {"a": 123},
+                    "country_code": "US",
+                    "name": "Manhattan",
+                    "id": "1",
+                    "place_type": "city",
+                    "country": "United States",
+                    "full_name": "Manhattan, NY",
+                }
+            ],
+        },
+    )
+
+
+def assert_basic_tweet(tweet: Tweet):
+    assert tweet.id == 1
+    assert tweet.context_annotations == []
+    assert tweet.withheld == {}
+    assert tweet.in_reply_to_user_id == 0
+    assert tweet.referenced_tweets == []
+    assert tweet.related_tweets == {}
+    assert tweet.source == ""
+    assert tweet.attachments == {}
+    assert tweet.mediums == []
+    assert tweet.polls == []
+    assert tweet.geo == {}
+    assert tweet.place == Place()
+    assert tweet.lang == ""
+    assert tweet.entities == {}
+    assert_common_tweet_fields(tweet)
+
+
+def assert_full_tweet(tweet: Tweet):
+    assert tweet.id == 2
+    assert tweet.context_annotations == [
+        ContextAnnotation(
+            domain=ContextAnnotation.Domain(id="1", name="dn", description="dhi"),
+            entity=ContextAnnotation.Entity(id="2", name="en", description="ehi"),
+        )
+    ]
+    assert tweet.withheld == {"a": 123}
+    assert tweet.in_reply_to_user_id == 2
+    assert tweet.referenced_tweets == [{"id": 1, "type": "quoted"}]
+    assert tweet.related_tweets["quoted"][0].id == 1
+    assert tweet.source == "App"
+    assert tweet.attachments == {"media_keys": ["1", "2"], "poll_ids": ["1"]}
+
+    photo = tweet.mediums[0]
+    assert photo.media_key == "1"
+    assert photo.type == "photo"
+    assert photo.alt_text == "alt"
+    assert photo.height == 123
+    assert photo.width == 456
+    assert photo.duration_ms is None
+    assert photo.url == test_url
+
+    video = tweet.mediums[1]
+    assert video.media_key == "2"
+    assert video.type == "video"
+    assert video.alt_text is None
+    assert video.height == 123
+    assert video.width == 456
+    assert video.duration_ms == 789
+    assert video.url is None
+    assert video.preview_image_url == test_url
+    assert video.public_metrics == {"view_count": 2901}
+
+    poll = tweet.polls[0]
+    assert poll.id == "1"
+    assert poll.duration_minutes == 123
+    assert poll.end_datetime == test_time
+    assert poll.voting_status == Poll.Status.OPEN
+    assert poll.options == [Poll.Option(position=1, label="A", votes=1), Poll.Option(position=2, label="B", votes=2)]
+
+    assert tweet.geo == {"place_id": "1"}
+    assert tweet.place.id == "1"
+    assert tweet.place.name == "Manhattan"
+    assert tweet.place.full_name == "Manhattan, NY"
+    assert tweet.place.place_type == "city"
+    assert tweet.place.contained_with == []
+    assert tweet.place.country == "United States"
+    assert tweet.place.country_code == "US"
+    assert tweet.place.geo == {"a": 123}
+
+    assert tweet.lang == "en"
+    assert tweet.entities == {"a": 123}
+    assert_common_tweet_fields(tweet)
+
+
+def assert_common_tweet_fields(tweet: Tweet):
+    assert tweet.author.name == "Test User"
+    assert tweet.created_at == test_time
+    assert tweet.possibly_sensitive is False
+    assert tweet.text == "text"
+    assert tweet.retweet_count == 1
+    assert tweet.reply_count == 1
+    assert tweet.like_count == 1
+    assert tweet.quote_count == 1
+    assert tweet.reply_settings == ReplySettings.FOLLOWING
+    assert tweet.conversation_id == 123
