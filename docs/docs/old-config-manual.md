@@ -293,7 +293,7 @@ This rule is basically
 maps [the Twitter Tweet Search API](https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-recent)
 .
 According to official documentation, the query length is limited up to 512 characters,
-and can only search the last 7 days of tweets with Essential Twitter API permission.
+and can only search the last 7 days of tweets with Essential Twitter API access.
 
 This rule is powerful but easily being misused, due to its fuzzy search feature,
 make sure you have read advices [below](#more) and knowing clearly
@@ -316,7 +316,7 @@ If search query result is not empty, triggered.
 You can save your api query volume by integrating search query rules to minimum number.
 The rate of limit
 of [tweet searching API](https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-recent)
-is **180 requests per 15 minutes** with Essential Twitter API permission.
+is **180 requests per 15 minutes** with Essential Twitter API access.
 
 When used as a further filter rule (not under [who](#who) field),
 the script will generate a prefix `from:{user_id}` followed by this query string,

@@ -96,7 +96,7 @@ meanwhile the API [have different rate limits](https://developer.twitter.com/en/
 These limits can sometimes be very impactful on execution speed, such as only fifty block API query is allowed for every fifteen minutes.
 
 What's more, you can only [search for last 7 days tweets](https://developer.twitter.com/en/docs/twitter-api/tweets/search/introduction)
-(using "search/recent" API) with Essential Twitter API permission, and query string length is limited up to 512.
+(using "search/recent" API) with Essential Twitter API access, and query string length is limited up to 512.
 
 ### Details about secrets encryption and usage
 

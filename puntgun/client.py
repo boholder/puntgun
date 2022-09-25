@@ -1,5 +1,8 @@
+import datetime
 import functools
-from typing import Any, Callable, Iterator, List
+import itertools
+from enum import Enum
+from typing import Any, Callable, Iterator, List, TypeVar
 
 import tweepy
 from loguru import logger
@@ -158,7 +161,7 @@ USER_API_FIELDS = [
 ]
 
 # Not authorized to access 'non_public_metrics', 'organic_metrics', 'promoted_metrics'
-# with free-registered Essential level token
+# with free-registered Essential access token
 TWEET_API_FIELDS = [
     "attachments",
     "author_id",
@@ -219,6 +222,13 @@ TWEET_API_PARAMS = {
 }
 
 
+class SortOrder(str, Enum):
+    """Specify the order in which you want the Tweets returned."""
+
+    RECENCY = "recency"
+    RELEVANCY = "relevancy"
+
+
 class Client(object):
     """
     Adapter of :class:`tweepy.Client` for handling requests and responses to the Twitter API.
@@ -274,7 +284,7 @@ class Client(object):
     def get_users_by_usernames(self, names: List[str]) -> List[User]:
         """
         Query users information.
-        **rate limit: 900 / 15 min**
+        **Rate limit: 900 / 15 min**
         https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-by
         """
         if len(names) > 100:
@@ -285,7 +295,7 @@ class Client(object):
     def get_users_by_ids(self, ids: List[int | str]) -> List[User]:
         """
         Query users information.
-        **rate limit: 900 / 15 min**
+        **Rate limit: 900 / 15 min**
         https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users
         """
         if len(ids) > 100:
@@ -296,7 +306,7 @@ class Client(object):
     def get_blocked(self) -> List[User]:
         """
         Get the latest blocking list of the current account.
-        **rate limit: 15 / 15 min**
+        **Rate limit: 15 / 15 min**
         https://developer.twitter.com/en/docs/twitter-api/users/blocks/api-reference/get-users-blocking
         """
         return query_paged_user_api(self.clt.get_blocked)
@@ -318,7 +328,7 @@ class Client(object):
     def get_following(self, user_id: int | str) -> List[User]:
         """
         Get the latest following list of a user.
-        **rate limit: 15 / 15 min**
+        **Rate limit: 15 / 15 min**
         https://developer.twitter.com/en/docs/twitter-api/users/follows/api-reference/get-users-id-following
         """
         return query_paged_user_api(self.clt.get_users_following, id=user_id)
@@ -334,7 +344,7 @@ class Client(object):
     def get_follower(self, user_id: int | str) -> List[User]:
         """
         Get the latest follower list of a user.
-        **rate limit: 15 / 15 min**
+        **Rate limit: 15 / 15 min**
         https://developer.twitter.com/en/docs/twitter-api/users/follows/api-reference/get-users-id-followers
         """
         return query_paged_user_api(self.clt.get_users_followers, id=user_id)
@@ -350,7 +360,7 @@ class Client(object):
     def block_user_by_id(self, target_user_id: int | str) -> bool:
         """
         Block given user on current account.
-        **rate limit: 50 / 15 min**
+        **Rate limit: 50 / 15 min**
         https://help.twitter.com/en/using-twitter/advanced-twitter-block-options
         https://developer.twitter.com/en/docs/twitter-api/users/blocks/api-reference/post-users-user_id-blocking
         """
@@ -376,7 +386,7 @@ class Client(object):
     def get_tweets_by_ids(self, ids: List[int | str]) -> List[Tweet]:
         """
         Query tweets information.
-        **rate limit: 900 / 15 min**
+        **Rate limit: 900 / 15 min**
         https://developer.twitter.com/en/docs/twitter-api/tweets/lookup/api-reference/get-tweets
         """
         if len(ids) > 100:
@@ -387,7 +397,7 @@ class Client(object):
     def get_users_who_like_tweet(self, tweet_id: int | str) -> List[User]:
         """
         Get a Tweet’s liking users (who liked this tweet).
-        **rate limit: 75 / 15 min**
+        **Rate limit: 75 / 15 min**
         https://developer.twitter.com/en/docs/twitter-api/tweets/likes/api-reference/get-tweets-id-liking_users
         """
         return query_paged_user_api(self.clt.get_liking_users, max_results=100, id=tweet_id)
@@ -395,10 +405,42 @@ class Client(object):
     def get_users_who_retweet_tweet(self, tweet_id: int | str) -> List[User]:
         """
         Get users who have retweeted a Tweet.
-        **rate limit: 75 / 15 min**
+        **Rate limit: 75 / 15 min**
         https://developer.twitter.com/en/docs/twitter-api/tweets/retweets/api-reference/get-tweets-id-retweeted_by
         """
         return query_paged_user_api(self.clt.get_retweeters, max_results=100, id=tweet_id)
+
+    def search_tweets(
+        self,
+        query: str,
+        hundreds_number: int = None,
+        sort_order: SortOrder = SortOrder.RECENCY,
+        start_time: datetime.datetime = None,
+        end_time: datetime.datetime = None,
+        since_id: int = None,
+        until_id: int = None,
+    ) -> List[Tweet]:
+        """
+        Search tweets with a query string.
+        With Essential Twitter API access, the query length is limited up to 512 characters,
+        and we can only search the last 7 days of tweets.
+        **Rate limit: 180 / 15 min**
+        **Counted in monthly Tweet consumption cap**
+        1. https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-recent
+        2. https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query
+        3. https://developer.twitter.com/en/docs/twitter-api/tweet-caps
+        TODO unfinished
+
+        :param query: One query for matching Tweets.
+        :param hundreds_number: The number of tweets you want to get, in hundreds.
+        :param sort_order: recency or relevancy.
+        :param start_time: The oldest or earliest UTC timestamp from which the Tweets will be provided, exclusive.
+        :param end_time: The newest, most recent UTC timestamp to which the Tweets will be provided, exclusive.
+        :param since_id: Returns results with a Tweet ID greater than (more recent than) the specified ID, exclusive.
+        :param until_id: Returns results with a Tweet ID less than (older than) the specified ID, exclusive.
+        :return:
+        """
+        return []
 
 
 def response_to_users(resp: tweepy.Response) -> List[User]:
@@ -476,18 +518,39 @@ def response_to_tweets(resp: tweepy.Response) -> List[Tweet]:
 
 
 def query_paged_user_api(clt_func: Callable[..., Response], max_results: int = 1000, **kwargs: Any) -> List[User]:
+    return query_paged_entity_api(clt_func, USER_API_PARAMS, response_to_users, max_results=max_results, **kwargs)
+
+
+def query_paged_tweet_api(clt_func: Callable[..., Response], times: int = None, **kwargs: Any) -> List[Tweet]:
+    return query_paged_entity_api(clt_func, TWEET_API_PARAMS, response_to_tweets, times, max_results=100, **kwargs)
+
+
+E = TypeVar("E")
+
+
+def query_paged_entity_api(
+    clt_func: Callable[..., Response],
+    api_params: dict,
+    transforming_func: Callable[[Response], List[E]],
+    times: int = None,
+    max_results: int = 100,
+    **kwargs: Any,
+) -> List[E]:
     # mix two part of params into one dict
     params = {}
-    for k, v in USER_API_PARAMS.items():
+    for k, v in api_params.items():
         params[k] = v
     if kwargs:
         for k, v in kwargs.items():
             params[k] = v
 
-    # use list() to query all pages
-    responses = list(paged_api_iter(clt_func, params, max_results))
-    # and return all users in responses as one list
-    return functools.reduce(lambda a, b: a + b, [response_to_users(r) for r in responses], [])
+    # only query limited pages
+    # or use list() to query all pages
+    api_iter = paged_api_iter(clt_func, params, max_results)
+    responses = list(itertools.islice(api_iter, times)) if times else list(api_iter)
+
+    # and return all entities in responses as one list
+    return functools.reduce(lambda a, b: a + b, [transforming_func(r) for r in responses], [])
 
 
 def paged_api_iter(
@@ -512,6 +575,9 @@ class NeedClientMixin(object):
 
     This class can also be used to label filter rules that take time to run their judgements
     (because they need to query Twitter API) and can't return immediately.
+
+    IMPROVE: Use multiple Twitter API tokens to build multiple clients, make a load-balancing client grid,
+    reducing the impact of API rate limit on program performance.
     """
 
     @property
