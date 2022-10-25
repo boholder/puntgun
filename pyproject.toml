@@ -14,7 +14,7 @@ dependencies = [
     # for loading config from env, files...
     "dynaconf<4.0.0,>=3.1.9",
     # Twitter client library
-    "tweepy<5.0.0,>=4.10.0",
+    "tweepy<5.0.0,>=4.12.0",
     # ...runtime? combining steps into a processing pipeline
     "reactivex<5.0.0,>=4.0.4",
     # for encrypto stuff
