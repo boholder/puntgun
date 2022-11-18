@@ -13,7 +13,7 @@
     
     
       
-        <title>Security policy - puntgun</title>
+        <title>Custom Rules - puntgun</title>
       
     
     
@@ -68,7 +68,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#security-policy" class="md-skip">
+        <a href="#custom-rules" class="md-skip">
           Skip to content
         </a>
       
@@ -107,7 +107,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Security policy
+              Custom Rules
             
           </span>
         </div>
@@ -507,20 +507,6 @@
               
   
   
-  
-    <li class="md-nav__item">
-      <a href="../custom-rules/" class="md-nav__link">
-        Custom Rules
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
     
   
   
@@ -533,12 +519,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Security policy
+          Custom Rules
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Security policy
+        Custom Rules
       </a>
       
         
@@ -557,8 +543,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#reporting-a-vulnerability" class="md-nav__link">
-    Reporting a Vulnerability
+  <a href="#structure-of-rules-source-code" class="md-nav__link">
+    Structure of rules source code
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inheritance-structure-of-one-example-rule-class" class="md-nav__link">
+    Inheritance structure of one example rule class
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-the-rule-instances-are-generated-from-the-plan-configuration" class="md-nav__link">
+    How the rule instances are generated from the plan configuration
   </a>
   
 </li>
@@ -567,6 +567,20 @@
   
 </nav>
       
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../security-policy/" class="md-nav__link">
+        Security policy
+      </a>
     </li>
   
 
@@ -605,8 +619,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#reporting-a-vulnerability" class="md-nav__link">
-    Reporting a Vulnerability
+  <a href="#structure-of-rules-source-code" class="md-nav__link">
+    Structure of rules source code
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inheritance-structure-of-one-example-rule-class" class="md-nav__link">
+    Inheritance structure of one example rule class
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-the-rule-instances-are-generated-from-the-plan-configuration" class="md-nav__link">
+    How the rule instances are generated from the plan configuration
   </a>
   
 </li>
@@ -625,24 +653,231 @@
                 
                   
 
-  <a href="https://github.com/boholder/puntgun/edit/main/docs/docs/development/security-policy.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/boholder/puntgun/edit/main/docs/docs/development/custom-rules.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="security-policy">Security Policy<a class="headerlink" href="#security-policy" title="Permanent link">#</a></h1>
-<p>This page is used to show which versions of the tool are affected by which vulnerabilities.
-There are currently no vulnerabilities present.
-It is recommended to update this tool to the latest version each time you run it 
-(it is much easier to update with the help of <a href="https://pypa.github.io/pipx/">pipx</a>).</p>
-<h2 id="reporting-a-vulnerability">Reporting a Vulnerability<a class="headerlink" href="#reporting-a-vulnerability" title="Permanent link">#</a></h2>
-<p>Please submit vulnerability or abuse reports via <a href="https://github.com/boholder/puntgun/issues">issues</a>. 
-Responses and fixes for such issues will be prioritized over any other issues.
-If the submitter determines that the problem is serious and should not directly disclose the specifics in public, 
-please email the specifics to <a href="mailto:bottleholder@anche.no">current maintainer</a> and create an issue without the specifics
-(I generally check my emails once a week, but the creation of an issue can be notified immediately).</p>
-<p>We apologize that we cannot give an exact expected fix time.</p>
+<h1 id="custom-rules">Custom Rules<a class="headerlink" href="#custom-rules" title="Permanent link">#</a></h1>
+<p>This page describes knowledge about developing custom rules.</p>
+<p>This tool is distributed as a standalone application, you cannot add rules by modifying the source code,
+so first please follow <a href="https://boholder.github.io/puntgun/development/contributing/#prepare-for-local-development">this documentation</a>
+to make your local development environment ready.</p>
+<h2 id="structure-of-rules-source-code">Structure of rules source code<a class="headerlink" href="#structure-of-rules-source-code" title="Permanent link">#</a></h2>
+<p>All rule-related code are stored under the <a href="https://github.com/boholder/puntgun/tree/main/puntgun/rules"><strong>rules</strong></a> module.
+Depending on the type of entity that the rule operates, rules are divided into two categories:
+user rules and tweet rules, which are stored in the corresponding <strong>user</strong> and <strong>tweet</strong> submodules.
+The rules are further categorized by the purpose (source, filter, action...) and stored in different modules.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code>[../puntgun/puntgun/rules ‹main*›] $ tree
+.
+├── __init__.py
+├── config_parser.py
+├── data.py
+├── tweet
+│   └── __init__.py
+│   └── ...
+└── user
+    ├── __init__.py
+    ├── action_rules.py
+    ├── filter_rules.py
+    ├── plan.py
+    ├── rule_sets.py
+    └── source_rules.py
+</code></pre></div></td></tr></table></div>
+<h2 id="inheritance-structure-of-one-example-rule-class">Inheritance structure of one example rule class<a class="headerlink" href="#inheritance-structure-of-one-example-rule-class" title="Permanent link">#</a></h2>
+<p>This project is developed using object-oriented design pattern,
+and each rule exists in the form of a class structure.
+Take example from inheritance diagram of "FollowerUserFilterRule":</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code>         ┌────────────► BaseModel
+         │                   ▲
+         │                   │
+FieldsRequired ◄──┬───► FromConfig ◄────┐
+                  │                     │
+NumericRangeCheckingMixin ◄──┬───► UserFilterRule
+                             │
+                  FollowerUserFilterRule
+</code></pre></div></td></tr></table></div>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Position</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FollowerUserFilterRule</code></td>
+<td><code>rules.user.filter_rules</code></td>
+<td>User filter rule, for checking if user's follower count within given range</td>
+</tr>
+<tr>
+<td><code>NumericRangeCheckingMixin</code></td>
+<td><code>rules.__init__</code></td>
+<td>Reusable class which providing range checking function on numeric type value</td>
+</tr>
+<tr>
+<td><code>UserFilterRule</code></td>
+<td><code>rules.user.filter_rules</code></td>
+<td>Rule type tagging for runtime rule classes loading</td>
+</tr>
+<tr>
+<td><code>FieldsRequired</code></td>
+<td><code>rules.__init__</code></td>
+<td>Contain an auto-validating function to check at least one field is provided with configuration</td>
+</tr>
+<tr>
+<td><code>FromConfig</code></td>
+<td><code>rules.__init__</code></td>
+<td>Indicate that one class can be parsed from loaded plan configuration (Python dictionary type)</td>
+</tr>
+<tr>
+<td><code>BaseModel</code></td>
+<td><code>pydantic</code> <a href="https://pydantic-docs.helpmanual.io/">(dependency)</a></td>
+<td>Use this dependency to get easy instance initialization and field values validation capabilities</td>
+</tr>
+</tbody>
+</table>
+<p>We reuse the functions through the <a href="https://stackoverflow.com/a/547714/11397457">mixin</a> practice,
+so the final rule implementation will be simple (if it doesn't need additional logic):</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">FollowerUserFilterRule</span><span class="p">(</span><span class="n">NumericRangeCheckingMixin</span><span class="p">,</span> <span class="n">UserFilterRule</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check user&#39;s follower count.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Inherits from [FromConfig].</span>
+    <span class="c1"># Same-name in plan configuration, works like index of rule classes for configuration parsing,</span>
+    <span class="c1"># let the configuration parser knows which rule class the configuration should be parsed to.</span>
+    <span class="n">_keyword</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;follower&quot;</span>
+
+    <span class="c1"># Overrides from [UserFilterRule].</span>
+    <span class="c1"># Returns a wrapper DTO which contains itself (for latter reporting) and the filtering result.</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">:</span> <span class="n">User</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RuleResult</span><span class="p">:</span>
+        <span class="c1">#                       call NumericRangeCheckingMixin.compare()</span>
+        <span class="k">return</span> <span class="n">RuleResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">compare</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">followers_count</span><span class="p">))</span>
+</code></pre></div></td></tr></table></div>
+<p>To create instances of this class:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># 1. Normal way</span>
+<span class="c1"># Two initializing parameters are inherited from [NumericRangeCheckingMixin]</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">FollowerUserFilterRule</span><span class="p">(</span><span class="n">less_than</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">more_than</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># 2. Parse from configuration </span>
+<span class="c1"># using BaseModel.parse_obj()</span>
+<span class="c1"># https://pydantic-docs.helpmanual.io/usage/models/#helper-functions</span>
+<span class="c1">#</span>
+<span class="c1"># follower:</span>
+<span class="c1">#   less_than: 100</span>
+<span class="c1">#   more_than: 1</span>
+<span class="c1">#</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">FollowerUserFilterRule</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">({</span><span class="s2">&quot;follower&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;less_than&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;more_than&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}})</span>
+</code></pre></div></td></tr></table></div>
+<p>In the rule class developing we use quite a few features provided by <a href="https://pydantic-docs.helpmanual.io/">pydantic</a>.
+For the most part using <strong>pydantic</strong> speed-up our development, but it made the rule class has unknown behavior,
+and implementing some simple features on the rule class (such as adding <code>_keyword</code> <strong>class variable</strong>)
+required more time reading the documentation and experimenting. Take it as a trade-off.</p>
+<h2 id="how-the-rule-instances-are-generated-from-the-plan-configuration">How the rule instances are generated from the plan configuration<a class="headerlink" href="#how-the-rule-instances-are-generated-from-the-plan-configuration" title="Permanent link">#</a></h2>
+<p>Since the exact logic may change in the future, the description here does not involve specific implementation.
+The description will be given with the following plan configuration.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code>plans:
+  - user_plan: Name #(3)
+    from:
+      - names: [&#39;TwitterDev&#39;, &#39;TwitterAPI&#39;]
+    that:
+      - follower: #(4)
+          less_than: 10
+      - following:
+          more_than: 100000000
+    do:
+      - block: {}
+</code></pre></div></td></tr></table></div>
+<ol>
+<li>
+<p>When the program starts, Python loads module <a href="https://github.com/boholder/puntgun/blob/main/puntgun/rules/config_parser.py"><code>rules.config_parser</code></a>
+   into the namespace, the function call written in the global environment in module <code>rules.config_parser</code> are executed,
+   loads all the rule classes (all classes inherited <code>FromConfig</code>, in fact, including plan classes, etc.) in module <code>rules</code> recursively in runtime
+   (simply import all classes in this module will cause circular dependency problem, while move importing to other upper modules looks awkward).</p>
+</li>
+<li>
+<p>Once the program takes the plan configuration (in Python dictionary type) from the full configuration,
+   the program will recursively parse the plan configuration using the <code>ConfigParser</code> under the <code>rules.config_parser</code> module,
+   converting it into a list of plan instances which contain rule instances.</p>
+</li>
+<li>
+<p>The <code>ConfigParser</code> matching configuration and rules with the help of inheritance chain of rule classes and <code>_keyword</code> class variables of each rule class.
+   The first step is to parse the root of the plan configuration (Python dictionary) i.e. the plan class,
+   which inherit from the <code>Plan</code> parent class, so we know that all <code>Plan</code>'s subclasses are candidates for this step (and it is hard-coded).
+   Now assuming that the root of first plan configuration is "user_plan",
+   we'll look for the subclass which <code>_keyword</code>'s value is exactly <code>user_plan</code>,
+   and it turns out to be the <code>UserPlan</code> class (if no answer occur, the <code>ConfigParser</code> will raise an error).
+   Now the <code>ConfigParser</code> knows that it should try to pass the configuration to <code>UserPlan</code>'s constructor.</p>
+</li>
+<li>
+<p>Inside <code>UserPlan</code>'s constructor, the <code>ConfigParser</code> is called again for parsing rules inside this plan instance.
+   This time the <code>ConfigParser</code> is given <code>UserSourceRule</code>, <code>UserFilterRule</code>, <code>UserActionRule</code> as candidate transforming targets' parent classes,
+   and the <code>ConfigParser</code> will again search for the same <code>_keyword</code> class variables.
+   For example, <code>UserFilterRule</code> + <code>_keyword:follower</code> =&gt; <code>FollowerUserFilterRule</code>.</p>
+</li>
+<li>
+<p>Repeating step 3 and step 4, whole plan configuration dictionary is transformed into plan instances.
+   Possible construction and parsing errors are caught and collected outside the <code>ConfigParser</code> invoking logic.
+   If no errors occur during the whole parsing process, the program will start executing the plan,
+   otherwise the program will exit and print these errors to notify the user to fix them.</p>
+</li>
+</ol>
 
 
 
@@ -663,7 +898,7 @@ please email the specifics to <a href="mailto:bottleholder@anche.no">current mai
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="../custom-rules/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Custom Rules" rel="prev">
+        <a href="../contributing/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Contributing" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -672,11 +907,26 @@ please email the specifics to <a href="mailto:bottleholder@anche.no">current mai
               <span class="md-footer__direction">
                 Previous
               </span>
-              Custom Rules
+              Contributing
             </div>
           </div>
         </a>
       
+      
+        
+        <a href="../security-policy/" class="md-footer__link md-footer__link--next" aria-label="Next: Security policy" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Security policy
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
       
     </nav>
   
