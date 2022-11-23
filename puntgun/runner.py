@@ -65,7 +65,7 @@ The tool is trying to load from this plan configuration file:
 If it not exists, generate example configuration files with "puntgun gen config".
 If it exists, check if its content is valid with "puntgun check plan --plan_file=...",
 and fix it with reference documentation:
-https://boholder.github.io/puntgun/configuration/plan-configuration/ """
+https://boholder.github.io/puntgun/dev//configuration/plan-configuration/ """
 
 
 def get_and_validate_plan_config() -> list[dict]:
@@ -81,7 +81,7 @@ def get_and_validate_plan_config() -> list[dict]:
 CHECK_PLAN_FAIL = """Checking {plan_file} FAIL,
 Please fix these errors in plan configuration file with reference document.
 Reference documentation:
-https://boholder.github.io/puntgun/configuration/plan-configuration/
+https://boholder.github.io/puntgun/dev//configuration/plan-configuration/
 Errors:
 {errors}"""
 

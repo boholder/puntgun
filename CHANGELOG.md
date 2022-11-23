@@ -7,7 +7,7 @@ Change logs are written for demonstration purposes only.
 ### Features
 
 * Add a command line tool to run the program.
-* [follower](https://boholder.github.io/puntgun/configuration/plan-configuration#follower) - filter user by follower count.
+* [follower](https://boholder.github.io/puntgun/dev//configuration/plan-configuration#follower) - filter user by follower count.
 
 ### Improvements
 

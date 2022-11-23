@@ -39,7 +39,7 @@ Running this command after installation will generate:
 
 ### Follow the tool's lead to generate the secrets file
 
-This tool also needs [secret values](https://boholder.github.io/puntgun/configuration/tool-configuration/secrets)
+This tool also needs [secret values](https://boholder.github.io/puntgun/dev//configuration/tool-configuration/secrets)
 registered externally on Twitter Developer Platform to enable it to work properly.
 Let the tool guides you to register necessary tokens,
 and leave them to the tool to safely keep them into encrypted secrets file for future use.

@@ -22,13 +22,13 @@ except for the records field, which is continuously expanded at runtime.
 | `reference_documentation` | URL of this documentation      | JSON doesn't allow comments exist, so...                                                               |
 | `tool_version`            | `"0.1.0"`                      | Current tool version, indicate what data structure this report is                                      |
 | `generate_time`           | `"2022-01-01T00:00:00.000000"` | Report generating time in ISO 8601 format at UTC+0 timezone                                            |
-| `plan_configuration`      | `[<plan config>,...]`          | [Plan configuration](https://boholder.github.io/puntgun/configuration/plan-configuration/) of this run |
+| `plan_configuration`      | `[<plan config>,...]`          | [Plan configuration](https://boholder.github.io/puntgun/dev//configuration/plan-configuration/) of this run |
 | `plan_ids`                | `[<plan id>,...]`              | See description below                                                                                  |
 | `records`                 | `[<record>,...]`               | See description below                                                                                  |
 
 ```json
 {
-  "reference_documentation": "https://boholder.github.io/puntgun/usage/report-file",
+  "reference_documentation": "https://boholder.github.io/puntgun/dev//usage/report-file",
   "tool_version": "0.1.0",
   "generate_time": "2022-01-01T00:00:00.000000",
   "plan_configuration": [],

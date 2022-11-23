@@ -62,14 +62,14 @@ or any other terminal.
 
 First you need a "Twitter Dev OAuth App API" to enable the tool, with this we can request the developer APIs provided by Twitter.
 Run the command below to let the tool interactively guide you register one on Twitter platform for free.
-For more information, read [documentation about available commands](https://boholder.github.io/puntgun/usage/commands).
+For more information, read [documentation about available commands](https://boholder.github.io/puntgun/dev//usage/commands).
 
 ```shell
 puntgun gen secrets
 ```
 
 Then you need a Plan Configuration file to instruct what the tool will do for you, run the command below to generate an example file.
-For more information about plan configuration, read [the documentation](https://boholder.github.io/puntgun/configuration/plan-configuration).
+For more information about plan configuration, read [the documentation](https://boholder.github.io/puntgun/dev//configuration/plan-configuration).
 
 ```shell
 puntgun gen example
@@ -83,10 +83,10 @@ puntgun fire
 
 If the tool doesn't exit quickly due to configuration errors (with red error logs printed pointing out what's wrong),
 you can leave the terminal (window) open and move on to other things.
-The tool will generate a [report file](https://boholder.github.io/puntgun/usage/report-file) (and log file) during runtime,
+The tool will generate a [report file](https://boholder.github.io/puntgun/dev//usage/report-file) (and log file) during runtime,
 which you can view later to see what happened.
 
-For more information on usage, see [the documentation website](https://boholder.github.io/puntgun).
+For more information on usage, see [the documentation website](https://boholder.github.io/puntgun/dev/).
 
 ## Technical details you may want to know
 

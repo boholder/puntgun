@@ -109,7 +109,7 @@ class Recorder(object):
         """
 
         head = {
-            "reference_documentation": "https://boholder.github.io/puntgun/usage/report-file",
+            "reference_documentation": "https://boholder.github.io/puntgun/dev//usage/report-file",
             # For version based branch logic in report-based "undo" operation.
             # (you have different available actions at different version,
             # which may require different "undo" process.)

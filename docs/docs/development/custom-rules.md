@@ -3,7 +3,7 @@
 This page describes knowledge about developing custom rules.
 
 This tool is distributed as a standalone application, you cannot add rules by modifying the source code,
-so first please follow [this documentation](https://boholder.github.io/puntgun/development/contributing/#prepare-for-local-development)
+so first please follow [this documentation](https://boholder.github.io/puntgun/dev//development/contributing/#prepare-for-local-development)
 to make your local development environment ready.
 
 ## Structure of rules source code

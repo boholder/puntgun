@@ -8,7 +8,7 @@ tool_settings = """# The settings of the tool itself.
 # in the user-written plan configuration file or in the environment variables.
 # The values of the commented out options are default values.
 # Reference documentation:
-# https://boholder.github.io/puntgun/configuration/tool-configuration/
+# https://boholder.github.io/puntgun/dev//configuration/tool-configuration/
 
 # Log level of the log file and stderr
 # https://loguru.readthedocs.io/en/stable/api/logger.html#levels
@@ -34,7 +34,7 @@ plan_config = """# This is an example plan configuration file.
 # This file does not cover all available rules,
 # you'd better check the documentation for more detailed description.
 # Reference documentation:
-# https://boholder.github.io/puntgun/configuration/plan-configuration/
+# https://boholder.github.io/puntgun/dev//configuration/plan-configuration/
 
 plans:
   # Name (explain) of this plan
