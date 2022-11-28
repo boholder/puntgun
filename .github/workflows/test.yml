@@ -5,7 +5,17 @@
 
 name: Test
 
-on: [ push, pull_request ]
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - puntgun/**
+      - tests/**
+  pull_request:
+    paths:
+      - puntgun/**
+      - tests/**
 
 env:
   default-python: "3.10"
