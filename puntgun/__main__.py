@@ -71,7 +71,6 @@ def fire(**kwargs: str) -> None:
 def gen() -> None:
     """
     Generate various files from the tool.
-    Will be automatically done by initialization process, nothing additional is needed.
     """
     pass
 
@@ -99,14 +98,13 @@ def secrets(**kwargs: str) -> None:
 
 @gen.command(context_settings=CONTEXT_SETTINGS)
 @click.option(
-    "--private-key",
+    cfg.CommandArg.PRIVATE_KEY_FILE.to_arg(),
     default=cfg.CommandArg.PRIVATE_KEY_FILE.value,
     show_default=True,
     help="Original private key file which generated the secrets file.",
 )
 @click.option(
-    "--secrets",
-    "_secrets",
+    cfg.CommandArg.SECRETS_FILE.to_arg(),
     default=cfg.CommandArg.SECRETS_FILE.value,
     show_default=True,
     help="Original secrets file.",
