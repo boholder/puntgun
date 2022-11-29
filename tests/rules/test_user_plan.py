@@ -5,12 +5,11 @@ import pytest
 import reactivex as rx
 from hamcrest import all_of, assert_that, contains_string
 from reactivex import operators as op
-from rules.data import RuleResult
 
 from puntgun.record import Record
 from puntgun.rules.base import Plan
 from puntgun.rules.config_parser import ConfigParser
-from puntgun.rules.data import User
+from puntgun.rules.data import RuleResult, User
 from puntgun.rules.user.action_rules import UserActionRule
 from puntgun.rules.user.filter_rules import UserFilterRule
 from puntgun.rules.user.plan import UserPlanResult

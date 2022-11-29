@@ -13,11 +13,10 @@ from loguru import logger
 from pydantic import BaseModel
 from reactivex import Observable
 from reactivex import operators as op
-from rules.data import RuleResult
 
 from puntgun.client import NeedClientMixin
 from puntgun.rules.config_parser import ConfigParser
-from puntgun.rules.data import User
+from puntgun.rules.data import RuleResult, User
 from puntgun.rules.user.action_rules import UserActionRule
 from puntgun.rules.user.filter_rules import UserFilterRule
 from puntgun.rules.user.source_rules import UserSourceRule

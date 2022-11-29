@@ -3,14 +3,13 @@ import re
 from typing import ClassVar
 
 from reactivex import Observable
-from rules.data import RuleResult
 
 from puntgun.rules.base import (
     FromConfig,
     NumericRangeCheckingMixin,
     TemporalRangeCheckingMixin,
 )
-from puntgun.rules.data import User
+from puntgun.rules.data import RuleResult, User
 
 
 class UserFilterRule(FromConfig):
