@@ -4,11 +4,13 @@ All the loaded settings and global variables for many modules to use.
 IMPROVE: Any proper way to unit test this module?
 I feel it is too implement-coupling to be valuable enough writing test cases.
 """
+import enum
 import os
 import sys
 from datetime import datetime
 from importlib import metadata
 from pathlib import Path
+from typing import Dict
 
 # import dynaconf before loguru because loguru also uses dynaconf
 # https://github.com/Delgan/loguru/issues/138#issuecomment-610476814
@@ -65,7 +67,32 @@ def load_settings() -> Dynaconf:
 settings = load_settings()
 
 
-def reload_important_files(**kwargs: str) -> None:
+class CommandArg(enum.Enum):
+    """How arguments are named in commands."""
+
+    CONFIG_PATH = str(config_path)
+    PLAN_FILE = str(plan_file)
+    SETTINGS_FILE = str(settings_file)
+    PRIVATE_KEY_FILE = str(pri_key_file)
+    SECRETS_FILE = str(secrets_file)
+    REPORT_FILE = str(report_file)
+
+    def to_arg_str(self) -> str:
+        return self.name.lower().replace("_", "-")
+
+    def to_arg(self) -> str:
+        return "--" + self.to_arg_str()
+
+    @staticmethod
+    def from_arg_str(arg: str) -> "CommandArg":
+        return CommandArg[arg.upper().replace("-", "_")]
+
+    @staticmethod
+    def arg_dict_to_enum_dict(**kwargs: str) -> Dict["CommandArg", str]:
+        return {CommandArg.from_arg_str(k): v for k, v in kwargs.items()}
+
+
+def reload_important_files(args: Dict[CommandArg, str]) -> None:
     """
     Change file paths base on command arguments passed by user,
     and reload configuration from new files.
@@ -79,19 +106,20 @@ def reload_important_files(**kwargs: str) -> None:
     global secrets_file
     global report_file
 
-    # after changing config_path, other paths need to be re-computed to propagate change
-    if kwargs.get("config_path"):
-        config_path = Path(kwargs.get("config_path"))
-    if kwargs.get("plan_file"):
-        plan_file = Path(kwargs.get("plan_file"))
-    if kwargs.get("settings_file"):
-        settings_file = Path(kwargs.get("settings_file"))
-    if kwargs.get("pri_key_file"):
-        pri_key_file = Path(kwargs.get("pri_key_file"))
-    if kwargs.get("secrets_file"):
-        secrets_file = Path(kwargs.get("secrets_file"))
-    if kwargs.get("report_file"):
-        report_file = Path(kwargs.get("report_file"))
+    # after changing the config_path, other paths need to be re-computed to propagate change
+    # it's how arguments paired with configurations.
+    if a := args.get(CommandArg.CONFIG_PATH):
+        config_path = Path(a)
+    if a := args.get(CommandArg.PLAN_FILE):
+        plan_file = Path(a)
+    if a := args.get(CommandArg.SETTINGS_FILE):
+        settings_file = Path(a)
+    if a := args.get(CommandArg.PRIVATE_KEY_FILE):
+        pri_key_file = Path(a)
+    if a := args.get(CommandArg.SECRETS_FILE):
+        secrets_file = Path(a)
+    if a := args.get(CommandArg.REPORT_FILE):
+        report_file = Path(a)
 
     # reload configuration files
     global settings

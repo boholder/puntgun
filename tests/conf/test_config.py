@@ -4,6 +4,11 @@ from pathlib import Path
 from puntgun.conf import config
 
 
+def test_command_arg_enum():
+    for e in config.CommandArg:
+        assert {e: "v"} == config.CommandArg.arg_dict_to_enum_dict(**{e.to_arg_str(): "v"})
+
+
 def test_reload_config_files(monkeypatch, tmp_path):
     # prepare a config file for testing config reloading
     # after indicating config file paths through command args.
@@ -21,12 +26,14 @@ def test_reload_config_files(monkeypatch, tmp_path):
         f.write("c: 2022-01-01 01:01:01")
 
     config.reload_important_files(
-        config_path="cf",
-        plan_file=str(custom_plan_file),
-        settings_file=str(custom_config_file),
-        pri_key_file="pkf",
-        secrets_file=str(custom_secrets_file),
-        report_file="rf",
+        {
+            config.CommandArg.CONFIG_PATH: "cf",
+            config.CommandArg.PLAN_FILE: str(custom_plan_file),
+            config.CommandArg.SETTINGS_FILE: str(custom_config_file),
+            config.CommandArg.PRIVATE_KEY_FILE: "pkf",
+            config.CommandArg.SECRETS_FILE: str(custom_secrets_file),
+            config.CommandArg.REPORT_FILE: "rf",
+        }
     )
 
     # expect the real runner can use updated config file paths
