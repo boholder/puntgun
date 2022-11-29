@@ -15,14 +15,8 @@
 [![pypi python version badge](https://img.shields.io/pypi/pyversions/puntgun)](https://pypi.org/project/puntgun/)
 
 > **Warning**
-> I won't be putting in another weekend on this project until I judge that Twitter's servers continue to function properly 😂
-> The project is still not in a state that I'm happy with (almost there!), so it's always in private.
-> But I think it's better to make it public for now...
-> 
-> At the moment the tool is working, there are just too few rules available,
-> maybe you can do something with this project in the... last hours? of the Twitter,
-> just add more custom rules fits your need.
-> We don't even know if the service will still work tomorrow.
+> The project is still not in a state that I'm happy with (almost there!),
+> the tool is working, there are just too few rules available.
 
 You can use this tool to do some boring Twitter account management
 (such as automatically select and block users from a source like a tweet's likes, your follower...),

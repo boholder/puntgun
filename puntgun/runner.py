@@ -2,14 +2,12 @@
 Plans runner at the highest abstraction level of the tool.
 Constructing plans, executing plans, collecting and recording plan results...
 """
-import multiprocessing
 import sys
 from typing import Any, List
 
 import reactivex as rx
 from loguru import logger
 from reactivex import operators as op
-from reactivex.scheduler import ThreadPoolScheduler
 
 from puntgun.client import Client
 from puntgun.conf import config
@@ -103,11 +101,6 @@ def parse_plans_config(_plans_config: list[dict]) -> List[Plan]:
     return plans
 
 
-# calculate number of CPUs, then create a ThreadPoolScheduler with that number of threads
-optimal_thread_count = multiprocessing.cpu_count()
-pool_scheduler = ThreadPoolScheduler(optimal_thread_count)
-
-
 def execute_plans(plans: List[Plan]) -> None:
     def on_error(e: Exception) -> None:
         logger.error("Error occurred when executing plan", e)
@@ -120,9 +113,7 @@ def execute_plans(plans: List[Plan]) -> None:
             try:
                 # Explicitly blocking execute plans one by one.
                 # for avoiding competition among plans on limited API invocation resources.
-                plan().pipe(
-                    op.subscribe_on(pool_scheduler), op.do(rx.Observer(on_next=process_plan_result, on_error=on_error))
-                ).run()
+                plan().pipe(op.do(rx.Observer(on_next=process_plan_result, on_error=on_error))).run()
             except rx.internal.SequenceContainsNoElementsError:
                 # If there is no element in the pipeline, the reactivex library will raise an error,
                 # catch this error as an expected case.
