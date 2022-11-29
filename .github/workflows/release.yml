@@ -10,9 +10,9 @@
 name: Release
 
 on:
+  # if we set both "branches" and "tags", they'll be judged in union instead of intersection.
+  # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-excluding-branches-and-tags
   push:
-    branches:
-      - main
     tags:
       - "v*.*.*"
 
