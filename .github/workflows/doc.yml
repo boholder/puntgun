@@ -10,7 +10,6 @@ on:
       - "*.md"
       - docs/**
       - .github/workflows/doc.yml
-      - "puntgun/**"
 
 env:
   default-python: "3.10"
