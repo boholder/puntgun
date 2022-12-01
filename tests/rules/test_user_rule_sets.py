@@ -1,5 +1,5 @@
 import time
-from typing import List, Optional
+from typing import List
 
 import pytest
 import reactivex as rx
@@ -68,7 +68,7 @@ class TSlowFilterRuleTrue(UserFilterRule, NeedClientMixin):
     _keyword = "srt"
     will_return: bool
     wait: int
-    work_count: Optional[int] = 0
+    work_count: int | None = 0
 
     def __call__(self, user: User):
         for _ in range(self.wait):

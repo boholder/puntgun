@@ -1,5 +1,5 @@
 import itertools
-from typing import ClassVar, List, Optional
+from typing import ClassVar, List
 
 import reactivex as rx
 from loguru import logger
@@ -83,11 +83,11 @@ class MyFollowerUserSourceRule(UserSourceRule, NeedClientMixin):
 
     _keyword = "my_followers"
     # last (newest) N followers
-    last: Optional[int]
+    last: int | None
     # first (oldest) N followers
-    first: Optional[int]
+    first: int | None
     # new followers after someone (@username)
-    after_user: Optional[str]
+    after_user: str | None
 
     @classmethod
     def parse_from_config(cls, conf: dict) -> "FromConfig":

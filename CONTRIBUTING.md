@@ -150,6 +150,7 @@ it will help us to manage other linting tools.
 Check `.pre-commit-config.yaml` under root directory to see pre-commit hooks configuration.
 Currently, this project uses:
 
+* [**pyupgrade**](https://github.com/asottile/pyupgrade) for automatically upgrade the syntax.
 * [**black**](https://black.readthedocs.io/en/stable/) for code style automatic formatting.
 * [**isort**](https://pycqa.github.io/isort/) for import statements sorting.
 * [**codespell**](https://github.com/codespell-project/codespell) for typo checking.

@@ -10,6 +10,12 @@ ci:
   autoupdate_commit_msg: "Auto update by pre-commit hooks"
 
 repos:
+  # automatically upgrade the syntax.
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.2.3
+    hooks:
+      - id: pyupgrade
+
   # for code style formatting
   # see pyproject.toml for config
   - repo: https://github.com/psf/black

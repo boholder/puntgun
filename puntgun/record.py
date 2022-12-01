@@ -27,7 +27,7 @@ from puntgun.conf import config
 from puntgun.rules.base import Plan
 
 
-class Record(object):
+class Record:
     """
     Record wrapper for a recordable object for format uniformity.
     """
@@ -59,7 +59,7 @@ class Record(object):
             return False
 
 
-class Recordable(object):
+class Recordable:
     """Interface for objects that can be recorded into report file."""
 
     def to_record(self) -> Record:
@@ -72,15 +72,15 @@ class Recordable(object):
         raise NotImplementedError
 
 
-COMMA = ",".encode("utf-8")
+COMMA = b","
 
 # 1. an empty list item (an empty map) for pairing one comma character behind the last plan item
 # 2. one square bracket for closing the "plans" list
 # 3. one curly bracket for closing the root level dictionary
-REPORT_TAIL = "{}]}".encode("utf-8")
+REPORT_TAIL = b"{}]}"
 
 
-class Recorder(object):
+class Recorder:
     """
     Saving / loading execution results with a report file in json format.
     Annoying temporal coupling included, you must call methods in this class

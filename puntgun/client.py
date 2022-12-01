@@ -229,7 +229,7 @@ class SortOrder(str, Enum):
     RELEVANCY = "relevancy"
 
 
-class Client(object):
+class Client:
     """
     Adapter of :class:`tweepy.Client` for handling requests and responses to the Twitter API.
 
@@ -568,7 +568,7 @@ def paged_api_iter(
         yield from paged_api_iter(clt_func, params, max_results, response.meta["next_token"])
 
 
-class NeedClientMixin(object):
+class NeedClientMixin:
     """
     Some rules need a :class:`Client` to call for getting extra information.
     This class provides a lazy loading client field (call Client.singleton()).

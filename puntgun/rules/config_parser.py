@@ -30,7 +30,7 @@ def import_rule_classes() -> None:
                 importlib.import_module(f"{base_module_name}.{module_name}")
 
 
-class ConfigParser(object):
+class ConfigParser:
     # There are only once parsing process for each run,
     # so I guess it's ok to use a class variable to store the errors,
     # and use this class as singleton pattern.

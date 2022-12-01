@@ -1,6 +1,5 @@
 """The implementation of commands"""
 from pathlib import Path
-from typing import Dict
 
 from loguru import logger
 
@@ -10,7 +9,7 @@ from puntgun.conf import config, encrypto, example, secret
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
-def fire(args: Dict[config.CommandArg, str]) -> None:
+def fire(args: dict[config.CommandArg, str]) -> None:
     logger.info("Run command [fire]")
     config.reload_important_files(args)
     # only config log files, stderr logs... in this command.
@@ -37,14 +36,14 @@ settings: {example_settings_file}
 plan: {example_plan_file}"""
 
 
-class Gen(object):
+class Gen:
     @staticmethod
-    def secrets(args: Dict[config.CommandArg, str]) -> None:
+    def secrets(args: dict[config.CommandArg, str]) -> None:
         config.reload_important_files(args)
         load_secrets_with_keyboard_interrupt_exit()
 
     @staticmethod
-    def new_password(args: Dict[config.CommandArg, str]) -> None:
+    def new_password(args: dict[config.CommandArg, str]) -> None:
         def get_new_password() -> str:
             new_pwd = ""
             two_pwd_are_not_same = True
@@ -67,7 +66,7 @@ class Gen(object):
         print("Password change succeed, new private key file has been generated.")
 
     @staticmethod
-    def plain_secrets(output_file: str, args: Dict[config.CommandArg, str]) -> None:
+    def plain_secrets(output_file: str, args: dict[config.CommandArg, str]) -> None:
         config.reload_important_files(args)
 
         print("Attention! This command will generate an unprotected plaintext secret value file.")
@@ -102,8 +101,8 @@ class Gen(object):
         )
 
 
-class Check(object):
+class Check:
     @staticmethod
-    def plan(args: Dict[config.CommandArg, str]) -> None:
+    def plan(args: dict[config.CommandArg, str]) -> None:
         config.reload_important_files(args)
         runner.parse_plans_config(runner.get_and_validate_plan_config())

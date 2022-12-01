@@ -5,7 +5,7 @@ https://en.wikipedia.org/wiki/Data_transfer_object
 import sys
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any, List, Mapping, Optional
 
 from pydantic import BaseModel, validator
 
@@ -39,26 +39,26 @@ class User(BaseModel):
 
     # Any field can be None in Twitter API response,
     # use "Optional" for avoiding this not-None pydantic validation error
-    id: Optional[int] = 0
-    name: Optional[str] = ""
-    username: Optional[str] = ""
-    profile_image_url: Optional[str] = ""
-    created_at: Optional[datetime] = DEFAULT_TIME
-    protected: Optional[bool] = False
-    verified: Optional[bool] = False
-    location: Optional[str] = ""
-    description: Optional[str] = ""
-    followers_count: Optional[int] = 0
-    following_count: Optional[int] = 0
-    tweet_count: Optional[int] = 0
-    pinned_tweet_id: Optional[int] = 0
-    pinned_tweet_text: Optional[str] = ""
+    id: int | None = 0
+    name: str | None = ""
+    username: str | None = ""
+    profile_image_url: str | None = ""
+    created_at: datetime | None = DEFAULT_TIME
+    protected: bool | None = False
+    verified: bool | None = False
+    location: str | None = ""
+    description: str | None = ""
+    followers_count: int | None = 0
+    following_count: int | None = 0
+    tweet_count: int | None = 0
+    pinned_tweet_id: int | None = 0
+    pinned_tweet_text: str | None = ""
     # IMPROVE: Can not overcome the forward-declaring problem.
     # I would like to give this attribute a "Tweet()" default value if I can.
     pinned_tweet: Optional["Tweet"]
-    entities: Optional[Dict[str, Any]] = {}
-    url: Optional[str] = ""
-    withheld: Optional[Dict[str, Any]] = {}
+    entities: Optional[dict[str, Any]] = {}
+    url: str | None = ""
+    withheld: Optional[dict[str, Any]] = {}
 
     @staticmethod
     def from_response(resp_data: Mapping, pinned_tweet: "Tweet" = None) -> "User":
@@ -135,50 +135,50 @@ class User(BaseModel):
 class Media(BaseModel):
     """https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/media"""
 
-    media_key: Optional[str] = ""
-    type: Optional[str] = ""
-    url: Optional[str] = ""
-    duration_ms: Optional[int] = 0
-    height: Optional[int] = 0
-    width: Optional[int] = 0
-    alt_text: Optional[str] = ""
-    preview_image_url: Optional[str] = ""
-    public_metrics: Optional[dict] = {}
-    variants: Optional[list] = []
+    media_key: str | None = ""
+    type: str | None = ""
+    url: str | None = ""
+    duration_ms: int | None = 0
+    height: int | None = 0
+    width: int | None = 0
+    alt_text: str | None = ""
+    preview_image_url: str | None = ""
+    public_metrics: dict | None = {}
+    variants: list | None = []
 
 
 class Poll(BaseModel):
     """https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/poll"""
 
     class Option(BaseModel):
-        position: Optional[int] = 0
-        label: Optional[str] = ""
-        votes: Optional[int] = 0
+        position: int | None = 0
+        label: str | None = ""
+        votes: int | None = 0
 
     class Status(str, Enum):
         OPEN = "open"
         CLOSED = "closed"
 
-    id: Optional[str] = ""
+    id: str | None = ""
     options: Optional[List[Option]] = []
-    duration_minutes: Optional[int] = 0
-    end_datetime: Optional[datetime] = DEFAULT_TIME
-    voting_status: Optional[Status] = Status.CLOSED
+    duration_minutes: int | None = 0
+    end_datetime: datetime | None = DEFAULT_TIME
+    voting_status: Status | None = Status.CLOSED
 
 
 class Place(BaseModel):
     """https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/place"""
 
-    id: Optional[str] = ""
-    name: Optional[str] = ""
-    full_name: Optional[str] = ""
-    place_type: Optional[str] = ""
+    id: str | None = ""
+    name: str | None = ""
+    full_name: str | None = ""
+    place_type: str | None = ""
     # The identifiers of known place that contain the referenced place.
     # (Do not know what it is)
     contained_with: Optional[List[Any]] = []
-    country: Optional[str] = ""
-    country_code: Optional[str] = ""
-    geo: Optional[dict] = {}
+    country: str | None = ""
+    country_code: str | None = ""
+    geo: dict | None = {}
 
 
 class ContextAnnotation(BaseModel):
@@ -193,14 +193,14 @@ class ContextAnnotation(BaseModel):
     """
 
     class Domain(BaseModel):
-        id: Optional[str] = ""
-        name: Optional[str] = ""
-        description: Optional[str] = ""
+        id: str | None = ""
+        name: str | None = ""
+        description: str | None = ""
 
     class Entity(BaseModel):
-        id: Optional[str] = ""
-        name: Optional[str] = ""
-        description: Optional[str] = ""
+        id: str | None = ""
+        name: str | None = ""
+        description: str | None = ""
 
     domain: Domain
     entity: Entity
@@ -221,29 +221,29 @@ class Tweet(BaseModel):
     https://developer.twitter.com/en/docs/twitter-api/tweets/lookup/api-reference/get-tweets-id
     """
 
-    id: Optional[int] = 0
+    id: int | None = 0
     # Author's user information
-    author: Optional[User] = User()
-    created_at: Optional[datetime] = DEFAULT_TIME
-    possibly_sensitive: Optional[bool] = False
-    text: Optional[str] = ""
-    retweet_count: Optional[int] = 0
-    reply_count: Optional[int] = 0
-    like_count: Optional[int] = 0
-    quote_count: Optional[int] = 0
-    reply_settings: Optional[ReplySettings] = ReplySettings.EVERYONE
+    author: User | None = User()
+    created_at: datetime | None = DEFAULT_TIME
+    possibly_sensitive: bool | None = False
+    text: str | None = ""
+    retweet_count: int | None = 0
+    reply_count: int | None = 0
+    like_count: int | None = 0
+    quote_count: int | None = 0
+    reply_settings: ReplySettings | None = ReplySettings.EVERYONE
     context_annotations: Optional[List[ContextAnnotation]] = []
 
     # Contains withholding details for withheld content
     # copyright, country_codes, scope
-    withheld: Optional[Dict[str, Any]] = {}
+    withheld: Optional[dict[str, Any]] = {}
 
     # The Tweet ID of the original Tweet of the conversation
     # (which includes direct replies, replies of replies)
-    conversation_id: Optional[int] = 0
+    conversation_id: int | None = 0
 
     # If this Tweet is a Reply, indicates the user ID of the parent Tweet's author.
-    in_reply_to_user_id: Optional[int] = 0
+    in_reply_to_user_id: int | None = 0
 
     # A list of Tweets this Tweet refers to.
     # For example, if the parent Tweet is:
@@ -254,19 +254,19 @@ class Tweet(BaseModel):
     # [{"type":<type (str)>,"id":<tweet id (int)>}...]
     #
     # Types have been found: "quoted" (quote tweet), "replied_to"
-    referenced_tweets: Optional[List[Dict[str, Any]]] = []
+    referenced_tweets: Optional[List[dict[str, Any]]] = []
 
     # Transform referenced_tweets into a convenient dictionary,
     # each key representing one type of reference.
-    related_tweets: Optional[Dict[str, List["Tweet"]]] = {}
+    related_tweets: Optional[dict[str, List["Tweet"]]] = {}
 
     # Application source
     # The name of the app the user Tweeted from
-    source: Optional[str] = ""
+    source: str | None = ""
 
     # Specifies the type of attachments (if any) present in this Tweet
     # media_keys (list), poll_ids (list)
-    attachments: Optional[dict] = {}
+    attachments: dict | None = {}
 
     # Media attachments' information, such as video, photo...
     mediums: Optional[List[Media]] = []
@@ -277,21 +277,21 @@ class Tweet(BaseModel):
     # Contains details about the location tagged by the user in this Tweet,
     # if they specified one
     # IMPROVE: can not find a sample tweet that contains this "geo" field
-    geo: Optional[Dict[str, Any]] = {}
+    geo: Optional[dict[str, Any]] = {}
 
     # got this from "response.includes.places" via "geo.place_id"
-    place: Optional[Place] = Place()
+    place: Place | None = Place()
 
     # Language of the Tweet, if detected by Twitter
     # Returned as a BCP47 language tag
     # https://en.wikipedia.org/wiki/IETF_language_tag
     # example: "en" (it's a subtag)
     # PS: pure emoji tweets' language is "art"
-    lang: Optional[str] = ""
+    lang: str | None = ""
 
     # Contains details about text that has a special meaning in a Tweet
     # urls, hashtags, mentions, annotations (not the context annotation)...
-    entities: Optional[Dict[str, Any]] = {}
+    entities: Optional[dict[str, Any]] = {}
 
     @staticmethod
     def from_response(
@@ -372,7 +372,7 @@ class Tweet(BaseModel):
         return wh or {}
 
 
-class RuleResult(object):
+class RuleResult:
     """
     It's a special wrapper as filter/action rules' execution result.
     After a rule's execution, it returns an instance of this class instead of directly return the boolean value,

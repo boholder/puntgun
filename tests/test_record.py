@@ -66,7 +66,7 @@ class TestRecorder:
 
     def test_load_report_fail(self):
         with pytest.raises(ValueError) as _:
-            load_report("{".encode("utf-8"))
+            load_report(b"{")
 
     def test_write_report_head_tail(self, mock_datetime_now, mock_record_logger, mock_configuration):
         mock_configuration({"plans": [{"p": 123}]})

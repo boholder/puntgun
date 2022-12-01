@@ -10,7 +10,6 @@ import sys
 from datetime import datetime
 from importlib import metadata
 from pathlib import Path
-from typing import Dict
 
 # import dynaconf before loguru because loguru also uses dynaconf
 # https://github.com/Delgan/loguru/issues/138#issuecomment-610476814
@@ -88,11 +87,11 @@ class CommandArg(enum.Enum):
         return CommandArg[arg.upper().replace("-", "_")]
 
     @staticmethod
-    def arg_dict_to_enum_dict(**kwargs: str) -> Dict["CommandArg", str]:
+    def arg_dict_to_enum_dict(**kwargs: str) -> dict["CommandArg", str]:
         return {CommandArg.from_arg_str(k): v for k, v in kwargs.items()}
 
 
-def reload_important_files(args: Dict[CommandArg, str]) -> None:
+def reload_important_files(args: dict[CommandArg, str]) -> None:
     """
     Change file paths base on command arguments passed by user,
     and reload configuration from new files.

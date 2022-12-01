@@ -1,6 +1,5 @@
 import binascii
 from pathlib import Path
-from typing import Dict
 
 import dynaconf
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPublicKey
@@ -129,7 +128,7 @@ so next time you running this tool you need not enter these annoying unreadable 
 And we'll encrypt them before saving, it's time to load your private key."""
 
 
-def load_or_request_all_secrets(pri_key: RSAPrivateKey) -> Dict[str, str]:
+def load_or_request_all_secrets(pri_key: RSAPrivateKey) -> dict[str, str]:
     api_secrets = load_or_request_api_secrets(pri_key)
     access_token_secrets = load_or_request_access_token_secrets(api_secrets, pri_key)
     secrets = {
@@ -239,7 +238,7 @@ def encrypt_and_save_secrets_into_file(
 
 def secrets_config_file_valid() -> bool:
     def not_empty_or_has_only_blank_characters() -> bool:
-        with open(config.secrets_file, "r", encoding="utf-8") as f:
+        with open(config.secrets_file, encoding="utf-8") as f:
             return bool(f.read().strip())
 
     return config.secrets_file.exists() and not_empty_or_has_only_blank_characters()
