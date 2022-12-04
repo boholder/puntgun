@@ -1,98 +1,117 @@
-import multiprocessing
-import random
+import asyncio
 import time
-from threading import current_thread
+from collections import namedtuple
 
 import reactivex as rx
 from reactivex import operators as op
-from reactivex.scheduler import ThreadPoolScheduler
+from reactivex.disposable import Disposable
+from reactivex.scheduler.eventloop import AsyncIOScheduler
+from reactivex.subject import Subject
+
+start = time.time()
 
 
-def official_concurrency_example():
-    """https://rxpy.readthedocs.io/en/latest/get_started.html#concurrency"""
-
-    def intense_calculation(value):
-        # sleep for a random short duration between 0.5 to 2.0 seconds to simulate a long-running calculation
-        time.sleep(random.randint(5, 20) * 0.1)
-        return value
-
-    # calculate number of CPUs, then create a ThreadPoolScheduler with that number of threads
-    optimal_thread_count = multiprocessing.cpu_count()
-    pool_scheduler = ThreadPoolScheduler(optimal_thread_count)
-
-    # Create Process 1
-    rx.of("Alpha", "Beta", "Gamma", "Delta", "Epsilon").pipe(
-        op.map(lambda s: intense_calculation(s)), op.subscribe_on(pool_scheduler)
-    ).subscribe(
-        on_next=lambda s: print("PROCESS 1: {} {}".format(current_thread().name, s)),
-        on_error=lambda e: print(e),
-        on_completed=lambda: print("PROCESS 1 done!"),
-    )
-
-    # Create Process 2
-    rx.range(1, 10).pipe(op.map(lambda s: intense_calculation(s)), op.subscribe_on(pool_scheduler)).subscribe(
-        on_next=lambda i: print("PROCESS 2: {} {}".format(current_thread().name, i)),
-        on_error=lambda e: print(e),
-        on_completed=lambda: print("PROCESS 2 done!"),
-    )
-
-    # Create Process 3, which is infinite
-    rx.interval(1).pipe(
-        op.map(lambda i: i * 100),
-        op.observe_on(pool_scheduler),
-        op.map(lambda s: intense_calculation(s)),
-    ).subscribe(
-        on_next=lambda i: print("PROCESS 3: {} {}".format(current_thread().name, i)),
-        on_error=lambda e: print(e),
-    )
-
-    input("Press Enter key to exit\n")
+def ts():
+    return f"{time.time() - start:.3f}"
 
 
-def my_concurrency_test():
-    """https://github.com/ReactiveX/RxPY/discussions/659"""
-    pool_scheduler = ThreadPoolScheduler(2)
+ACTION_DURATION = 1.0
+Data = namedtuple("Data", ["id", "future"])
+subject = Subject()
+subject2 = Subject()
 
-    def num_map(num: int):
-        print(f"[num] {current_thread().name} : {num}")
-        return num
-
-    num = rx.range(1, 5).pipe(op.map(num_map))
-
-    def name_map(name: str):
-        print(f"[name] {current_thread().name} : {name}")
-        return name
-
-    name = rx.from_iterable(["Alpha", "Beta", "Gamma", "Delta", "Epsilon"]).pipe(op.map(name_map))
-
-    # zipped = rx.zip(num, name)
-    merged = rx.merge(num, name)
-
-    merged.pipe(op.subscribe_on(pool_scheduler)).subscribe(
-        on_next=lambda i: print("consumer: {} {}".format(current_thread().name, i))
-    )
-
-    input("Press Enter key to exit\n")
+APICalling = namedtuple("APICalling", ["api", "future"])
 
 
-def is_recalculate_upstream_elements_for_every_subscriber():
+async def async_action(id: int = 0):
+    """Some async processing, like sending/writing data."""
+    print(f"{ts()} Async action  started {id}")
+    await asyncio.sleep(ACTION_DURATION)
+    print(f"{ts()} Async action finished {id}")
+    return id
+
+
+def serialize_map_async(mapper):
+    def _serialize_map_async(source):
+        def on_subscribe(observer, scheduler):
+            q = asyncio.Queue()
+
+            async def map_async(q):
+                try:
+                    while True:
+                        i = await q.get()
+                        ii = await mapper(i.id)
+                        observer.on_next(ii)
+                        i.future.set_result(ii)
+                except Exception as e:
+                    observer.on_error(e)
+
+            def on_next(i):
+                try:
+                    q.put_nowait(i)
+                except Exception as e:
+                    observer.on_error(e)
+
+            task = asyncio.create_task(map_async(q))
+            d = source.subscribe(
+                on_next=on_next,
+                on_error=observer.on_error,
+                on_completed=observer.on_completed,
+            )
+
+            def dispose():
+                d.dispose()
+                task.cancel()
+
+            return Disposable(dispose)
+
+        return rx.create(on_subscribe)
+
+    return _serialize_map_async
+
+
+async def setup():
+    """Setting up the Rx subject to make sure all work is done
+    in sequence without overlaps.
     """
-    No, but it does so when using, something wrong in my usage.
-    Found the solution:
-    https://stackoverflow.com/a/68482112/11397457
-    """
-    source_call_count = 0
 
-    def on_next(i):
-        print(f"i:{i}, call count:{source_call_count}")
+    subject.pipe(
+        serialize_map_async(async_action),
+        op.map(lambda x: f"{x} <-"),
+        op.do_action(lambda x: subject2.on_next(Data(f"-> {x}", asyncio.Future()))),
+    ).subscribe(
+        on_next=lambda item: print("observer [1] received:", item), scheduler=AsyncIOScheduler(asyncio.get_event_loop())
+    )
 
-    def source():
-        nonlocal source_call_count
-        old = source_call_count
-        source_call_count += 1
-        return old
+    subject2.pipe(serialize_map_async(async_action), ).subscribe(
+        on_next=lambda item: print("observer [2] received:", item), scheduler=AsyncIOScheduler(asyncio.get_event_loop())
+    )
 
-    s = rx.start(source)
-    s.pipe(op.do(rx.Observer(on_next=on_next)), op.do(rx.Observer(on_next=on_next))).run()
-    s.subscribe(on_next=on_next)
-    s.subscribe(on_next=on_next)
+
+async def add(id: int):
+    """Add "some work" and await until it is done."""
+    future = asyncio.Future()
+    subject.on_next(Data(id, future))
+    return await future
+
+
+async def main():
+    await setup()
+
+    # add work in any fashion (code I cannot influence)
+    print(f"{ts()} before 1")
+    await add(1)
+    print(f"{ts()} after  1")
+
+    await asyncio.sleep(0.1)
+
+    print(f"{ts()} before 2")
+    await add(2)
+    print(f"{ts()} after  2")
+
+    print(f"{ts()} before 4, 5, 6")
+    await asyncio.gather(add(4), add(5), add(6))
+    print(f"{ts()} after  4, 5, 6")
+
+
+asyncio.run(main())
