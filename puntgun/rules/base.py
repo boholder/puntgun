@@ -1,7 +1,7 @@
 import datetime
 import itertools
 import sys
-from typing import ClassVar, List
+from typing import ClassVar
 
 from pydantic import BaseModel, Field, root_validator
 from reactivex import Observable
@@ -76,7 +76,7 @@ class Plan(FromConfig):
         raise NotImplementedError
 
 
-def validate_required_fields_exist(rule_keyword: str, conf: dict, required_field_names: List[str]) -> None:
+def validate_required_fields_exist(rule_keyword: str, conf: dict, required_field_names: list[str]) -> None:
     """
     Custom configuration parsing process
     - :class:`ConfigParser` sort of bypass the pydantic library's validation,
@@ -92,7 +92,7 @@ def validate_required_fields_exist(rule_keyword: str, conf: dict, required_field
         raise ValueError(f"Missing required field(s) {missing} in configuration [{rule_keyword}]: {conf}")
 
 
-def validate_fields_conflict(values: dict, field_groups: List[List[str]]) -> None:
+def validate_fields_conflict(values: dict, field_groups: list[list[str]]) -> None:
     """
     :param values: configuration dictionary
     :param field_groups: no conflict inside each group

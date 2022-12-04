@@ -5,7 +5,7 @@ https://en.wikipedia.org/wiki/Data_transfer_object
 import sys
 from datetime import datetime
 from enum import Enum
-from typing import Any, List, Mapping, Optional
+from typing import Any, Mapping, Optional
 
 from pydantic import BaseModel, validator
 
@@ -74,7 +74,7 @@ class User(BaseModel):
         # Find the true user pinned url in "entities.url.urls[]" instead of using Twitter shorten url (t.co)
         shorten_url = resp_data.get("url")
         if shorten_url:
-            urls: List[dict] = resp_data.get("entities").get("url").get("urls")
+            urls: list[dict] = resp_data.get("entities").get("url").get("urls")
             # 1. tweepy.User (type of "resp_data") inherits "DataMapping" to gain the get() method,
             # but we still need to use attribute-assignment way to update the value,
             # and this makes the type hint of "resp_data" becomes "tweepy.User" (coupled with tweepy library).
@@ -160,7 +160,7 @@ class Poll(BaseModel):
         CLOSED = "closed"
 
     id: str | None = ""
-    options: Optional[List[Option]] = []
+    options: Optional[list[Option]] = []
     duration_minutes: int | None = 0
     end_datetime: datetime | None = DEFAULT_TIME
     voting_status: Status | None = Status.CLOSED
@@ -175,7 +175,7 @@ class Place(BaseModel):
     place_type: str | None = ""
     # The identifiers of known place that contain the referenced place.
     # (Do not know what it is)
-    contained_with: Optional[List[Any]] = []
+    contained_with: Optional[list[Any]] = []
     country: str | None = ""
     country_code: str | None = ""
     geo: dict | None = {}
@@ -232,7 +232,7 @@ class Tweet(BaseModel):
     like_count: int | None = 0
     quote_count: int | None = 0
     reply_settings: ReplySettings | None = ReplySettings.EVERYONE
-    context_annotations: Optional[List[ContextAnnotation]] = []
+    context_annotations: Optional[list[ContextAnnotation]] = []
 
     # Contains withholding details for withheld content
     # copyright, country_codes, scope
@@ -254,11 +254,11 @@ class Tweet(BaseModel):
     # [{"type":<type (str)>,"id":<tweet id (int)>}...]
     #
     # Types have been found: "quoted" (quote tweet), "replied_to"
-    referenced_tweets: Optional[List[dict[str, Any]]] = []
+    referenced_tweets: Optional[list[dict[str, Any]]] = []
 
     # Transform referenced_tweets into a convenient dictionary,
     # each key representing one type of reference.
-    related_tweets: Optional[dict[str, List["Tweet"]]] = {}
+    related_tweets: Optional[dict[str, list["Tweet"]]] = {}
 
     # Application source
     # The name of the app the user Tweeted from
@@ -269,10 +269,10 @@ class Tweet(BaseModel):
     attachments: dict | None = {}
 
     # Media attachments' information, such as video, photo...
-    mediums: Optional[List[Media]] = []
+    mediums: Optional[list[Media]] = []
 
     # Poll attachments' information
-    polls: Optional[List[Poll]] = []
+    polls: Optional[list[Poll]] = []
 
     # Contains details about the location tagged by the user in this Tweet,
     # if they specified one
@@ -297,10 +297,10 @@ class Tweet(BaseModel):
     def from_response(
         resp_data: dict,
         author: User = None,
-        mediums: List[Media] = None,
-        polls: List[Poll] = None,
+        mediums: list[Media] = None,
+        polls: list[Poll] = None,
         place: Place = None,
-        referenced_tweets: List["Tweet"] = None,
+        referenced_tweets: list["Tweet"] = None,
     ) -> "Tweet":
         """Other params except first one are data in 'response.includes' field that belong to this tweet"""
         if not resp_data:

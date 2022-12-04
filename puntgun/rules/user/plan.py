@@ -1,4 +1,4 @@
-from typing import ClassVar, List
+from typing import ClassVar
 
 import reactivex as rx
 from loguru import logger
@@ -20,7 +20,7 @@ from puntgun.rules.user.source_rules import UserSourceRule
 
 
 class UserPlanResult(Recordable):
-    def __init__(self, plan_id: int, target: User, filtering_result: RuleResult, action_results: List[RuleResult]):
+    def __init__(self, plan_id: int, target: User, filtering_result: RuleResult, action_results: list[RuleResult]):
         self.plan_id = plan_id
         self.target = target
         self.filtering_result = filtering_result
@@ -110,7 +110,7 @@ class UserPlan(Plan):
         """
         Run this plan, return users that triggered filter rules and action rules execution results.
         result explanation: (<user instance>, <filtering result>, <action results>)
-        :return: rx.Observable(Tuple[ Tuple[User, RuleResult], List[RuleResult] ])
+        :return: rx.Observable(Tuple[ Tuple[User, RuleResult], list[RuleResult] ])
         """
         # take users that triggered filter rules
         target_users = self._filtering().pipe(op.filter(lambda z: bool(z[1]) is True))

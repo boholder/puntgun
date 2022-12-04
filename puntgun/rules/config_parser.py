@@ -1,6 +1,6 @@
 import importlib
 import pkgutil
-from typing import Any, List, Type, TypeVar
+from typing import Any, Type, TypeVar
 
 from loguru import logger
 from pydantic import ValidationError
@@ -35,7 +35,7 @@ class ConfigParser:
     # so I guess it's ok to use a class variable to store the errors,
     # and use this class as singleton pattern.
     # Sort of inconvenient when unit testing.
-    _errors: List[Exception] = []
+    _errors: list[Exception] = []
 
     _T = TypeVar("_T", bound=FromConfig)
 
@@ -78,7 +78,7 @@ class ConfigParser:
         return generate_placeholder_instance()
 
     @staticmethod
-    def errors() -> List[Exception]:
+    def errors() -> list[Exception]:
         """Get errors occurred when paring plan configuration"""
         return ConfigParser._errors
 

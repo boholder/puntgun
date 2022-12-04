@@ -3,7 +3,7 @@ Plans runner at the highest abstraction level of the tool.
 Constructing plans, executing plans, collecting and recording plan results...
 """
 import sys
-from typing import Any, List
+from typing import Any
 
 import reactivex as rx
 from loguru import logger
@@ -87,9 +87,9 @@ CHECK_PLAN_SUCC = """Checking {plan_file} SUCCESS,
 {plan_num} plans found."""
 
 
-def parse_plans_config(_plans_config: list[dict]) -> List[Plan]:
+def parse_plans_config(_plans_config: list[dict]) -> list[Plan]:
     """Let the ConfigParser recursively constructing plan instances and rule instances inside plans."""
-    plans: List[Plan] = [ConfigParser.parse(p, Plan) for p in _plans_config]
+    plans: list[Plan] = [ConfigParser.parse(p, Plan) for p in _plans_config]
 
     # Can't continue without a zero-error plan configuration
     if ConfigParser.errors():
@@ -101,7 +101,7 @@ def parse_plans_config(_plans_config: list[dict]) -> List[Plan]:
     return plans
 
 
-def execute_plans(plans: List[Plan]) -> None:
+def execute_plans(plans: list[Plan]) -> None:
     def on_error(e: Exception) -> None:
         logger.error("Error occurred when executing plan", e)
         raise e

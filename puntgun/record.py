@@ -18,7 +18,7 @@ I've heard about the effort different json parsing libraries have made.
 IMPROVE: More elegant way to generating a json format report file.
 """
 import datetime
-from typing import Any, List
+from typing import Any
 
 import orjson
 from loguru import logger
@@ -102,7 +102,7 @@ class Recorder:
         Recorder._write(recordable.to_record().to_json() + COMMA)
 
     @staticmethod
-    def write_report_header(plans: List[Plan]) -> None:
+    def write_report_header(plans: list[Plan]) -> None:
         """
         This paragraph works as the report file content's header
         - for correctly formatting latter records in json format.

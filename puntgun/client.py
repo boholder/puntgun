@@ -2,7 +2,7 @@ import datetime
 import functools
 import itertools
 from enum import Enum
-from typing import Any, Callable, Iterator, List, TypeVar
+from typing import Any, Callable, Iterator, TypeVar
 
 import tweepy
 from loguru import logger
@@ -73,7 +73,7 @@ class TwitterApiErrors(Exception, Recordable):
     contains a list of :class:`TwitterApiError`.
     """
 
-    def __init__(self, query_func_name: str, query_params: dict, resp_errors: List[dict]):
+    def __init__(self, query_func_name: str, query_params: dict, resp_errors: list[dict]):
         """Details for debugging via log."""
         self.query_func_name = query_func_name
         self.query_params = query_params
@@ -281,7 +281,7 @@ class Client:
             )
         )
 
-    def get_users_by_usernames(self, names: List[str]) -> List[User]:
+    def get_users_by_usernames(self, names: list[str]) -> list[User]:
         """
         Query users information.
         **Rate limit: 900 / 15 min**
@@ -292,7 +292,7 @@ class Client:
 
         return response_to_users(self.clt.get_users(usernames=names, **USER_API_PARAMS))
 
-    def get_users_by_ids(self, ids: List[int | str]) -> List[User]:
+    def get_users_by_ids(self, ids: list[int | str]) -> list[User]:
         """
         Query users information.
         **Rate limit: 900 / 15 min**
@@ -303,7 +303,7 @@ class Client:
 
         return response_to_users(self.clt.get_users(ids=ids, **USER_API_PARAMS))
 
-    def get_blocked(self) -> List[User]:
+    def get_blocked(self) -> list[User]:
         """
         Get the latest blocking list of the current account.
         **Rate limit: 15 / 15 min**
@@ -312,7 +312,7 @@ class Client:
         return query_paged_user_api(self.clt.get_blocked)
 
     @functools.lru_cache(maxsize=1)
-    def cached_blocked(self) -> List[User]:
+    def cached_blocked(self) -> list[User]:
         """
         Call query method, cache them, and return the cache on latter calls.
         Since the tool may be constantly modifying the block list,
@@ -322,10 +322,10 @@ class Client:
         return self.get_blocked()
 
     @functools.lru_cache(maxsize=1)
-    def cached_blocked_id_list(self) -> List[int]:
+    def cached_blocked_id_list(self) -> list[int]:
         return [u.id for u in self.cached_blocked()]
 
-    def get_following(self, user_id: int | str) -> List[User]:
+    def get_following(self, user_id: int | str) -> list[User]:
         """
         Get the latest following list of a user.
         **Rate limit: 15 / 15 min**
@@ -334,14 +334,14 @@ class Client:
         return query_paged_user_api(self.clt.get_users_following, id=user_id)
 
     @functools.lru_cache(maxsize=1)
-    def cached_following(self) -> List[User]:
+    def cached_following(self) -> list[User]:
         return self.get_following(self.id)
 
     @functools.lru_cache(maxsize=1)
-    def cached_following_id_list(self) -> List[int]:
+    def cached_following_id_list(self) -> list[int]:
         return [u.id for u in self.cached_following()]
 
-    def get_follower(self, user_id: int | str) -> List[User]:
+    def get_follower(self, user_id: int | str) -> list[User]:
         """
         Get the latest follower list of a user.
         **Rate limit: 15 / 15 min**
@@ -350,11 +350,11 @@ class Client:
         return query_paged_user_api(self.clt.get_users_followers, id=user_id)
 
     @functools.lru_cache(maxsize=1)
-    def cached_follower(self) -> List[User]:
+    def cached_follower(self) -> list[User]:
         return self.get_follower(self.id)
 
     @functools.lru_cache(maxsize=1)
-    def cached_follower_id_list(self) -> List[int]:
+    def cached_follower_id_list(self) -> list[int]:
         return [u.id for u in self.cached_follower()]
 
     def block_user_by_id(self, target_user_id: int | str) -> bool:
@@ -383,7 +383,7 @@ class Client:
         # call the block api
         return self.clt.block(target_user_id=target_user_id).data["blocking"]
 
-    def get_tweets_by_ids(self, ids: List[int | str]) -> List[Tweet]:
+    def get_tweets_by_ids(self, ids: list[int | str]) -> list[Tweet]:
         """
         Query tweets information.
         **Rate limit: 900 / 15 min**
@@ -394,7 +394,7 @@ class Client:
 
         return response_to_tweets(self.clt.get_tweets(ids=ids, **TWEET_API_PARAMS))
 
-    def get_users_who_like_tweet(self, tweet_id: int | str) -> List[User]:
+    def get_users_who_like_tweet(self, tweet_id: int | str) -> list[User]:
         """
         Get a Tweet’s liking users (who liked this tweet).
         **Rate limit: 75 / 15 min**
@@ -402,7 +402,7 @@ class Client:
         """
         return query_paged_user_api(self.clt.get_liking_users, max_results=100, id=tweet_id)
 
-    def get_users_who_retweet_tweet(self, tweet_id: int | str) -> List[User]:
+    def get_users_who_retweet_tweet(self, tweet_id: int | str) -> list[User]:
         """
         Get users who have retweeted a Tweet.
         **Rate limit: 75 / 15 min**
@@ -419,7 +419,7 @@ class Client:
         end_time: datetime.datetime = None,
         since_id: int = None,
         until_id: int = None,
-    ) -> List[Tweet]:
+    ) -> list[Tweet]:
         """
         Search tweets with a query string.
         With Essential Twitter API access, the query length is limited up to 512 characters,
@@ -443,7 +443,7 @@ class Client:
         return []
 
 
-def response_to_users(resp: tweepy.Response) -> List[User]:
+def response_to_users(resp: tweepy.Response) -> list[User]:
     """Build a list of :class:`User` instances from one response."""
     if not resp.data:
         return []
@@ -459,7 +459,7 @@ def response_to_users(resp: tweepy.Response) -> List[User]:
     return [map_one(d) for d in resp.data]
 
 
-def response_to_tweets(resp: tweepy.Response) -> List[Tweet]:
+def response_to_tweets(resp: tweepy.Response) -> list[Tweet]:
     """Build a list of :class:`Tweet` instances from one response."""
     if not resp.data:
         return []
@@ -517,11 +517,11 @@ def response_to_tweets(resp: tweepy.Response) -> List[Tweet]:
     return [map_one(d) for d in resp.data]
 
 
-def query_paged_user_api(clt_func: Callable[..., Response], max_results: int = 1000, **kwargs: Any) -> List[User]:
+def query_paged_user_api(clt_func: Callable[..., Response], max_results: int = 1000, **kwargs: Any) -> list[User]:
     return query_paged_entity_api(clt_func, USER_API_PARAMS, response_to_users, max_results=max_results, **kwargs)
 
 
-def query_paged_tweet_api(clt_func: Callable[..., Response], times: int = None, **kwargs: Any) -> List[Tweet]:
+def query_paged_tweet_api(clt_func: Callable[..., Response], times: int = None, **kwargs: Any) -> list[Tweet]:
     return query_paged_entity_api(clt_func, TWEET_API_PARAMS, response_to_tweets, times, max_results=100, **kwargs)
 
 
@@ -531,11 +531,11 @@ E = TypeVar("E")
 def query_paged_entity_api(
     clt_func: Callable[..., Response],
     api_params: dict,
-    transforming_func: Callable[[Response], List[E]],
+    transforming_func: Callable[[Response], list[E]],
     times: int = None,
     max_results: int = 100,
     **kwargs: Any,
-) -> List[E]:
+) -> list[E]:
     # mix two part of params into one dict
     params = {}
     for k, v in api_params.items():
