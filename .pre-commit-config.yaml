@@ -12,16 +12,22 @@ ci:
 repos:
   # automatically upgrade the syntax.
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.2.3
+    rev: v3.3.1
     hooks:
       - id: pyupgrade
 
   # for code style formatting
   # see pyproject.toml for config
   - repo: https://github.com/psf/black
-    rev: 22.6.0
+    rev: 22.10.0
     hooks:
       - id: black
+
+  # for removing unused import statements
+  - repo: https://github.com/hadialqattan/pycln
+    rev: v2.1.2
+    hooks:
+      - id: pycln
 
   # for import sentences sorting
   # see pyproject.toml for config
@@ -33,14 +39,14 @@ repos:
   # for typo checking
   # see setup.cfg for config
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.1.0
+    rev: v2.2.2
     hooks:
       - id: codespell
 
   # for common python problem checking
   # see setup.cfg for config
   - repo: https://github.com/PyCQA/flake8
-    rev: 5.0.2
+    rev: 6.0.0
     hooks:
       - id: flake8
         additional_dependencies:
@@ -49,7 +55,7 @@ repos:
 
   # see setup.cfg for config
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.971
+    rev: v0.991
     hooks:
       - id: mypy
         args: [ puntgun ]

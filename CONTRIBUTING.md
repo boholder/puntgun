@@ -148,15 +148,6 @@ pdm run lint
 This project uses [**pre-commit**](https://pre-commit.com/#intro) for [linting](https://en.wikipedia.org/wiki/Lint_(software)),
 it will help us to manage other linting tools.
 Check `.pre-commit-config.yaml` under root directory to see pre-commit hooks configuration.
-Currently, this project uses:
-
-* [**pyupgrade**](https://github.com/asottile/pyupgrade) for automatically upgrade the syntax.
-* [**black**](https://black.readthedocs.io/en/stable/) for code style automatic formatting.
-* [**isort**](https://pycqa.github.io/isort/) for import statements sorting.
-* [**codespell**](https://github.com/codespell-project/codespell) for typo checking.
-* [**flake8**](https://flake8.pycqa.org/en/latest/index.html) for common Python programming problem checking.
-* [**mypy**](https://mypy.readthedocs.io/en/stable/) for static type hint scanning.
-
 As we all know, the rigid linting results sometimes does not make sense or have false positives,
 if your changes encounter unreasonable linting results,
 feel free to modify the configuration of the corresponding tool.
