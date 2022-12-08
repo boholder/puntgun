@@ -10,40 +10,46 @@ ci:
   autoupdate_commit_msg: "Auto update by pre-commit hooks"
 
 repos:
-  # automatically upgrade the syntax.
+  # upgrade the syntax.
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.3.1
     hooks:
       - id: pyupgrade
 
-  # for code style formatting
+  # adding "from __future__ import annotations" for enabling new features
+  - repo: https://github.com/frostming/fix-future-annotations
+    rev: 0.5.0
+    hooks:
+      - id: fix-future-annotations
+
+  # code style formatting
   # see pyproject.toml for config
   - repo: https://github.com/psf/black
     rev: 22.10.0
     hooks:
       - id: black
 
-  # for removing unused import statements
+  # removing unused import statements
   - repo: https://github.com/hadialqattan/pycln
     rev: v2.1.2
     hooks:
       - id: pycln
 
-  # for import sentences sorting
+  # import sentences sorting
   # see pyproject.toml for config
   - repo: https://github.com/pycqa/isort
     rev: 5.10.1
     hooks:
       - id: isort
 
-  # for typo checking
+  # typo checking
   # see setup.cfg for config
   - repo: https://github.com/codespell-project/codespell
     rev: v2.2.2
     hooks:
       - id: codespell
 
-  # for common python problem checking
+  # common python problem checking
   # see setup.cfg for config
   - repo: https://github.com/PyCQA/flake8
     rev: 6.0.0
