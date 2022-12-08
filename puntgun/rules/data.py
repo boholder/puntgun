@@ -2,6 +2,8 @@
 DTOs of rule module
 https://en.wikipedia.org/wiki/Data_transfer_object
 """
+from __future__ import annotations
+
 import sys
 from datetime import datetime
 from enum import Enum
