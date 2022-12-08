@@ -1,4 +1,6 @@
-from typing import ClassVar, List
+from __future__ import annotations
+
+from typing import ClassVar
 
 import pytest
 import reactivex as rx
@@ -68,7 +70,7 @@ class TRule(FromConfig):
 class TPlan(Plan):
     _keyword: ClassVar[str] = "runner_test_plan"
 
-    rules: List[FromConfig]
+    rules: list[FromConfig]
 
     def __call__(self) -> Observable[TResult]:
         return rx.from_iterable([r.f for r in self.rules]).pipe(op.map(lambda i: TResult(i)))

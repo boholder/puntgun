@@ -6,7 +6,9 @@ The rule set itself can be contained inside another rule set,
 so you can make complex cascading execution order tree with them.
 It's the composite pattern I guess.
 """
-from typing import Callable, List, Type
+from __future__ import annotations
+
+from typing import Callable
 
 import reactivex as rx
 from loguru import logger
@@ -29,10 +31,10 @@ class UserSourceRuleResultMergingSet(UserSourceRule):
     """
 
     _keyword = "any_of"
-    rules: List[UserSourceRule]
+    rules: list[UserSourceRule]
 
     @classmethod
-    def parse_from_config(cls, conf: dict) -> "UserSourceRuleResultMergingSet":
+    def parse_from_config(cls, conf: dict) -> UserSourceRuleResultMergingSet:
         return cls(rules=[ConfigParser.parse(c, UserSourceRule) for c in conf["any_of"]])
 
     def __call__(self) -> Observable[User]:
@@ -48,11 +50,11 @@ class UserSourceRuleResultMergingSet(UserSourceRule):
 
 
 class UserFilterRuleSet(BaseModel):
-    immediate_rules: List[UserFilterRule]
-    slow_rules: List[UserFilterRule]
+    immediate_rules: list[UserFilterRule]
+    slow_rules: list[UserFilterRule]
 
     @staticmethod
-    def divide_and_construct(cls: Type["UserFilterRuleSet"], rules: List[UserFilterRule]) -> "UserFilterRuleSet":
+    def divide_and_construct(cls: type[UserFilterRuleSet], rules: list[UserFilterRule]) -> UserFilterRuleSet:
         return cls(
             slow_rules=[r for r in rules if isinstance(r, NeedClientMixin)],
             immediate_rules=[r for r in rules if not isinstance(r, NeedClientMixin)],
@@ -84,7 +86,7 @@ class UserFilterRuleAllOfSet(UserFilterRuleSet, UserFilterRule, NeedClientMixin)
     _keyword = "all_of"
 
     @classmethod
-    def parse_from_config(cls, conf: dict) -> "UserFilterRuleSet":
+    def parse_from_config(cls, conf: dict) -> UserFilterRuleSet:
         return UserFilterRuleSet.divide_and_construct(
             cls, [ConfigParser.parse(c, UserFilterRule) for c in conf["all_of"]]
         )
@@ -114,7 +116,7 @@ class UserFilterRuleAnyOfSet(UserFilterRuleSet, UserFilterRule, NeedClientMixin)
     _keyword = "any_of"
 
     @classmethod
-    def parse_from_config(cls, conf: dict) -> "UserFilterRuleSet":
+    def parse_from_config(cls, conf: dict) -> UserFilterRuleSet:
         return UserFilterRuleSet.divide_and_construct(
             cls, [ConfigParser.parse(c, UserFilterRule) for c in conf["any_of"]]
         )
@@ -140,13 +142,13 @@ class UserActionRuleResultCollectingSet(UserActionRule):
     """
 
     _keyword = "all_of"
-    rules: List[UserActionRule]
+    rules: list[UserActionRule]
 
     @classmethod
-    def parse_from_config(cls, conf: dict) -> "UserActionRuleResultCollectingSet":
+    def parse_from_config(cls, conf: dict) -> UserActionRuleResultCollectingSet:
         return cls(rules=[ConfigParser.parse(c, UserActionRule) for c in conf["all_of"]])
 
-    def __call__(self, user: User) -> Observable[List[RuleResult]]:
+    def __call__(self, user: User) -> Observable[list[RuleResult]]:
         action_results = [rx.start(execution_wrapper(user, r)) for r in self.rules]
         return rx.merge(*action_results).pipe(
             # collect them into one list

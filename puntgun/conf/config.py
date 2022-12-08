@@ -4,6 +4,8 @@ All the loaded settings and global variables for many modules to use.
 IMPROVE: Any proper way to unit test this module?
 I feel it is too implement-coupling to be valuable enough writing test cases.
 """
+from __future__ import annotations
+
 import enum
 import os
 import sys
@@ -83,11 +85,11 @@ class CommandArg(enum.Enum):
         return "--" + self.to_arg_str()
 
     @staticmethod
-    def from_arg_str(arg: str) -> "CommandArg":
+    def from_arg_str(arg: str) -> CommandArg:
         return CommandArg[arg.upper().replace("-", "_")]
 
     @staticmethod
-    def arg_dict_to_enum_dict(**kwargs: str) -> dict["CommandArg", str]:
+    def arg_dict_to_enum_dict(**kwargs: str) -> dict[CommandArg, str]:
         return {CommandArg.from_arg_str(k): v for k, v in kwargs.items()}
 
 
