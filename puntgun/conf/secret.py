@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import binascii
 from pathlib import Path
 
@@ -59,21 +61,21 @@ class TwitterAPISecrets(BaseModel):
         max_anystr_length = 100
 
     @staticmethod
-    def from_environment() -> "TwitterAPISecrets":
+    def from_environment() -> TwitterAPISecrets:
         return TwitterAPISecrets(
             key=load_settings_from_environment_variables(twitter_api_key_name),
             secret=load_settings_from_environment_variables(twitter_api_key_secret_name),
         )
 
     @staticmethod
-    def from_settings(pri_key: RSAPrivateKey) -> "TwitterAPISecrets":
+    def from_settings(pri_key: RSAPrivateKey) -> TwitterAPISecrets:
         return TwitterAPISecrets(
             key=load_and_decrypt_secret_from_settings(pri_key, twitter_api_key_name),
             secret=load_and_decrypt_secret_from_settings(pri_key, twitter_api_key_secret_name),
         )
 
     @staticmethod
-    def from_input() -> "TwitterAPISecrets":
+    def from_input() -> TwitterAPISecrets:
         print(GET_API_SECRETS_FROM_INPUT)
         return TwitterAPISecrets(
             key=util.get_secret_from_terminal("Api key"), secret=util.get_secret_from_terminal("Api key secret")
@@ -101,21 +103,21 @@ class TwitterAccessTokenSecrets(BaseModel):
         max_anystr_length = 100
 
     @staticmethod
-    def from_environment() -> "TwitterAccessTokenSecrets":
+    def from_environment() -> TwitterAccessTokenSecrets:
         return TwitterAccessTokenSecrets(
             token=load_settings_from_environment_variables(twitter_access_token_name),
             secret=load_settings_from_environment_variables(twitter_access_token_secret_name),
         )
 
     @staticmethod
-    def from_settings(pri_key: RSAPrivateKey) -> "TwitterAccessTokenSecrets":
+    def from_settings(pri_key: RSAPrivateKey) -> TwitterAccessTokenSecrets:
         return TwitterAccessTokenSecrets(
             token=load_and_decrypt_secret_from_settings(pri_key, twitter_access_token_name),
             secret=load_and_decrypt_secret_from_settings(pri_key, twitter_access_token_secret_name),
         )
 
     @staticmethod
-    def from_input(api_secrets: TwitterAPISecrets) -> "TwitterAccessTokenSecrets":
+    def from_input(api_secrets: TwitterAPISecrets) -> TwitterAccessTokenSecrets:
         oauth1_user_handler = OAuth1UserHandler(api_secrets.key, api_secrets.secret, callback="oob")
         print(AUTH_URL.format(auth_url=oauth1_user_handler.get_authorization_url()))
         pin = util.get_input_from_terminal("PIN")

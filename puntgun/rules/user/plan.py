@@ -1,4 +1,6 @@
-from typing import ClassVar, List
+from __future__ import annotations
+
+from typing import ClassVar
 
 import reactivex as rx
 from loguru import logger
@@ -20,7 +22,7 @@ from puntgun.rules.user.source_rules import UserSourceRule
 
 
 class UserPlanResult(Recordable):
-    def __init__(self, plan_id: int, target: User, filtering_result: RuleResult, action_results: List[RuleResult]):
+    def __init__(self, plan_id: int, target: User, filtering_result: RuleResult, action_results: list[RuleResult]):
         self.plan_id = plan_id
         self.target = target
         self.filtering_result = filtering_result
@@ -48,7 +50,7 @@ class UserPlanResult(Recordable):
         )
 
     @staticmethod
-    def parse_from_record(record: Record) -> "UserPlanResult":
+    def parse_from_record(record: Record) -> UserPlanResult:
         user: dict = record.data.get("target", {})
         filter_rule_record = record.data.get("decisive_filter_rule", {})
         action_rule_results: list = record.data.get("action_rule_results", [])
@@ -87,7 +89,7 @@ class UserPlan(Plan):
             return True
 
     @classmethod
-    def parse_from_config(cls, conf: dict) -> "UserPlan":
+    def parse_from_config(cls, conf: dict) -> UserPlan:
         # we won't directly extract values from configuration and assign them to fields,
         # so custom validation is needed
         # as we can't use pydantic library's validating function on fields.

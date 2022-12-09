@@ -4,8 +4,9 @@ Some user filter rules have simular functions and contain same delegating agents
 Most functions of these rules are tested when testing delegating agents,
 so only basic "parsing" logic will be tested in this test module.
 """
+from __future__ import annotations
+
 import datetime
-from typing import List
 
 import pytest
 from dynaconf import Dynaconf
@@ -86,7 +87,7 @@ class TestTextMatchUserFilterRule:
     @pytest.fixture
     def run_assert(self, config_plan_file_with):
         def wrapper(regex: str, text: str, expect: bool):
-            def user_texts(_texts: List[str]):
+            def user_texts(_texts: list[str]):
                 words = [t if t else "" for t in _texts[0:3]]
                 return User(name=words[0], description=words[1], pinned_tweet_text=words[2])
 

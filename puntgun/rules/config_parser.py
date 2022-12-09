@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import importlib
 import pkgutil
-from typing import Any, List, Type, TypeVar
+from typing import Any, TypeVar
 
 from loguru import logger
 from pydantic import ValidationError
@@ -35,12 +37,12 @@ class ConfigParser:
     # so I guess it's ok to use a class variable to store the errors,
     # and use this class as singleton pattern.
     # Sort of inconvenient when unit testing.
-    _errors: List[Exception] = []
+    _errors: list[Exception] = []
 
     _T = TypeVar("_T", bound=FromConfig)
 
     @staticmethod
-    def parse(conf: dict, expected_type: _T | Type[_T]) -> _T:
+    def parse(conf: dict, expected_type: _T | type[_T]) -> _T:
         """
         Take a piece of configuration and the expected type from caller,
         recognize which rule it is and parse it into corresponding rule instance.
@@ -78,7 +80,7 @@ class ConfigParser:
         return generate_placeholder_instance()
 
     @staticmethod
-    def errors() -> List[Exception]:
+    def errors() -> list[Exception]:
         """Get errors occurred when paring plan configuration"""
         return ConfigParser._errors
 

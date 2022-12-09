@@ -2,6 +2,7 @@
 DTOs of rule module
 https://en.wikipedia.org/wiki/Data_transfer_object
 """
+
 import sys
 from datetime import datetime
 from enum import Enum
@@ -92,7 +93,7 @@ class User(BaseModel):
             following_count=public_metrics.get("following_count", 0),
             tweet_count=public_metrics.get("tweet_count", 0),
             pinned_tweet_text=pinned_tweet.text,
-            pinned_tweet=pinned_tweet
+            pinned_tweet=pinned_tweet,
         )
 
     class Config:
@@ -329,7 +330,7 @@ class Tweet(BaseModel):
             mediums=mediums,
             polls=polls,
             place=place,
-            related_tweets=relations
+            related_tweets=relations,
         )
 
     class Config:

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import re
 from typing import ClassVar
@@ -87,7 +89,7 @@ class CreatedAfterUserFilterRule(UserFilterRule):
     _keyword: ClassVar[str] = "created_after"
 
     @classmethod
-    def parse_from_config(cls, conf: dict) -> "CreatedUserFilterRule":
+    def parse_from_config(cls, conf: dict) -> CreatedUserFilterRule:
         return CreatedUserFilterRule(after=conf[cls._keyword])
 
 
@@ -96,7 +98,7 @@ class CreatedWithinDaysUserFilterRule(UserFilterRule):
     within_days: int
 
     @classmethod
-    def parse_from_config(cls, conf: dict) -> "CreatedWithinDaysUserFilterRule":
+    def parse_from_config(cls, conf: dict) -> CreatedWithinDaysUserFilterRule:
         return CreatedWithinDaysUserFilterRule(within_days=conf[cls._keyword])
 
     def __call__(self, user: User) -> RuleResult:
@@ -109,7 +111,7 @@ class TextMatchUserFilterRule(UserFilterRule):
     pattern: str
 
     @classmethod
-    def parse_from_config(cls, conf: dict) -> "TextMatchUserFilterRule":
+    def parse_from_config(cls, conf: dict) -> TextMatchUserFilterRule:
         return cls(pattern=conf[cls._keyword])
 
     def __call__(self, user: User) -> RuleResult:

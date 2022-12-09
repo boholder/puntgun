@@ -17,8 +17,10 @@ I've heard about the effort different json parsing libraries have made.
 
 IMPROVE: More elegant way to generating a json format report file.
 """
+from __future__ import annotations
+
 import datetime
-from typing import Any, List
+from typing import Any
 
 import orjson
 from loguru import logger
@@ -41,7 +43,7 @@ class Record:
         return orjson.dumps({"type": self.type, "data": self.data})
 
     @staticmethod
-    def parse_from_dict(conf: dict) -> "Record":
+    def parse_from_dict(conf: dict) -> Record:
         """
         Assume that the parameter is already a dictionary type parsed from a json file.
         """
@@ -67,7 +69,7 @@ class Recordable:
         raise NotImplementedError
 
     @staticmethod
-    def parse_from_record(record: Record) -> "Recordable":
+    def parse_from_record(record: Record) -> Recordable:
         """Generate an instance from a record."""
         raise NotImplementedError
 
@@ -102,7 +104,7 @@ class Recorder:
         Recorder._write(recordable.to_record().to_json() + COMMA)
 
     @staticmethod
-    def write_report_header(plans: List[Plan]) -> None:
+    def write_report_header(plans: list[Plan]) -> None:
         """
         This paragraph works as the report file content's header
         - for correctly formatting latter records in json format.

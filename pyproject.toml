@@ -117,6 +117,11 @@ known_third_party = [
     "pytest",
 ]
 
+[tool.fix_future_annotations]
+exclude_files = [
+    'puntgun/rules/data.py',
+]
+
 # The key config for building executable wheel
 # https://github.com/pypa/pipx#where-does-pipx-install-apps-from
 # https://python-packaging.readthedocs.io/en/latest/command-line-scripts.html#the-console-scripts-entry-point

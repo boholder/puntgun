@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import itertools
-from typing import ClassVar, List
+from typing import ClassVar
 
 import reactivex as rx
 from loguru import logger
@@ -32,7 +34,7 @@ class NameUserSourceRule(UserSourceRule, NeedClientMixin):
     """
 
     _keyword: ClassVar[str] = "names"
-    names: List[str]
+    names: list[str]
 
     def __call__(self) -> rx.Observable[User]:
         return rx.from_iterable(self.names).pipe(
@@ -48,7 +50,7 @@ class NameUserSourceRule(UserSourceRule, NeedClientMixin):
         )
 
     @classmethod
-    def parse_from_config(cls, conf: dict) -> "NameUserSourceRule":
+    def parse_from_config(cls, conf: dict) -> NameUserSourceRule:
         """the config is { 'names': [...] }"""
         return cls.parse_obj(conf)
 
@@ -61,7 +63,7 @@ class IdUserSourceRule(UserSourceRule, NeedClientMixin):
     """
 
     _keyword: ClassVar[str] = "ids"
-    ids: List[int | str]
+    ids: list[int | str]
 
     def __call__(self) -> rx.Observable[User]:
         return rx.from_iterable(self.ids).pipe(
@@ -74,7 +76,7 @@ class IdUserSourceRule(UserSourceRule, NeedClientMixin):
         )
 
     @classmethod
-    def parse_from_config(cls, conf: dict) -> "IdUserSourceRule":
+    def parse_from_config(cls, conf: dict) -> IdUserSourceRule:
         return cls.parse_obj(conf)
 
 
@@ -90,7 +92,7 @@ class MyFollowerUserSourceRule(UserSourceRule, NeedClientMixin):
     after_user: str | None
 
     @classmethod
-    def parse_from_config(cls, conf: dict) -> "FromConfig":
+    def parse_from_config(cls, conf: dict) -> FromConfig:
         fields = conf.get(cls._keyword)
         validate_fields_conflict(fields, [["last"], ["first"], ["after_user"]])
         return cls.parse_obj(fields)
@@ -104,7 +106,7 @@ class MyFollowerUserSourceRule(UserSourceRule, NeedClientMixin):
             # if no field, return all followers
             return rx.from_iterable(followers)
 
-    def _take_part_of_followers(self, followers: List[User]) -> List[User]:
+    def _take_part_of_followers(self, followers: list[User]) -> list[User]:
         if self.last:
             # the follower API response puts newer followers on list head.
             return followers[: self.last]

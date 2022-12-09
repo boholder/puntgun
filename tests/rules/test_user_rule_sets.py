@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import time
-from typing import List
 
 import pytest
 import reactivex as rx
@@ -246,7 +247,7 @@ class TUserActionRule(UserActionRule):
 
 class TestUserActionRuleResultCollectingSet:
     def test_result_aggregating(self):
-        def action_ruleset_result_checker(results: List[RuleResult]):
+        def action_ruleset_result_checker(results: list[RuleResult]):
             """For user filter rule sets testing."""
             action_ruleset_result_checker.call_count = 0
 
