@@ -118,8 +118,8 @@ known_third_party = [
 ]
 
 [tool.fix_future_annotations]
-exclude_lines = [  # regex patterns to exclude lines
-    'class .+\(BaseModel\):'  # classes that inherit from `BaseModel` will be excluded
+exclude_files = [
+    'puntgun/rules/data.py',
 ]
 
 # The key config for building executable wheel
