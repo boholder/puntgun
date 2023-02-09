@@ -1,5 +1,17 @@
 # puntgun - a configurable automation command line tool for Twitter
 
+> **Warning**
+> 
+> Twitter [announced](https://twitter.com/TwitterDev/status/1621026986784337922) that free API usage will be stopped since 2023/02/09.
+> 
+> While this project could instead rely on libraries that don't use the official API,
+> I don't really think such...ehh... "illegal" libraries can be used consistently.
+> If the platform itself does not encourage the development of API ecology, we can only respect its choice.
+> 
+> It just so happens that I hit a development problem and the solution I could learn and managed was inelegant and difficult to implement.
+>
+> So... that's it. This project ceased development.
+
 ```text
      ____              _      ____
 ,___|____\____________|_|____/____|____________________
@@ -13,10 +25,6 @@
 [![downloads badge](https://img.shields.io/pypi/dm/puntgun)](https://pypi.org/project/puntgun/)
 [![pypi version badge](https://img.shields.io/pypi/v/puntgun)](https://pypi.org/project/puntgun/)
 [![pypi python version badge](https://img.shields.io/pypi/pyversions/puntgun)](https://pypi.org/project/puntgun/)
-
-> **Warning**
-> The project is still not in a state that I'm happy with (almost there!),
-> the tool is working, there are just too few rules available.
 
 You can use this tool to do some boring Twitter account management
 (such as automatically select and block users from a source like a tweet's likes, your follower...),
